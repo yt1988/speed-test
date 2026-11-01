@@ -2,8 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { quantile, median, jitter, mbps, serverTime, l4, meta, nextSize, rateNow, steady, settled } from "../src/measure.mjs";
-import { fromServer, site } from "../src/mlab.mjs";
-import { fromMeta, fromTrace, reasons, netOf, hostOf } from "../src/net.mjs";
+import { fromMeta, fromTrace, reasons } from "../src/net.mjs";
 import { uses, bloat, bloatLevel, fmtMbps, fmtMs, speedTier } from "../src/verdict.mjs";
 import { encode, decode, sharePath } from "../src/share.mjs";
 import { items, ruleSets, inline, remote, FORMATS } from "../src/rules.mjs";
@@ -54,15 +53,6 @@ test("speed now, steady speed, and when it has settled", () => {
   assert.equal(steady([[0, 0]]), 0);
 });
 
-test("M-Lab server measurements", () => {
-  assert.deepEqual(fromServer({ AppInfo: { NumBytes: 125e6, ElapsedTime: 10e6 }, TCPInfo: { MinRTT: 42000 } }, "down"), { mbps: 100, minRtt: 42 });
-  assert.deepEqual(fromServer({ TCPInfo: { BytesReceived: 25e6, ElapsedTime: 10e6 } }, "up"), { mbps: 20 });
-  assert.deepEqual(fromServer({}, "down"), {});
-  assert.equal(site("ndt-hnd63770-db645cea.ipacyberlab.autojoin.measurement-lab.org"), "HND");
-  assert.equal(site("mlab1-sin01.mlab-oti.measurement-lab.org"), "SIN");
-  assert.equal(site(""), "");
-});
-
 test("the exit, and signs it isn't the visitor's own line", () => {
   const e = fromMeta({ clientIp: "114.254.73.157", asn: 4808, asOrganization: "China Unicom Beijing province network", country: "CN", city: "Beijing",
     colo: { iata: "HKG", city: "Hong Kong", cca2: "HK" } });
@@ -72,13 +62,6 @@ test("the exit, and signs it isn't the visitor's own line", () => {
   assert.deepEqual(reasons(e, { tz: "Asia/Shanghai" }), [], "home line in China");
   assert.deepEqual(reasons({ ...e, cc: "HK" }, { tz: "Asia/Shanghai" }), [], "Hong Kong counts as China's");
   assert.deepEqual(reasons({ ...e, cc: "JP", org: "Vultr Holdings LLC", asn: 20473 }, { tz: "Asia/Shanghai" }).map(r => r.k), ["r_tz", "r_dc"]);
-  assert.deepEqual(reasons(e, { tz: "Asia/Shanghai", mlabIp: "114.254.9.9" }), [], "same /16");
-  assert.deepEqual(reasons(e, { tz: "Asia/Shanghai", mlabIp: "45.76.1.1" }).map(r => r.k), ["r_split"]);
-  assert.deepEqual(reasons(e, { tz: "Asia/Shanghai", mlabIp: "2408:8207::1" }), [], "other family: not comparable");
-  assert.equal(netOf("2408:8207:265b:52d0:3451:43d5:b987:5ab3"), netOf("2408:8207:265b:52d0::1"));
-  assert.equal(hostOf("1.2.3.4:5678"), "1.2.3.4");
-  assert.equal(hostOf("[2001:db8::1]:443"), "2001:db8::1");
-  assert.equal(hostOf("garbage"), "");
   assert.deepEqual(reasons(null), []);
 });
 
@@ -116,21 +99,19 @@ test("a shared result survives the link; other formats refused", () => {
   assert.equal(sharePath("/zh-cn/"), null);
 });
 
-test("direct rules name the test's hosts and M-Lab's domain, nothing broader", () => {
+test("direct rules name the test's host, nothing broader", () => {
   const it = items();
-  assert.deepEqual(it.map(i => i.d || "*." + i.s), ["speed.cloudflare.com", "locate.measurementlab.net", "*.measurement-lab.org"]);
+  assert.deepEqual(it.map(i => i.d), ["speed.cloudflare.com"]);
   const sets = ruleSets("https://speed.1ms.dog");
   assert.ok(sets["clash.yaml"].includes("  - DOMAIN,speed.cloudflare.com\n"));
-  assert.ok(sets["clash.yaml"].includes("  - DOMAIN-SUFFIX,measurement-lab.org\n"));
-  assert.ok(sets["quanx.list"].includes("host-suffix, measurement-lab.org, direct"));
-  assert.ok(!/DOMAIN-KEYWORD|DOMAIN-SUFFIX,[\w.]*cloudflare|host-suffix, [\w.]*cloudflare/i.test(Object.values(sets).join("")), "never all of Cloudflare");
-  assert.deepEqual(JSON.parse(sets["singbox.json"]).rules[0], { domain: ["speed.cloudflare.com", "locate.measurementlab.net"], domain_suffix: ["measurement-lab.org"] });
+  assert.ok(sets["quanx.list"].includes("host, speed.cloudflare.com, direct"));
+  assert.ok(!/DOMAIN-KEYWORD|DOMAIN-SUFFIX|host-suffix/i.test(Object.values(sets).join("")), "never all of Cloudflare");
+  assert.deepEqual(JSON.parse(sets["singbox.json"]).rules[0], { domain: ["speed.cloudflare.com"], domain_suffix: [] });
   for (const f of FORMATS) assert.ok(inline(f, { top: "t" }).includes("speed.cloudflare.com"), f);
-  assert.ok(JSON.parse(inline("xray", { top: "t" })).routing.rules[0].domain.includes("domain:measurement-lab.org"));
+  assert.deepEqual(JSON.parse(inline("xray", { top: "t" })).routing.rules[0].domain, ["full:speed.cloudflare.com"]);
   assert.equal(remote("xray", "x", { top: "t" }), null);
   assert.ok(remote("clash", "https://speed.1ms.dog", { top: "t" }).includes("https://speed.1ms.dog/rules/clash.yaml"));
 });
-
 test("history: only well-formed records, newest first, at most 20; change and evening peak", async () => {
   const { parse, add, change, isPeak, MAX } = await import("../src/history.mjs");
   assert.deepEqual(parse("not json"), []);
@@ -144,34 +125,3 @@ test("history: only well-formed records, newest first, at most 20; change and ev
   assert.ok(isPeak(new Date(2026, 10, 1, 21))); assert.ok(!isPeak(new Date(2026, 10, 1, 23)));
 });
 
-test("M-Lab's server tells whether M-Lab sees the visitor elsewhere", async () => {
-  const { mlabAway } = await import("../src/net.mjs");
-  const cn = { cc: "CN" }, de = { cc: "DE" }, vn = { cc: "VN" };
-  assert.equal(mlabAway(cn, { country: "JP" }), true, "Beijing exit, Tokyo server: a proxy");
-  assert.equal(mlabAway(cn, { country: "HK" }), false, "mainland China is placed in Hong Kong");
-  assert.equal(mlabAway(de, { country: "DE" }), false);
-  assert.equal(mlabAway(de, { country: "NL" }), false, "a neighbor on the same continent");
-  assert.equal(mlabAway(de, { country: "US" }), true);
-  assert.equal(mlabAway(vn, { country: "SG" }), null, "no servers, no known placement: can't tell");
-  assert.equal(mlabAway(null, { country: "JP" }), null);
-});
-
-test("a proxy shows in the gap between the server's round trip and the browser's time to connect", async () => {
-  const { tcpElsewhere } = await import("../src/net.mjs");
-  assert.equal(tcpElsewhere(620, 2), true, "seen through a proxy node near the server");
-  assert.equal(tcpElsewhere(180, 40), false, "direct: a few round trips");
-  assert.equal(tcpElsewhere(30, 2), false, "direct to a server next door");
-  assert.equal(tcpElsewhere(0, 2), null); assert.equal(tcpElsewhere(500, null), null);
-});
-
-test("an address M-Lab sees on a data-center network, while Cloudflare sees a home line", async () => {
-  const { fromIpinfo, dcOnlyMlab } = await import("../src/net.mjs");
-  const aws = fromIpinfo({ org: "AS16509 Amazon.com, Inc." });
-  assert.deepEqual(aws, { asn: 16509, org: "Amazon.com, Inc." });
-  assert.equal(fromIpinfo({}), null);
-  const home = { org: "China Unicom Beijing province network" };
-  assert.equal(dcOnlyMlab(home, aws), true);
-  assert.equal(dcOnlyMlab(home, fromIpinfo({ org: "AS4837 CHINA UNICOM China169 Backbone" })), false, "the same ISP over IPv6");
-  assert.equal(dcOnlyMlab({ org: "Vultr Holdings LLC" }, aws), false, "both through proxies: the main row warns already");
-  assert.equal(dcOnlyMlab(home, null), false);
-});

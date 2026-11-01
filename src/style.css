@@ -1,5 +1,5 @@
 /* page layout and components (tokens and top bar: base.css): the hero with the two speeds around the start button,
-   the live chart, the latencies, what the line is good for; then M-Lab's second opinion. Every slot keeps its size
+   the live curves, the latencies, what the line is good for. Every slot keeps its size
    from the first paint; only the text inside changes. */
 h2 { font-size: 15px; font-weight: 700; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; font-weight: 500; white-space: nowrap; }
@@ -19,17 +19,13 @@ h2 { font-size: 15px; font-weight: 700; }
 /* where the test runs: under the heading, which service and which of its data centers */
 .src { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin-top: -10px; font-size: 13px; color: var(--muted); min-height: 22px; }
 .src-k { font-weight: 600; color: var(--fg); }
-/* the exit a service sees: Cloudflare's under the source line, M-Lab's at the end of its card */
+/* the exit Cloudflare sees, under the source line */
 .net { display: flex; align-items: center; gap: 6px 12px; flex-wrap: wrap; padding: 9px 12px; border-radius: 12px; background: var(--soft); font-size: 13px; min-height: 40px; }
 /* under the source line: centered, as wide as its text */
 .hero .net { align-self: center; max-width: 100%; margin-top: -10px; padding: 6px 14px; border-radius: 18px; min-height: 0; }
 .hero .net-v { flex: 0 1 auto; }
 /* a proxy in the way: a colored panel, so it is hard to miss */
 .net[data-st="warn"] { background: var(--warn-soft); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--warn) 45%, transparent); }
-.net[data-st=""] .net-k { display: none; }
-.net-w { flex-basis: 100%; color: var(--warn); font-size: 12.5px; line-height: 1.5; }
-.net-w button { border: 0; background: none; padding: 0; color: var(--ink); cursor: pointer; font: inherit; }
-.net-w button:hover { text-decoration: underline; }
 .net-k { display: inline-flex; align-items: center; gap: 7px; flex: none; }
 .net .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
 .net[data-st="good"] .dot { background: var(--t1); box-shadow: 0 0 0 3px color-mix(in srgb, var(--t1) 22%, transparent); }
@@ -39,11 +35,9 @@ h2 { font-size: 15px; font-weight: 700; }
 .net[data-st="good"] .net-st { color: var(--t1); } .net[data-st="warn"] .net-st { color: var(--warn); }
 .net-s { font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; flex: none; }
 .net-v { flex: 1 1 260px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 22px; }
-.net-x { flex: none; color: var(--muted); white-space: nowrap; line-height: 22px; }
-.net-v .m, .net-x .m { color: var(--muted); }
+.net-v .m { color: var(--muted); }
 .net a { color: var(--ink); text-decoration: none; font-family: var(--f-num); font-size: 12.5px; }
 .net a:hover { text-decoration: underline; }
-.ml-net { grid-column: 1 / -1; }
 .flag { width: 18px; height: 13.5px; border-radius: 2px; box-shadow: 0 0 0 1px var(--line); vertical-align: -2px; margin-right: 6px; }
 
 /* the two speeds around the start button; each tile draws its own live curve behind the number */
@@ -86,7 +80,7 @@ h2 { font-size: 15px; font-weight: 700; }
 .lat li { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px 11px; border-radius: 12px; border: 1px solid var(--line); min-width: 0; }
 .lat li > span { align-self: flex-start; font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; cursor: help; text-decoration: underline dotted; text-underline-offset: 3px; outline: none; }
 .lat b { display: block; font: 600 22px/30px var(--f-num); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.lat b small, .ml-m b small { font: 400 12px var(--f-ui); color: var(--muted); margin-left: 3px; }
+.lat b small { font: 400 12px var(--f-ui); color: var(--muted); margin-left: 3px; }
 .lat b i { font: 500 12px var(--f-num); font-style: normal; color: var(--muted); margin-left: 6px; }
 
 /* the conclusion: what the line is good for, and one or two sentences (before a test: how it works, or a warning
@@ -120,17 +114,6 @@ h2 { font-size: 15px; font-weight: 700; }
 .auto input:focus-visible + .sw { outline: 2px solid var(--ink); outline-offset: 2px; }
 .tip { position: fixed; z-index: 50; white-space: pre-line; max-width: min(340px, calc(100vw - 16px)); background: var(--fg); color: var(--bg); font: 500 12.5px/1.45 var(--f-ui); padding: 6px 10px; border-radius: 7px; pointer-events: none; opacity: 0; transition: opacity .12s; }
 .tip.on { opacity: 1; }
-
-/* M-Lab: one row, what it is, its three numbers, the button */
-.mlab { padding: 16px 22px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) auto; gap: 12px 28px; align-items: center; }
-.ml-t p { margin-top: 3px; }
-.ml-t .ml-p { color: var(--warn); }
-.ml-m { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.ml-m li { display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border-radius: 10px; background: var(--soft); min-width: 0; }
-.ml-m li > span { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ml-m li > span[data-why] { align-self: flex-start; cursor: help; text-decoration: underline dotted; text-underline-offset: 3px; outline: none; }
-.ml-m b { font: 600 17px/24px var(--f-num); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mlab #mlRun { height: 34px; font-size: 13px; }
 
 /* dialogs (as in the other 1ms.dog tools) */
 .scrim { position: fixed; inset: 0; z-index: 40; background: #0006; display: flex; align-items: center; justify-content: center; padding: 16px; }
@@ -185,10 +168,6 @@ details.rblk > summary { cursor: pointer; font-size: 13px; color: var(--ink); }
 .shared .btn { height: 32px; font-size: 13px; }
 
 @media (prefers-reduced-motion: reduce) { .skl, .net .dot, .ring-fg { animation: none !important; transition: none !important; } }
-@media (max-width: 900px) {
-  .mlab { grid-template-columns: minmax(0, 1fr) auto; }
-  .ml-m { grid-column: 1 / -1; grid-row: 2; }
-}
 @media (max-width: 720px) {
   .hero { padding: 12px 16px 0; gap: 14px; }
   /* phones: the exit wraps rather than losing the address */
@@ -208,9 +187,6 @@ details.rblk > summary { cursor: pointer; font-size: 13px; color: var(--ink); }
   .htbl .hr { grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, .8fr)); }
   .htbl .hr > :last-child { display: none; }
   .note-l { min-height: 4.8em; }
-  .mlab { padding: 14px 16px; grid-template-columns: minmax(0, 1fr); }
-  .ml-m { grid-row: auto; }
-  .mlab #mlRun { justify-self: start; }
   .dialog.help { height: calc(100vh - 32px); }
   .help-b { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
   .help-nav { display: none; }

@@ -3,12 +3,9 @@
   "rules": [
     {
       "domain": [
-        "speed.cloudflare.com",
-        "locate.measurementlab.net"
+        "speed.cloudflare.com"
       ],
-      "domain_suffix": [
-        "measurement-lab.org"
-      ]
+      "domain_suffix": []
     }
   ]
 }

@@ -1,10 +1,9 @@
 // Direct (bypass) rules for proxy tools: with a proxy on, the test's requests go through it and the page measures the
-// proxy's route and node, not the visitor's own line. These rules send exactly the test's hosts DIRECT: Cloudflare's
-// speed test host by exact name, M-Lab's locate service by exact name, and M-Lab's servers by their domain (the
-// server changes from test to test: ndt-mlab1-hnd02.mlab-oti.measurement-lab.org, …autojoin.measurement-lab.org).
+// proxy's route and node, not the visitor's own line. These rules send exactly the test's host DIRECT: Cloudflare's
+// speed test host by exact name. (Domain-suffix rules are supported too, for a test server that changes from test to
+// test; none is used now.)
 // Used by scripts/build.mjs (the remote rule sets under /rules/) and by the page (the rules dialog).
 import { CF } from "./measure.mjs";
-import { LOCATE } from "./mlab.mjs";
 
 export const FORMATS = ["clash", "surge", "shadowrocket", "quanx", "loon", "singbox", "xray", "plain"];
 export const FORMAT_NAMES = { clash: "Clash / Mihomo", surge: "Surge", shadowrocket: "Shadowrocket", quanx: "Quantumult X", loon: "Loon", singbox: "sing-box", xray: "Xray / v2rayN" };
@@ -13,8 +12,6 @@ export const FORMAT_NAMES = { clash: "Clash / Mihomo", surge: "Surge", shadowroc
 export function items() {
   return [
     { n: "Cloudflare", d: new URL(CF).hostname },
-    { n: "M-Lab", d: new URL(LOCATE).hostname },
-    { n: "M-Lab", s: "measurement-lab.org" },
   ];
 }
 
@@ -57,7 +54,7 @@ export function remote(f, site, notes) {
 
 // the remote rule set files, written by scripts/build.mjs
 export function ruleSets(site, it = items()) {
-  const head = `# Speed Test: the hosts the speed test talks to, to be sent DIRECT. ${it.length} rules.\n# ${site}/ · https://github.com/yt1988/speed-test\n`;
+  const head = `# Speed Test: the hosts the speed test talks to, to be sent DIRECT. ${it.length} rule${it.length === 1 ? "" : "s"}.\n# ${site}/ · https://github.com/yt1988/speed-test\n`;
   return {
     "clash.yaml": head + "payload:\n" + listed(it, "clash", "  ", false) + "\n",
     "surge.list": head + listed(it, "surge", "", false) + "\n",

@@ -3,9 +3,9 @@
 > Free internet speed test in the browser: download and upload speed, idle latency, jitter, and latency under load
 > (bufferbloat), measured from the visitor's own network against Cloudflare's speed test servers (the nearest
 > Cloudflare data center). Several requests in flight, bytes counted as they arrive, speed taken after the ramp-up.
-> Says what the line is good for (4K video, video calls, online games, cloud gaming, live streaming). Optional second
-> opinion from M-Lab's ndt7 test (one connection, a server outside the visitor's ISP). Waits for Start by default.
-> Nothing is sent to this site; requests go straight from the browser to the test servers.
+> Says what the line is good for (4K video, video calls, online games, cloud gaming, live streaming), and whether the
+> test goes through a proxy. Waits for Start by default. Nothing is sent to this site; requests go straight from the
+> browser to Cloudflare.
 
 - Page: https://speed.1ms.dog/ (also /zh-cn/, /zh-tw/, /ja/, /ko/, /es/, /fr/, /de/, /pt/, /ru/)
 - Shared results: https://speed.1ms.dog/r/<code> (format in src/share.mjs)

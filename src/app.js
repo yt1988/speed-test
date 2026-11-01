@@ -1,10 +1,8 @@
 // Speed Test page. Waits for Start unless the visitor turned on testing when the page opens (remembered here).
 // Order: idle latency, download, upload (src/measure.mjs), each shown live in the hero's fixed slots; at the end what
-// the line is good for and how much latency load adds. M-Lab's single-connection test runs only when asked
-// (src/mlab.mjs). Strings: window.L1MS.
+// the line is good for and how much latency load adds. Strings: window.L1MS.
 import { ping, download, upload, median, jitter, exit } from "./measure.mjs";
-import { reasons, hostOf, mlabAway, netOf, family, tcpElsewhere, fromIpinfo, dcOnlyMlab, IPINFO } from "./net.mjs";
-import * as ndt from "./mlab.mjs";
+import { reasons } from "./net.mjs";
 import { fmtMbps, fmtMs, msTier, speedTier, bloat, bloatLevel, uses, USES } from "./verdict.mjs";
 import { FORMATS, FORMAT_NAMES, items as ruleItems, inline as ruleInline, remote as ruleRemote } from "./rules.mjs";
 import { parse as parseHist, add as addHist, change, isPeak } from "./history.mjs";
@@ -141,13 +139,11 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   document.addEventListener("error", e => { if (e.target.matches && e.target.matches("img.flag")) e.target.remove(); }, true);
 
   /* ---------- which way the test goes: asked as the page loads, before any test ---------- */
-  // Cloudflare: the exit it sees (/meta). M-Lab: the server its locate service picks for this visitor, and, once its
-  // test runs, the address its server sees (no M-Lab service tells it otherwise). A mismatch between the device's
-  // time zone and the exit, a data-center exit, or the two services seeing different networks means the test isn't
-  // measuring the visitor's own line (src/net.mjs); the direct rules fix that.
+  // The exit Cloudflare sees (/meta). The device's time zone in another country than the exit, or a data-center exit,
+  // means the test isn't measuring the visitor's own line (src/net.mjs); the direct rules fix that.
   const IPQS = document.querySelector('meta[name="ipqs"]'), EGRESS = document.querySelector('meta[name="egress"]');
   const TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ""; } })();
-  const NET = { cf: null, ml: null, mlIp: "", cfDone: false, mlDone: false, reasons: [] };
+  const NET = { cf: null, cfDone: false, reasons: [] };
   const ipLink = ip => IPQS ? `<a href="${esc(IPQS.content.replace(/\/+$/, "") + D.paths[D.lang] + "?ip=" + encodeURIComponent(ip))}" target="_blank" rel="noopener" title="${esc(t("ipqs_tip"))}">${esc(ip)}</a>` : `<span class="m">${esc(ip)}</span>`;
   function renderNet() {
     const e = NET.cf;
@@ -156,37 +152,14 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
         : flag(e.cc) + esc([e.city, country(e.cc)].filter(Boolean).join(", ") || "–") + (e.org ? ` <span class="m">· ${esc(e.org)}</span>` : "") + ` <span class="m">·</span> ` + ipLink(e.ip);
       $("#netCfX").innerHTML = e && e.colo ? t("net_node", { node: flag(e.coloCc) + esc([e.coloCity, e.colo].filter(Boolean).join(" ")) }) : "";
     }
-    if (NET.mlDone) {
-      const s = NET.ml;
-      // the address M-Lab sees, read as the page loads (a connection that sends nothing), and its network
-      $("#netMl").innerHTML = NET.mlIp ? ipLink(NET.mlIp) + (NET.mlOrg ? ` <span class="m">· ${esc(NET.mlOrg.org)}</span>` : "")
-        : `<span class="m">${esc(t(!s || NET.peekFail ? "ml_unreach" : "ml_peeking"))}</span>`;
-      $("#netMlX").innerHTML = s ? t("net_srv", { srv: flag(s.country) + esc(s.city || s.site || s.machine) }) : "";
-    }
-    NET.reasons = reasons(e, { tz: TZ, mlabIp: NET.mlIp });
+    NET.reasons = reasons(e, { tz: TZ });
     const st = !NET.cfDone ? "chk" : !e ? "unk" : NET.reasons.length ? "warn" : "good";
     $("#net").dataset.st = st; $("#netSt").textContent = t("st_" + st);
-    // M-Lab's own status, from the strongest sign there is: its server's round trip far below the browser's time to
-    // connect (a proxy opened the connection); the address it sees on another network than Cloudflare's, or on a
-    // data-center network while Cloudflare's isn't; before any of that, whether the server it picked fits where
-    // Cloudflare sees the exit. "Direct" only when something says so: an address of another family with no network
-    // known for it proves nothing either way.
-    const sameFam = NET.mlIp && e && family(NET.mlIp) === family(e.ip);
-    const relay = tcpElsewhere(NET.mlOpen, NET.mlRtt), split = sameFam ? netOf(NET.mlIp) !== netOf(e.ip) : null;
-    const dc = dcOnlyMlab(e, NET.mlOrg);
-    const placed = NET.cfDone && NET.mlDone ? mlabAway(e, NET.ml) : null;
-    const why = relay ? t("r_tcp", { a: fmtMs(NET.mlRtt), b: fmtMs(NET.mlOpen) }) : split ? t("r_split", { a: esc(e.ip), b: esc(NET.mlIp) })
-      : dc ? t("r_mldc", { org: esc(NET.mlOrg.org) }) : placed && split !== false ? esc(t("r_ml", { a: country(NET.ml.country), b: country(e.cc) })) : "";
-    const known = NET.mlIp ? split === false || !!NET.mlOrg : placed === false;
-    const ms = why ? "warn" : known ? "good" : "";
-    $("#netM").dataset.st = ms; $("#netMSt").textContent = ms ? t("st_" + ms) : "";
-    $("#netMW").hidden = !why;
-    if (why) $("#netMW").innerHTML = why + " " + t("r_fix", { rules: `<button type="button" data-rules>${esc(t("rules_btn"))}</button>` });
-    $("#rulesBtn").classList.toggle("warn", st === "warn" || ms === "warn");
+    $("#rulesBtn").classList.toggle("warn", st === "warn");
     if (!RUN && !LAST) $("#noteL").innerHTML = warnHTML() || esc(t("hint_idle"));
   }
   const reasonText = r => r.k === "r_tz" ? t("r_tz", { a: esc(country(r.a)), b: esc(country(r.b)) })
-    : r.k === "r_dc" ? t("r_dc", { org: esc(r.org) }) : t("r_split", { a: esc(r.a), b: esc(r.b) });
+    : t("r_dc", { org: esc(r.org) });
   // the warnings, the way out (the rules), and where to see which IP each site gets (EgressLens, on 1ms.dog)
   function warnHTML() {
     if (!NET.reasons.length) return "";
@@ -195,17 +168,6 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   }
   document.addEventListener("click", e => { if (e.target.closest && e.target.closest("[data-rules]")) $("#rulesBtn").click(); });
   exit().then(e => { NET.cf = e; NET.cfDone = true; renderNet(); });
-  // M-Lab hands out a server with a token that lasts about a minute, and limits how often one may ask: the answer from
-  // page load is used again while it is fresh
-  const mlServer = async signal => NET.ml && Date.now() - NET.mlAt < 45000 ? NET.ml : (NET.ml = await ndt.locate(signal), NET.mlAt = Date.now(), NET.ml);
-  // Then the address M-Lab sees: an upload connection that sends nothing, closed at the server's first message (no data
-  // moved; M-Lab records the connection, as the M-Lab card and the help say), and whose network that address is on.
-  mlServer(AbortSignal.timeout(6000)).then(async s => {
-    NET.mlDone = true; renderNet();
-    const p = await ndt.peek(s.up);
-    if (!NET.mlIp) { NET.mlIp = hostOf(p.client); NET.mlOpen = p.openMs; NET.mlRtt = p.minRtt; }
-    renderNet(); mlOrgOf(NET.mlIp);
-  }).catch(() => { NET.peekFail = true; }).finally(() => { NET.mlDone = true; renderNet(); });
 
   /* ---------- the test ---------- */
   let RUN = null, LAST = null, META = null;
@@ -236,7 +198,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     if (RUN) { RUN.abort(); return; }
     if (!$("#shared").hidden) { $("#shared").hidden = true; history.replaceState(null, "", D.paths[D.lang]); }
     const ctl = RUN = new AbortController(), sig = ctl.signal, t0 = performance.now();
-    reset(); showPrev(HIST[0]); setGo("run", t("ph_ping")); $("#mlRun").disabled = true;
+    reset(); showPrev(HIST[0]); setGo("run", t("ph_ping"));
     let bytes = 0;
     try {
       const p = await ping({ signal: sig, onSample: (ms, i, n) => progress("ping", i / n, t("prog_ping", { n: i, of: n })) });
@@ -288,7 +250,6 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
       else { $("#progTxt").innerHTML = "&nbsp;"; $("#noteL").textContent = t("e_fail"); setGo("idle"); }
     } finally {
       if (RUN === ctl) RUN = null;
-      $("#mlRun").disabled = false;
     }
   }
   $("#go").onclick = start;
@@ -324,50 +285,6 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   $("#histBtn").onclick = () => { renderHist(); openDlg("hist"); };
   $("#histClear").onclick = () => { HIST = []; store.set(K.hist, "[]"); showPrev(null); renderHist(); };
   showPrev(HIST[0]);
-
-  /* ---------- M-Lab: a second opinion, from a server outside the visitor's ISP, on one connection ---------- */
-  let ML = null;
-  const mlCell = (k, html) => { $(`.ml-m [data-m="${k}"] b`).innerHTML = html; };
-  const mlMbps = v => `<span class="n">${fmtMbps(v)}</span><small>Mbps</small>`;
-  async function runMlab() {
-    if (RUN) return;
-    if (ML) { ML.abort(); return; }
-    const ctl = ML = new AbortController();
-    $("#go").disabled = true; $("#mlRun").textContent = t("stop");
-    ["down", "up", "rtt"].forEach(k => mlCell(k, "–"));
-    $("#mlNote").textContent = t("ml_locating");
-    try {
-      // the server from page load while its token is fresh, else a new one
-      const s = await mlServer(ctl.signal);
-      NET.ml = s; NET.mlDone = true; renderNet();
-      $("#mlNote").textContent = t("ph_down");
-      const d = await ndt.download(s.down, { signal: ctl.signal, onTick: x => mlCell("down", mlMbps(x.mbps)),
-        onClient: (c, x) => { NET.mlIp = hostOf(c); NET.mlOpen = x.openMs; NET.mlRtt = x.minRtt; renderNet(); mlOrgOf(NET.mlIp); } });
-      if (ctl.signal.aborted) throw new Error("stopped");
-      mlCell("down", mlMbps(d.mbps));
-      if (d.minRtt != null) mlCell("rtt", `<span class="n ${msTier(d.minRtt)}">${fmtMs(d.minRtt)}</span><small>ms</small>`);
-      $("#mlNote").textContent = t("ph_up");
-      const u = await ndt.upload(s.up, { signal: ctl.signal, onTick: x => mlCell("up", mlMbps(x.mbps)) });
-      if (ctl.signal.aborted) throw new Error("stopped");
-      mlCell("up", mlMbps(u.mbps));
-      $("#mlNote").textContent = t("ml_done");
-    } catch (e) {
-      $("#mlNote").textContent = ctl.signal.aborted ? t("stopped") : t("ml_fail");
-    } finally {
-      ML = null; $("#go").disabled = false; $("#mlRun").textContent = t("ml_run");
-    }
-  }
-  $("#mlRun").onclick = runMlab;
-  // whose network the address M-Lab saw is on (ipinfo.io); nothing happens if it can't be reached
-  async function mlOrgOf(ip) {
-    if (!ip || NET.mlOrgFor === ip) return;
-    NET.mlOrgFor = ip; NET.mlOrg = null;
-    try {
-      const r = await fetch(`${IPINFO}/${encodeURIComponent(ip)}/json`, { signal: AbortSignal.timeout(6000) });
-      const o = r.ok ? fromIpinfo(await r.json()) : null;
-      if (NET.mlIp === ip) { NET.mlOrg = o; renderNet(); }
-    } catch (x) {}
-  }
 
   /* ---------- share: a link that carries the result, an image drawn here, the system share sheet ---------- */
   const shareLink = () => {

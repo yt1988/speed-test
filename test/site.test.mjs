@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { LANGS, ORIGINS, WS } from "../scripts/build.mjs";
+import { LANGS, ORIGINS } from "../scripts/build.mjs";
 import { USES } from "../src/verdict.mjs";
 
 const page = slug => readFile(new URL(`../public/${slug ? slug + "/" : ""}index.html`, import.meta.url), "utf8");
@@ -40,5 +40,5 @@ test("the hero's slots are there before the test", async () => {
 
 test("the CSP lets the page reach every test host", async () => {
   const hd = await readFile(new URL("../public/_headers", import.meta.url), "utf8");
-  for (const o of [...ORIGINS, WS]) assert.ok(hd.includes(" " + o), o);
+  for (const o of ORIGINS) assert.ok(hd.includes(" " + o), o);
 });

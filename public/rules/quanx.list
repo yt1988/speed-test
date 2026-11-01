@@ -1,7 +1,4 @@
-# Speed Test: the hosts the speed test talks to, to be sent DIRECT. 3 rules.
+# Speed Test: the hosts the speed test talks to, to be sent DIRECT. 1 rule.
 # https://speed.1ms.dog/ · https://github.com/yt1988/speed-test
 # Cloudflare
 host, speed.cloudflare.com, direct
-# M-Lab
-host, locate.measurementlab.net, direct
-host-suffix, measurement-lab.org, direct

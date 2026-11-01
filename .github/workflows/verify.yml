@@ -1,5 +1,5 @@
-# Every Monday (and by hand): check, with tiny requests, that Cloudflare's speed test endpoints and M-Lab's locate
-# service still answer as the page expects (CORS, Server-Timing, WebSocket URLs). A failure means the page needs a look.
+# Every Monday (and by hand): check, with tiny requests, that Cloudflare's speed test endpoints still answer as the
+# page expects (CORS, Server-Timing). A failure means the page needs a look.
 name: verify
 on:
   schedule:

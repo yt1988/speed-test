@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 // Checks that the endpoints the page relies on still behave as it expects, with tiny requests only (no speed test):
 //   Cloudflare  GET /__down?bytes=0 and POST /__up (1 KB): 200, CORS open to any origin, Server-Timing readable with
-//               the Worker's time, cf-meta-ip exposed; the upload's preflight allowed
-//   M-Lab       the locate service answers with wss:// download and upload URLs (each carrying an access token)
+//               the Worker's time, cf-meta-ip exposed; the upload's preflight allowed; /meta (the exit shown on load)
 // Exit 1 on any failure. Run by hand and weekly from GitHub Actions (.github/workflows/verify.yml).
 import { CF, serverTime } from "../src/measure.mjs";
-import { LOCATE } from "../src/mlab.mjs";
 
 const ORIGIN = "https://speed.1ms.dog";
 let bad = 0;
@@ -31,14 +29,12 @@ try {
   check(up.status === 200 && up.headers.get("access-control-allow-origin") === "*", `POST ${CF}/__up (1 KB) → ${up.status}`);
 } catch (e) { check(false, "Cloudflare: " + e.message); }
 
+// the exit shown before any test: /meta answers a cross-origin request that carries the page's origin as referrer
 try {
-  const r = await fetch(LOCATE + "?client_name=speed-test-verify", { headers: { origin: ORIGIN } });
-  check(r.status === 200 && r.headers.get("access-control-allow-origin") === "*", `GET ${LOCATE} → ${r.status}, CORS open`);
-  const s = ((await r.json()).results || [])[0] || {};
-  const u = s.urls || {};
-  check(/^wss:\/\/[^/]+\.measurement-lab\.org\/ndt\/v7\/download\?access_token=/.test(u["wss:///ndt/v7/download"] || ""), `  nearest: ${s.machine || "?"} (${(s.location || {}).city || "?"}), download URL`);
-  check(/^wss:\/\/[^/]+\.measurement-lab\.org\/ndt\/v7\/upload\?access_token=/.test(u["wss:///ndt/v7/upload"] || ""), "  upload URL");
-} catch (e) { check(false, "M-Lab: " + e.message); }
+  const r = await fetch(`${CF}/meta`, { headers: { origin: ORIGIN, referer: ORIGIN + "/" } });
+  const j = r.ok ? await r.json() : {};
+  check(r.status === 200 && r.headers.get("access-control-allow-origin") === "*" && !!j.clientIp && !!(j.colo && j.colo.iata), `GET ${CF}/meta → ${r.status}, address and data center`);
+} catch (e) { check(false, "Cloudflare /meta: " + e.message); }
 
 if (bad) { console.error(`\n${bad} check(s) failed`); process.exit(1); }
 console.log("\nall good");
