@@ -34,6 +34,7 @@ export default {
   r_tz: "Die Zeitzone deines Geräts liegt in {a}, der Ausgang aber in {b}.",
   r_dc: "Dein Ausgang ist {org}, ein Rechenzentrumsnetz: ein Proxy, VPN oder Cloud-Server.",
   r_split: "Cloudflare und M-Lab sehen verschiedene Adressen ({a} und {b}): Die beiden Tests nehmen verschiedene Ausgänge.",
+  r_ml: "M-Lab-Server: {a}; Ausgang laut Cloudflare: {b}. Die Anfragen an M-Lab gehen einen anderen Weg, vermutlich über einen Proxy.",
   r_fix: "Um deine eigene Leitung zu messen, füge die {rules} hinzu.",
   egress_link: "Welche IP jede Website sieht",
   hint_idle: "Auf Start drücken: etwa 20–30 Sekunden. Das Datenvolumen wächst mit der Geschwindigkeit (siehe Hilfe).",

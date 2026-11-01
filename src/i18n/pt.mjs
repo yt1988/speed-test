@@ -34,6 +34,7 @@ export default {
   r_tz: "O fuso horário do seu aparelho é de {a}, mas a saída está em {b}.",
   r_dc: "Sua saída é {org}, uma rede de data center: proxy, VPN ou servidor na nuvem.",
   r_split: "Cloudflare e M-Lab veem endereços diferentes ({a} e {b}): os dois testes saem por caminhos diferentes.",
+  r_ml: "Servidor do M-Lab: {a}; saída vista pela Cloudflare: {b}. As requisições ao M-Lab saem por outro caminho, quase certamente um proxy.",
   r_fix: "Para testar sua própria linha, adicione as {rules}.",
   egress_link: "Qual IP cada site vê",
   hint_idle: "Clique em Iniciar: cerca de 20–30 segundos. Os dados usados crescem com a velocidade (veja a Ajuda).",

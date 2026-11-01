@@ -34,6 +34,7 @@ export default {
   r_tz: "Your device's time zone is in {a}, but the exit is in {b}.",
   r_dc: "Your exit is {org}, a data-center network: a proxy, VPN or cloud server.",
   r_split: "Cloudflare and M-Lab see different addresses ({a} and {b}): the two tests leave by different exits.",
+  r_ml: "M-Lab gave you a server in {a}, but Cloudflare sees your exit in {b}: requests to M-Lab leave another way, most likely through a proxy.",
   r_fix: "To test your own line, add the {rules}.",
   egress_link: "Which IP each site sees",
   hint_idle: "Press Start: about 20–30 seconds. The data used grows with your speed (see Help).",

@@ -36,6 +36,24 @@ export const family = ip => ip && ip.includes(":") ? 6 : 4;
 // "1.2.3.4:5678" or "[2001:db8::1]:5678" (M-Lab's ConnectionInfo.Client) → the address
 export const hostOf = s => { const m = /^\[([^\]]+)\]:\d+$/.exec(s || "") || /^([\d.]+):\d+$/.exec(s || ""); return m ? m[1] : ""; };
 
+// M-Lab's locate service gives a server near where it sees the visitor (by the country of the address it sees). The
+// countries with M-Lab servers (siteinfo, 2026-11) and their continents; and where visitors from a few countries
+// without one are usually placed.
+const CONT = Object.fromEntries(("AR:SA AU:OC BE:EU BG:EU BR:SA CA:NA CH:EU CL:SA CO:SA CZ:EU DE:EU ES:EU FI:EU FR:EU GB:EU GR:EU HK:AS ID:AS IE:EU " +
+  "IL:AS IN:AS IT:EU JP:AS KE:AF KR:AS ME:EU MG:AF MX:NA MZ:AF NG:AF NL:EU NO:EU NZ:OC PE:SA PH:AS PL:EU PT:EU QA:AS RS:EU SE:EU SG:AS TN:AF " +
+  "TW:AS US:NA ZA:AF").split(" ").map(p => p.split(":")));
+const NEAR = { CN: ["HK", "TW", "KR"], MO: ["HK", "TW"] };
+// Whether M-Lab sees the visitor somewhere else than Cloudflare does: true when its server is outside the exit's
+// country and its usual neighbors (another continent, for countries with servers of their own), false when it fits,
+// null when it can't be told. True means M-Lab's requests leave by another exit: in practice a proxy.
+export function mlabAway(exit, srv) {
+  if (!exit || !exit.cc || !srv || !srv.country) return null;
+  if (srv.country === exit.cc) return false;
+  if (NEAR[exit.cc]) return !NEAR[exit.cc].includes(srv.country);
+  if (CONT[exit.cc] && CONT[srv.country]) return CONT[exit.cc] !== CONT[srv.country];
+  return null;
+}
+
 // Signs that the test doesn't measure the visitor's own line, each { k: string key, ...values }:
 //   r_tz     the device's time zone is in one country, the exit in another (Hong Kong and Macau count as China's)
 //   r_dc     the exit is on a data-center network

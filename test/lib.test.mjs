@@ -143,3 +143,15 @@ test("history: only well-formed records, newest first, at most 20; change and ev
   assert.equal(change(110, 100), 10); assert.equal(change(90, 100), -10); assert.equal(change(5, 0), null); assert.equal(change(null, 5), null);
   assert.ok(isPeak(new Date(2026, 10, 1, 21))); assert.ok(!isPeak(new Date(2026, 10, 1, 23)));
 });
+
+test("M-Lab's server tells whether M-Lab sees the visitor elsewhere", async () => {
+  const { mlabAway } = await import("../src/net.mjs");
+  const cn = { cc: "CN" }, de = { cc: "DE" }, vn = { cc: "VN" };
+  assert.equal(mlabAway(cn, { country: "JP" }), true, "Beijing exit, Tokyo server: a proxy");
+  assert.equal(mlabAway(cn, { country: "HK" }), false, "mainland China is placed in Hong Kong");
+  assert.equal(mlabAway(de, { country: "DE" }), false);
+  assert.equal(mlabAway(de, { country: "NL" }), false, "a neighbor on the same continent");
+  assert.equal(mlabAway(de, { country: "US" }), true);
+  assert.equal(mlabAway(vn, { country: "SG" }), null, "no servers, no known placement: can't tell");
+  assert.equal(mlabAway(null, { country: "JP" }), null);
+});

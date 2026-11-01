@@ -34,6 +34,7 @@ export default {
   r_tz: "Le fuseau horaire de votre appareil est en {a}, mais la sortie est en {b}.",
   r_dc: "Votre sortie est {org}, un réseau de centre de données : proxy, VPN ou serveur cloud.",
   r_split: "Cloudflare et M-Lab voient des adresses différentes ({a} et {b}) : les deux tests sortent par des chemins différents.",
+  r_ml: "Serveur M-Lab : {a} ; sortie vue par Cloudflare : {b}. Les requêtes vers M-Lab sortent ailleurs, très probablement par un proxy.",
   r_fix: "Pour tester votre ligne, ajoutez les {rules}.",
   egress_link: "Quelle IP voit chaque site",
   hint_idle: "Cliquez sur Lancer : environ 20 à 30 secondes. Les données consommées augmentent avec le débit (voir l'aide).",

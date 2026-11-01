@@ -3,7 +3,7 @@
 // the line is good for and how much latency load adds. M-Lab's single-connection test runs only when asked
 // (src/mlab.mjs). Strings: window.L1MS.
 import { ping, download, upload, median, jitter, exit } from "./measure.mjs";
-import { reasons, hostOf } from "./net.mjs";
+import { reasons, hostOf, mlabAway, netOf, family } from "./net.mjs";
 import * as ndt from "./mlab.mjs";
 import { fmtMbps, fmtMs, msTier, speedTier, bloat, bloatLevel, uses, USES } from "./verdict.mjs";
 import { FORMATS, FORMAT_NAMES, items as ruleItems, inline as ruleInline, remote as ruleRemote } from "./rules.mjs";
@@ -164,7 +164,16 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     NET.reasons = reasons(e, { tz: TZ, mlabIp: NET.mlIp });
     const st = !NET.cfDone ? "chk" : !e ? "unk" : NET.reasons.length ? "warn" : "good";
     $("#net").dataset.st = st; $("#netSt").textContent = t("st_" + st);
-    $("#rulesBtn").classList.toggle("warn", st === "warn");
+    // M-Lab's own status: before its test, whether the server it picked fits where Cloudflare sees the exit; once the
+    // test shows the address M-Lab sees, whether that is on the same network as Cloudflare's
+    const sameFam = NET.mlIp && e && family(NET.mlIp) === family(e.ip);
+    const away = sameFam ? netOf(NET.mlIp) !== netOf(e.ip) : NET.cfDone && NET.mlDone ? mlabAway(e, NET.ml) : null;
+    const ms = away === true ? "warn" : away === false ? "good" : "";
+    $("#netM").dataset.st = ms; $("#netMSt").textContent = ms ? t("st_" + ms) : "";
+    $("#netMW").hidden = ms !== "warn";
+    if (ms === "warn") $("#netMW").innerHTML = (sameFam ? t("r_split", { a: esc(e.ip), b: esc(NET.mlIp) }) : esc(t("r_ml", { a: country(NET.ml.country), b: country(e.cc) })))
+      + " " + t("r_fix", { rules: `<button type="button" data-rules>${esc(t("rules_btn"))}</button>` });
+    $("#rulesBtn").classList.toggle("warn", st === "warn" || ms === "warn");
     if (!RUN && !LAST) $("#noteL").innerHTML = warnHTML() || esc(t("hint_idle"));
   }
   const reasonText = r => r.k === "r_tz" ? t("r_tz", { a: esc(country(r.a)), b: esc(country(r.b)) })

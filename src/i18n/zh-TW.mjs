@@ -34,6 +34,7 @@ export default {
   r_tz: "裝置時區在{a}，但出口 IP 在{b}。",
   r_dc: "出口網路是 {org}，這是機房網路：代理、VPN 或雲端伺服器。",
   r_split: "Cloudflare 和 M-Lab 看到的 IP 不同（{a} 和 {b}）：兩項測試走了不同出口。",
+  r_ml: "M-Lab 給你分配了{a}的伺服器，但 Cloudflare 看到的出口在{b}：M-Lab 的請求走了另一個出口，多半是代理。",
   r_fix: "要測自己的線路，加上{rules}。",
   egress_link: "看每個網站看到的 IP",
   hint_idle: "按「開始」，約 20–30 秒。流量消耗隨網速增加，詳見說明。",

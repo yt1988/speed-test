@@ -19,10 +19,17 @@ h2 { font-size: 15px; font-weight: 700; }
 /* where the test runs: under the heading, which service and which of its data centers */
 .src { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin-top: -10px; font-size: 13px; color: var(--muted); min-height: 22px; }
 .src-k { font-weight: 600; color: var(--fg); }
-/* the exit a service sees: one row in its own card (Cloudflare above the bar, M-Lab at the end of its card) */
+/* the exit a service sees: Cloudflare's under the source line, M-Lab's at the end of its card */
 .net { display: flex; align-items: center; gap: 6px 12px; flex-wrap: wrap; padding: 9px 12px; border-radius: 12px; background: var(--soft); font-size: 13px; min-height: 40px; }
-.hero .net { margin-top: -4px; }
-.net[data-st="warn"] { background: var(--warn-soft); }
+/* under the source line: centered, as wide as its text */
+.hero .net { align-self: center; max-width: 100%; margin-top: -10px; padding: 6px 14px; border-radius: 18px; min-height: 0; }
+.hero .net-v { flex: 0 1 auto; }
+/* a proxy in the way: a colored panel, so it is hard to miss */
+.net[data-st="warn"] { background: var(--warn-soft); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--warn) 45%, transparent); }
+.net[data-st=""] .net-k { display: none; }
+.net-w { flex-basis: 100%; color: var(--warn); font-size: 12.5px; line-height: 1.5; }
+.net-w button { border: 0; background: none; padding: 0; color: var(--ink); cursor: pointer; font: inherit; }
+.net-w button:hover { text-decoration: underline; }
 .net-k { display: inline-flex; align-items: center; gap: 7px; flex: none; }
 .net .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
 .net[data-st="good"] .dot { background: var(--t1); box-shadow: 0 0 0 3px color-mix(in srgb, var(--t1) 22%, transparent); }

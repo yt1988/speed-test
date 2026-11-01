@@ -43,7 +43,7 @@
 <meta name="twitter:description" content="下載、上傳、延遲和緩衝膨脹，從你自己的網路實測">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"網速測試 · 1ms.dog","url":"https://speed.1ms.dog/zh-tw/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","description":"免費線上網速測試，直接在瀏覽器裡測下載速度、上傳速度、Ping 延遲、抖動和滿載延遲（緩衝膨脹），從你的網路測到最近的 Cloudflare 節點。不用安裝軟體，沒有廣告，不保存資料。","inLanguage":"zh-TW","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"測試是怎麼進行的？","acceptedAnswer":{"@type":"Answer","text":"你的瀏覽器直接連 Cloudflare 的測速伺服器（speed.cloudflare.com 背後那套），連的是離你的網路最近的 Cloudflare 節點，不經過本站。 先發 16 個空請求測延遲和抖動。然後測下載：同時保持幾個請求在傳輸，每個位元組到達時就計數，持續 5 到 10 秒；速度取前 30% 時間之後（連線已經提速完畢）的平均值，速度穩定下來就提前結束。上傳反方向同樣測一遍。兩個階段裡，每 0.4 秒再發一個小請求，測線路跑滿時的延遲。"}},{"@type":"Question","name":"為什麼比簽約速率或別的測速低？","acceptedAnswer":{"@type":"Answer","text":"最常見的原因是 Wi-Fi：想看線路本身的速度，用網路線連接，靠近路由器，讓其他裝置別占用網路。 瀏覽器和測速伺服器之間只有一條 HTTP/2 或 HTTP/3 連線（幾個請求共用它），而 Ookla 的 App 會開很多條獨立連線。離節點近的時候兩者結果一致；伺服器越遠，單條連線越吃虧。Ookla 還經常測到電信業者自己網內的伺服器，比任何出網的線路都好看。 在中國大陸，Cloudflare 的節點在境外，測到的是國際出口頻寬，常常遠低於簽約速率。"}},{"@type":"Question","name":"什麼是滿載延遲（緩衝膨脹）？","acceptedAnswer":{"@type":"Answer","text":"線路跑滿時，路由器和數據機會把封包排進很大的緩衝區。排在下載後面的所有東西，例如遊戲的封包、通話的語音，都會被耽擱：這就是緩衝膨脹（bufferbloat）。 測試會在下載和上傳時測延遲。增加 30 毫秒以內沒問題；超過 100 毫秒，只要有人傳照片或在跑備份，通話和遊戲就感覺得到。在路由器裡開啟智慧佇列管理（SQM：fq_codel 或 CAKE）能解決大部分問題，代價是最高速度略降。"}},{"@type":"Question","name":"開著代理或 VPN，測的是誰的速度？","acceptedAnswer":{"@type":"Answer","text":"代理的。開著代理或 VPN 時，瀏覽器經過它去連測速伺服器，測到的是你到代理節點的線路、節點自己的頻寬，以及節點到 Cloudflare 的線路。用來比較節點很方便。 要測自己的線路，加上直連規則（進度條旁邊的按鈕）：只有 speed.cloudflare.com 和 M-Lab 的伺服器直連，其他流量不變。支援 Clash/Mihomo、Surge、Shadowrocket、Quantumult X、Loon、sing-box 和 Xray，多數可以用遠端規則集自動保持最新。結果下方顯示的節點、網路編號和 IP 能告訴你測試走的是哪條路。"}},{"@type":"Question","name":"M-Lab 測試是什麼？","acceptedAnswer":{"@type":"Answer","text":"Measurement Lab 是一個開放專案，由 Google 和多所大學支持，把測速伺服器放在家用寬頻業者的網路之外；Google 自己的測速用的就是它。它的 ndt7 測試每個方向用一條連線測 10 秒。 所以它適合用來對照：看單一下載在出了業者網路的線路上表現如何。對遠距離線路它很嚴格：離伺服器遠時，結果常常比上面的測試低很多。只有你點了才會執行，因為 M-Lab 會把每次測試連同你的 IP 位址作為開放資料公開。有些國家可能連不上它的伺服器。"}},{"@type":"Question","name":"測一次用多少流量？","acceptedAnswer":{"@type":"Answer","text":"每個方向速度穩定後 5 秒就結束，最長 10 秒，所以一次測試的流量是上下行各按最高速度跑 5 到 10 秒：100 Mbps 的寬頻合計約 100 到 250 MB，1000 Mbps 約 1 到 2.5 GB。測完會顯示這次用了多少流量。用流量方案或行動網路時，少測幾次。"}},{"@type":"Question","name":"為什麼不自動開始？","acceptedAnswer":{"@type":"Answer","text":"測速很耗流量，所以頁面等你按「開始」。經常測的話，開啟進度條旁邊的「開啟頁面時自動測試」，這個選擇會記在這個瀏覽器裡。"}},{"@type":"Question","name":"會收集我的資料嗎？","acceptedAnswer":{"@type":"Answer","text":"不會。測試在你的瀏覽器和 Cloudflare（以及你選擇執行時的 M-Lab）的伺服器之間進行，本站收不到結果。和造訪任何網站一樣，Cloudflare 能看到你的 IP 位址。分享連結和圖片在你的瀏覽器裡產生，只包含測試數字。程式碼在 GitHub 上開源。"}}]}]}</script>
 <link rel="preload" href="/assets/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/app.557ae0e262.css">
+<link rel="stylesheet" href="/assets/app.bbbe98bfd6.css">
 </head>
 <body>
 <div class="app">
@@ -75,6 +75,12 @@
       <h1>你的網速有多快？</h1>
       <!-- where the test runs: Cloudflare, at its data center nearest to the visitor -->
       <p class="src"><span class="src-k" data-i="src_cf">測速伺服器：Cloudflare</span><span class="src-v" id="netCfX">&nbsp;</span></p>
+      <!-- the exit Cloudflare sees, asked as the page loads: whether this is the visitor's own line -->
+      <div class="net" id="net" data-st="chk">
+        <span class="net-k"><i class="dot"></i><span class="net-st" id="netSt" data-i="st_chk">檢測中</span></span>
+        <span class="net-s" data-i="net_you">你的出口</span>
+        <span class="net-v" id="netCf"><i class="skl"></i></span>
+      </div>
       <div class="dial">
         <div class="g" id="gDown" data-g="down">
           <canvas class="spark" aria-hidden="true"></canvas>
@@ -103,12 +109,6 @@
         <ul class="uses" id="uses"><li data-u="video" data-lv=""><span>4K 影片</span><span class="lv"></span></li><li data-u="call" data-lv=""><span>視訊通話</span><span class="lv"></span></li><li data-u="game" data-lv=""><span>線上遊戲</span><span class="lv"></span></li><li data-u="cloud" data-lv=""><span>雲端遊戲</span><span class="lv"></span></li><li data-u="live" data-lv=""><span>直播</span><span class="lv"></span></li></ul>
         <p class="note-l" id="noteL" data-i="hint_idle">按「開始」，約 20–30 秒。流量消耗隨網速增加，詳見說明。</p>
       </div>
-      <!-- the exit Cloudflare sees, asked as the page loads: whether this is the visitor's own line -->
-      <div class="net" id="net" data-st="chk">
-        <span class="net-k"><i class="dot"></i><span class="net-st" id="netSt" data-i="st_chk">檢測中</span></span>
-        <span class="net-s" data-i="net_you">你的出口</span>
-        <span class="net-v" id="netCf"><i class="skl"></i></span>
-      </div>
       <div class="bar">
         <span class="prog-t" id="progTxt">&nbsp;</span>
         <label class="auto"><input type="checkbox" id="auto"><span class="sw" aria-hidden="true"></span><span data-i="auto_label">開啟頁面時自動測試</span></label>
@@ -131,10 +131,12 @@
       </ul>
       <button class="btn" id="mlRun" type="button" data-i="ml_run">執行 M-Lab 測試</button>
       <!-- M-Lab's server (picked by its locate service on load) and the address it sees once its test runs -->
-      <div class="net ml-net">
+      <div class="net ml-net" id="netM" data-st="">
+        <span class="net-k"><i class="dot"></i><span class="net-st" id="netMSt"></span></span>
         <span class="net-x" id="netMlX"></span>
         <span class="net-s" data-i="net_you">你的出口</span>
         <span class="net-v" id="netMl"><i class="skl"></i></span>
+        <span class="net-w" id="netMW" hidden></span>
       </div>
     </section>
 
@@ -196,7 +198,7 @@
 </div>
 
 <script type="application/json" id="data">{"lang":"zh-TW","paths":{"en":"/","zh-CN":"/zh-cn/","zh-TW":"/zh-tw/","ja":"/ja/","ko":"/ko/","es":"/es/","fr":"/fr/","de":"/de/","pt":"/pt/","ru":"/ru/"}}</script>
-<script src="/assets/l.zh-tw.27a1a0e9e4.js"></script>
-<script src="/assets/app.bb2e5c5c79.js"></script>
+<script src="/assets/l.zh-tw.c112e9e112.js"></script>
+<script src="/assets/app.bf3ac6562c.js"></script>
 </body>
 </html>
