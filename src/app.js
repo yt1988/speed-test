@@ -146,8 +146,10 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   const NET = { cf: null, cfDone: false, reasons: [] };
   // a link to another 1ms.dog tool: its text, then the external-link icon (the same on every tool)
   const XL = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2.5h4.5V7M13.5 2.5 7.5 8.5M12 10v3.5H2.5V4H6"/></svg>';
-  const xlink = (href, html, { cls = "", title = "" } = {}) => `<a class="xl${cls ? " " + cls : ""}" href="${esc(href)}" target="_blank" rel="noopener"${title ? ` title="${esc(title)}"` : ""}>${html}${XL}</a>`;
-  const ipLink = ip => IPQS ? xlink(IPQS.content.replace(/\/+$/, "") + D.paths[D.lang] + "?ip=" + encodeURIComponent(ip), esc(ip), { title: t("ipqs_tip") }) : `<span class="m">${esc(ip)}</span>`;
+  const xlink = (href, html) => `<a class="xl" href="${esc(href)}" target="_blank" rel="noopener">${html}${XL}</a>`;
+  // a data value (an IP, a network) linked to its page on another tool: no icon, a dotted underline, where it goes in the title
+  const dlink = (href, html, title, cls = "") => `<a class="dv${cls ? " " + cls : ""}" href="${esc(href)}" target="_blank" rel="noopener" title="${esc(title)}">${html}</a>`;
+  const ipLink = ip => IPQS ? dlink(IPQS.content.replace(/\/+$/, "") + D.paths[D.lang] + "?ip=" + encodeURIComponent(ip), esc(ip), t("ipqs_tip"), "ip") : `<span class="m">${esc(ip)}</span>`;
   // the other 1ms.dog tools, each linked only when the page announces it: Me2Cloud (latency to the other clouds), the
   // DNS test, ASN Lookup (the exit's network, /AS<n>), the IPv6 test (when the test went over IPv4)
   const tool = name => { const m = document.querySelector(`meta[name="${name}"]`); return m ? m.content.replace(/\/+$/, "") + D.paths[D.lang] : ""; };
@@ -159,7 +161,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     $("#rel").innerHTML = links.join("");
     $("#rel").hidden = !links.length;
   }
-  const orgHTML = e => !e.org ? "" : ` <span class="m">· ${ASN && e.asn ? xlink(ASN + "AS" + e.asn, esc(e.org), { cls: "asn", title: t("asn_tip", { n: e.asn }) }) : esc(e.org)}</span>`;
+  const orgHTML = e => !e.org ? "" : ` <span class="m">· ${ASN && e.asn ? dlink(ASN + "AS" + e.asn, esc(e.org), t("asn_tip", { n: e.asn })) : esc(e.org)}</span>`;
   function renderNet() {
     const e = NET.cf;
     if (NET.cfDone) {

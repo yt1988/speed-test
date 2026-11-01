@@ -36,8 +36,7 @@ h2 { font-size: 15px; font-weight: 700; }
 .net-s { font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; flex: none; }
 .net-v { flex: 1 1 260px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 22px; }
 .net-v .m { color: var(--muted); }
-.net a { color: var(--ink); text-decoration: none; font-family: var(--f-num); font-size: 12.5px; }
-.net a:hover { text-decoration: underline; }
+.net a.ip { font-family: var(--f-num); font-size: 12.5px; }
 .flag { width: 18px; height: 13.5px; border-radius: 2px; box-shadow: 0 0 0 1px var(--line); vertical-align: -2px; margin-right: 6px; }
 
 /* the two speeds around the start button; each tile draws its own live curve behind the number */
@@ -105,8 +104,9 @@ a.xl svg { width: .95em; height: .95em; flex: none; }
 .rel { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 18px; margin: -6px 0 2px; font-size: 13px; text-align: center; }
 .rel a { color: var(--ink); text-decoration: none; }
 .rel a:hover { text-decoration: underline; }
-.net-v a.asn { color: inherit; text-decoration: none; }
-.net-v a.asn:hover { color: var(--ink); text-decoration: underline; }
+/* a data value linked to its page on another tool: dotted underline, no icon */
+a.dv { color: inherit; text-decoration: underline dotted; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a.dv:hover { color: var(--ink); }
 
 .bar { position: relative; display: flex; align-items: center; gap: 12px; margin: 0 -22px; padding: 11px 22px 13px; border-top: 1px solid var(--line); }
 .prog-t { font: 12.5px var(--f-num); color: var(--muted); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
