@@ -3,7 +3,7 @@
 //   index.html, <lang>/index.html              the page per language
 //   assets/app.<hash>.js, assets/app.<hash>.css the page's code and styles, shared by every language
 //   assets/l.<lang>.<hash>.js                    the strings the browser code needs, per language
-//   assets/qr.<hash>.js                          QR encoder for the share card, loaded only when someone shares
+//   (assets/share/: the 1ms.dog share dialog, copied verbatim from 1ms-shell and committed; not built here)
 //   og/<lang>.png                                link preview images: made by scripts/assets.mjs, committed, not here
 //   rules/*                                     direct rules for proxy tools (src/rules.mjs)
 //   sitemap.xml, robots.txt, llms.txt, _headers  SEO and security headers (CSP: the test's hosts)
@@ -52,16 +52,14 @@ export async function build({ check = false } = {}) {
   const tpl = await readFile(new URL("page.html", src), "utf8");
 
   const root = fileURLToPath(new URL("..", import.meta.url));
-  // the QR encoder for the share card stays out of the app bundle: only a visitor who shares downloads it
-  const qr = (await bundle({ stdin: { contents: 'import q from "qrcode-generator"; self.QR1MS = q;', resolveDir: root },
-    bundle: true, minify: true, format: "iife", target: "es2020", legalComments: "none", write: false })).outputFiles[0].text;
-  const qrName = `qr.${hash(qr)}.js`;
   const js = (await bundle({ entryPoints: [fileURLToPath(new URL("app.js", src))], bundle: true, minify: true, format: "iife", target: "es2020",
-    legalComments: "none", write: false, absWorkingDir: root, define: { QR_JS: JSON.stringify("/assets/" + qrName) } })).outputFiles[0].text;
+    legalComments: "none", write: false, absWorkingDir: root,
+    // the share dialog is loaded from /assets/share/ when someone shares, never bundled
+    external: ["/assets/*"] })).outputFiles[0].text;
   const cssFull = (await Promise.all(["fonts.css", "base.css", "style.css"].map(f => readFile(new URL(f, src), "utf8")))).join("\n");
   const css = (await transform(cssFull, { loader: "css", minify: true, legalComments: "none" })).code;
   const jsName = `app.${hash(js)}.js`, cssName = `app.${hash(css)}.css`;
-  const files = { ["assets/" + jsName]: js, ["assets/" + cssName]: css, ["assets/" + qrName]: qr };
+  const files = { ["assets/" + jsName]: js, ["assets/" + cssName]: css };
 
   const path = slug => "/" + (slug ? slug + "/" : "");
   for (const [lang, slug, locale] of langs) {
@@ -158,9 +156,6 @@ export async function build({ check = false } = {}) {
   ! Cache-Control
   Cache-Control: public, max-age=31536000, immutable
 /assets/l.*
-  ! Cache-Control
-  Cache-Control: public, max-age=31536000, immutable
-/assets/qr.*
   ! Cache-Control
   Cache-Control: public, max-age=31536000, immutable
 /assets/fonts/*

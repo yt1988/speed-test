@@ -43,7 +43,7 @@
 <meta name="twitter:description" content="Download, Upload, Ping und Bufferbloat in deinem Netz">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Speedtest · 1ms.dog","url":"https://speed.1ms.dog/de/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","description":"Kostenloser Speedtest und Bufferbloat-Test im Browser: Download- und Upload-Geschwindigkeit, Ping und Jitter in Ruhe und unter Last, mit einer Bufferbloat-Note von A+ bis F, von deinem Netz zum nächsten Cloudflare-Rechenzentrum. Keine App, keine Werbung, nichts gespeichert.","inLanguage":"de","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Wie funktioniert der Test?","acceptedAnswer":{"@type":"Answer","text":"Dein Browser spricht direkt mit den Testservern von Cloudflare (denen hinter speed.cloudflare.com), im Cloudflare-Rechenzentrum, das deinem Netz am nächsten ist. Nichts läuft über diese Seite. Zuerst messen 16 leere Anfragen Ping und Jitter. Dann der Download: mehrere Anfragen gleichzeitig, jedes Byte wird beim Eintreffen gezählt, 5 bis 10 Sekunden lang; die Geschwindigkeit ist der Durchschnitt nach den ersten 30 % (wenn die Verbindung hochgefahren ist), und der Test endet früher, sobald sie stabil ist. Der Upload läuft genauso in die andere Richtung. Währenddessen misst alle 0,15 s eine kleine Anfrage den Ping bei voller Leitung."}},{"@type":"Question","name":"Warum weniger als mein Tarif oder andere Tests?","acceptedAnswer":{"@type":"Answer","text":"Meist liegt es am WLAN: Um die Leitung selbst zu sehen, per Kabel testen, nah am Router, mit ruhenden anderen Geräten. Der Browser erreicht den Testserver über eine einzige HTTP/2- oder HTTP/3-Verbindung (mehrere Anfragen teilen sie), die Ookla-App öffnet dagegen viele getrennte Verbindungen. Zu einem nahen Rechenzentrum stimmen beide überein; je weiter der Server, desto mehr verliert eine einzelne Verbindung. Ookla misst außerdem oft zu einem Server im Netz deines Anbieters, was besser aussieht als jede Route, die es verlässt. In Festlandchina liegen die Rechenzentren von Cloudflare im Ausland: Gemessen wird dann die internationale Bandbreite, oft weit unter dem Tarif."}},{"@type":"Question","name":"Was ist Bufferbloat, und wie wird benotet?","acceptedAnswer":{"@type":"Answer","text":"Ist die Leitung voll, stellen Router und Modems Pakete in große Puffer. Alles, was hinter einem Download wartet, die Pakete eines Spiels oder der Ton eines Anrufs, kommt verspätet an: Das ist Bufferbloat. Der Test misst den Ping bei ruhiger Leitung, dann alle 0,15 s während Download und Upload, jeweils mit Median und Jitter. Um wie viel der Ping unter Last höher ist als in Ruhe (die schlechtere Richtung), ergibt die Note, mit den Schwellen des Bufferbloat-Tests von Waveform: unter 5 ms A+, unter 30 ms A, unter 60 ms B, unter 200 ms C, unter 400 ms D, mehr F. Ab C hängen Anrufe und Spiele, sobald jemand lädt oder hochlädt. Smart Queue Management (SQM: fq_codel oder CAKE) im Router behebt das meiste, kostet aber etwas Höchstgeschwindigkeit."}},{"@type":"Question","name":"Wie messe ich Latenz und Jitter?","acceptedAnswer":{"@type":"Answer","text":"Auf Start drücken; nichts zu installieren. Das Ergebnis zeigt drei Latenzen: in Ruhe, beim Download und beim Upload, jeweils mit Median und Jitter (die mittlere Änderung von einer Anfrage zur nächsten). Die Latenz in Ruhe zeigt, wie weit und wie sauber der Weg zu Cloudflare ist; hoher Jitter macht Anrufe und Spiele ruckelig; wie stark die Latenz beim Laden steigt, ist die Bufferbloat-Note. Ein Test vor einem Anruf oder Spiel zeigt am besten, ob deine Verbindung durchhält."}},{"@type":"Question","name":"Ich nutze einen Proxy oder ein VPN: Wessen Geschwindigkeit ist das?","acceptedAnswer":{"@type":"Answer","text":"Die des Proxys. Mit Proxy oder VPN erreicht der Browser den Testserver über ihn, die Zahlen zeigen also deine Leitung zum Proxy-Knoten, dessen Bandbreite und seine Route zu Cloudflare. Praktisch, um Knoten zu vergleichen. Um deine eigene Leitung zu messen, füge die Direkt-Regeln hinzu (Schaltfläche neben dem Fortschrittsbalken): Nur speed.cloudflare.com geht direkt, sonst ändert sich nichts. Unterstützt werden Clash/Mihomo, Surge, Shadowrocket, Quantumult X, Loon, sing-box und Xray, die meisten über einen Regelsatz, der aktuell bleibt. Der Ausgang unter der Überschrift (Stadt, Netz, IP) zeigt, welchen Weg der Test genommen hat, und die Seite warnt, wenn es nach einem Proxy aussieht."}},{"@type":"Question","name":"Wie viel Datenvolumen braucht ein Test?","acceptedAnswer":{"@type":"Answer","text":"Jede Richtung dauert 5 Sekunden, wenn sich die Geschwindigkeit einpendelt, höchstens 10: Ein Test bewegt also 5 bis 10 Sekunden deiner Höchstgeschwindigkeit pro Richtung, bei 100 Mbit/s insgesamt etwa 100 bis 250 MB, bei 1 Gbit/s 1 bis 2,5 GB. Die Seite zeigt, wie viel verbraucht wurde. Mit begrenztem Tarif oder mobil sparsam testen."}},{"@type":"Question","name":"Warum startet er nicht von selbst?","acceptedAnswer":{"@type":"Answer","text":"Ein Speedtest verbraucht viele Daten, daher wartet die Seite, bis du auf Start klickst. Wenn du oft testest, schalte „Beim Öffnen der Seite testen“ neben dem Fortschrittsbalken ein; die Wahl wird in diesem Browser gespeichert."}},{"@type":"Question","name":"Sammelt ihr meine Daten?","acceptedAnswer":{"@type":"Answer","text":"Nein. Der Test läuft zwischen deinem Browser und den Servern von Cloudflare; diese Seite sieht die Ergebnisse nie. Cloudflare sieht deine IP-Adresse wie jede Website. Link und Bild zum Teilen entstehen in deinem Browser und enthalten nur die Zahlen. Der Code ist Open Source auf GitHub."}}]}]}</script>
 <link rel="preload" href="/assets/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/app.cb41656c5c.css">
+<link rel="stylesheet" href="/assets/app.1c824dbb07.css">
 </head>
 <body>
 <div class="app">
@@ -117,29 +117,12 @@
         <label class="auto"><input type="checkbox" id="auto"><span class="sw" aria-hidden="true"></span><span data-i="auto_label">Beim Öffnen der Seite testen</span></label>
         <button class="btn sm" id="histBtn" type="button" aria-haspopup="dialog" aria-controls="hist"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.6V8l2.3 1.5"/></svg><span data-i="hist_btn">Verlauf</span></button>
         <button class="btn sm" id="rulesBtn" type="button" aria-haspopup="dialog" aria-controls="rules"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h9M8 4.5 11.5 8 8 11.5M14 3v10"/></svg><span data-i="rules_btn">Direkt-Regeln</span></button>
-        <button class="btn sm" id="shareBtn" type="button" aria-haspopup="dialog" aria-controls="shareDlg" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2M5 5l3-3 3 3M3 9v4.5h10V9"/></svg><span data-i="share">Teilen</span></button>
+        <button class="btn sm" id="shareBtn" type="button" aria-haspopup="dialog" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2M5 5l3-3 3 3M3 9v4.5h10V9"/></svg><span data-i="share">Teilen</span></button>
       </div>
     </section>
 
     <div data-ms-more></div>
   </main>
-</div>
-<div class="scrim" id="shareDlg" hidden>
-  <div class="dialog share" role="dialog" aria-modal="true" aria-labelledby="shareT">
-    <div class="dlg-h"><h2 id="shareT" data-i="share_h">Ergebnis teilen</h2>
-      <button class="icon-btn" data-close type="button" aria-label="Schließen"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
-    <div class="share-b">
-      <img id="shareImg" alt="" width="1200" height="760">
-      <div class="share-link"><input id="shareUrl" readonly aria-label="Link"><button class="btn pri" id="copyLink" type="button" data-i="copy_link">Link kopieren</button></div>
-      <div class="share-acts">
-        <button class="btn" id="copyImg" type="button" data-i="copy_img">Bild kopieren</button>
-        <button class="btn" id="dlImg" type="button" data-i="dl_img">Bild herunterladen</button>
-        <button class="btn" id="nativeShare" type="button" data-i="more_share" hidden>Mehr…</button>
-        <label class="chk"><input type="checkbox" id="shareCc"><span data-i="share_cc">Land und Rechenzentrum zeigen</span></label>
-      </div>
-      <p class="note" data-i="share_note">Bild und Link entstehen in deinem Browser und werden nicht hochgeladen. Der Link enthält nur die Zahlen.</p>
-    </div>
-  </div>
 </div>
 <div class="scrim" id="hist" hidden>
   <div class="dialog hist" role="dialog" aria-modal="true" aria-labelledby="histT">
@@ -179,7 +162,7 @@
 </div>
 
 <script type="application/json" id="data">{"lang":"de","paths":{"en":"/","zh-CN":"/zh-cn/","zh-TW":"/zh-tw/","ja":"/ja/","ko":"/ko/","es":"/es/","fr":"/fr/","de":"/de/","pt":"/pt/","ru":"/ru/"}}</script>
-<script src="/assets/l.de.895da83dfe.js"></script>
-<script src="/assets/app.8f9e8bec92.js"></script>
+<script src="/assets/l.de.365e06b322.js"></script>
+<script src="/assets/app.8c41d78a0f.js"></script>
 </body>
 </html>

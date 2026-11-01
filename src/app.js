@@ -338,110 +338,39 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   $("#histClear").onclick = () => { HIST = []; store.set(K.hist, "[]"); showPrev(null); renderHist(); };
   showPrev(HIST[0]);
 
-  /* ---------- share: a link that carries the result, an image drawn here, the system share sheet ---------- */
-  const shareLink = () => {
-    const where = $("#shareCc").checked;
-    return location.origin + D.paths[D.lang] + "r/" + encodeShare({ ...LAST, cc: where ? LAST.cc : "", colo: where ? LAST.colo : "" });
-  };
-  let shortFor = null;
-  async function shortLink(long) {
-    const meta = document.querySelector('meta[name="shortener"]');          // present on 1ms.dog; absent when self-hosted
-    if (!meta) return long;
-    if (shortFor && shortFor[0] === long) return shortFor[1];
-    try {
-      const r = await fetch(meta.content, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ url: long }), signal: AbortSignal.timeout(5000) });
-      const j = await r.json(); if (j.url) { shortFor = [long, j.url]; return j.url; }
-    } catch (e) {}
-    return long;
-  }
-  let shareBlob = null, shareRun = 0;
-  async function prepareShare() {
-    const run = ++shareRun, long = shareLink();
-    $("#shareUrl").value = long; $("#shareImg").removeAttribute("src"); shareBlob = null;
-    loadQR().catch(() => {});
-    const url = await shortLink(long);
-    if (run !== shareRun) return;
-    $("#shareUrl").value = url;
-    // the QR code carries the short link; a long one would be too dense to scan, so then it points at the page
-    const c = await drawCard(url.length <= 300 ? url : location.origin + D.paths[D.lang]).catch(() => null);
-    if (!c || run !== shareRun) return;
-    $("#shareImg").src = c.toDataURL("image/png"); c.toBlob(b => { shareBlob = b; }, "image/png");
-  }
-  $("#shareBtn").onclick = () => {
-    if (!LAST) return;
-    $("#shareCc").disabled = !LAST.cc && !LAST.colo;
-    $("#nativeShare").hidden = !navigator.share;
-    openDlg("shareDlg");
-    prepareShare();
-  };
-  $("#shareCc").onchange = prepareShare;
-  let qrP = null;
-  const loadQR = () => qrP ||= new Promise((res, rej) => {
-    const el = document.createElement("script"); el.src = QR_JS;
-    el.onload = () => res(self.QR1MS); el.onerror = () => { qrP = null; rej(); };
-    document.head.appendChild(el);
-  });
-  const flash = (btn, k) => { const o = btn.textContent; btn.textContent = t(k); setTimeout(() => { btn.textContent = o; }, 1500); };
-  $("#copyLink").onclick = async e => { try { await navigator.clipboard.writeText($("#shareUrl").value); flash(e.target, "copied"); } catch (x) { $("#shareUrl").select(); } };
-  $("#copyImg").onclick = async e => { try { await navigator.clipboard.write([new ClipboardItem({ "image/png": shareBlob })]); flash(e.target, "copied"); } catch (x) {} };
-  $("#dlImg").onclick = () => { const a = document.createElement("a"); a.href = $("#shareImg").src; a.download = "speed-test.png"; a.click(); };
-  $("#nativeShare").onclick = async () => {
-    const text = t("share_text", { down: fmtMbps(LAST.down), up: fmtMbps(LAST.up), ms: fmtMs(LAST.idle), grade: grade(LAST) || "–" });
-    const file = shareBlob && new File([shareBlob], "speed-test.png", { type: "image/png" });
-    try { await navigator.share(file && navigator.canShare && navigator.canShare({ files: [file] }) ? { text, url: $("#shareUrl").value, files: [file] } : { text, url: $("#shareUrl").value }); } catch (e) {}
-  };
-
-  // The card: brand, the two speeds, the latencies, what the line is good for, a QR code for the link; in the page's
-  // own theme. Country and data center only when the visitor ticked the box.
-  const img = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
-  function roundRect(x, a, b, w, h, r) { x.beginPath(); x.moveTo(a + r, b); x.arcTo(a + w, b, a + w, b + h, r); x.arcTo(a + w, b + h, a, b + h, r); x.arcTo(a, b + h, a, b, r); x.arcTo(a, b, a + w, b, r); x.closePath(); }
-  function clip(x, s, w) { if (x.measureText(s).width <= w) return s; while (s && x.measureText(s + "…").width > w) s = s.slice(0, -1); return s + "…"; }
-  async function drawCard(link) {
-    const W = 1200, H = 760, P = 56, where = $("#shareCc").checked, S = LAST;
-    const F = "Geist, 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans', 'Malgun Gothic', sans-serif", M = "'Geist Mono', Consolas, monospace";
-    const css = getComputedStyle(document.documentElement), v = n => css.getPropertyValue("--" + n).trim(), dark = css.colorScheme === "dark";
-    const c = document.createElement("canvas"); c.width = W; c.height = H;
-    const x = c.getContext("2d");
-    x.fillStyle = v("bg"); x.fillRect(0, 0, W, H);
-    const logo = await img(dark ? "/assets/logo-dark.svg" : "/assets/logo-light.svg");
-    x.drawImage(logo, P, 40, 150, 60);
+  /* ---------- share: the 1ms.dog share dialog (/assets/share/, copied verbatim from 1ms-shell), loaded on use ---------- */
+  // It makes the link short, draws the card's frame (logo, name, QR code, date) and offers copy, download and the
+  // system share sheet; this page gives the link, the card's middle and the footer. The box adds the country and the
+  // Cloudflare data center to both; the address is never in either.
+  const shareLink = show => location.origin + D.paths[D.lang] + "r/" + encodeShare({ ...LAST, cc: show ? LAST.cc : "", colo: show ? LAST.colo : "" });
+  // the card's middle: the two speeds, the latencies and the grade, what the line is good for
+  async function drawResult(x, kit) {
+    const { W, P, F, M, v, roundRect, clip, top } = kit, S = LAST, y = n => top + n;
     x.textBaseline = "alphabetic";
-    x.fillStyle = v("muted"); x.font = `600 24px ${F}`; x.fillText(t("app_name") + "  ·  " + location.host, P + 170, 80);
-    const QS = 150;
-    const qr = link && await loadQR().then(Q => { const q = Q(0, "M"); q.addData(link); q.make(); return q; }).catch(() => null);
-    if (qr) {
-      const n = qr.getModuleCount(), s = (QS - 16) / n, qx = W - P - QS, qy = 36;
-      x.fillStyle = "#fff"; roundRect(x, qx, qy, QS, QS, 12); x.fill();
-      x.fillStyle = "#111";
-      for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) if (qr.isDark(i, j)) x.fillRect(qx + 8 + j * s, qy + 8 + i * s, s + .3, s + .3);
-    }
-    // the two speeds
     const big = (label, val, at, color) => {
-      x.fillStyle = color; x.font = `600 28px ${F}`; x.fillText(label, at, 250);
-      x.fillStyle = v("fg"); x.font = `700 112px ${M}`; x.fillText(fmtMbps(val), at, 360);
+      x.fillStyle = color; x.font = `600 28px ${F}`; x.fillText(label, at, y(50));
+      x.fillStyle = v("fg"); x.font = `700 112px ${M}`; x.fillText(fmtMbps(val), at, y(160));
       const w = x.measureText(fmtMbps(val)).width;
-      x.fillStyle = v("muted"); x.font = `500 30px ${F}`; x.fillText("Mbps", at + w + 14, 360);
+      x.fillStyle = v("muted"); x.font = `500 30px ${F}`; x.fillText("Mbps", at + w + 14, y(160));
     };
     big("↓ " + t("k_down"), S.down, P, v("ink")); big("↑ " + t("k_up"), S.up, P + 560, v("up"));
-    // the latencies
     const lat = [["k_idle", S.idle, S.jit], ["k_ldown", S.ldown, S.jdown], ["k_lup", S.lup, S.jup]], cw = (W - P * 2) / 4;
-    x.fillStyle = v("line"); x.fillRect(P, 410, W - P * 2, 2);
+    x.fillStyle = v("line"); x.fillRect(P, y(210), W - P * 2, 2);
     lat.forEach(([k, ms, jit], i) => {
       const at = P + i * cw;
-      x.fillStyle = v("muted"); x.font = `500 22px ${F}`; x.fillText(clip(x, t(k), cw - 16), at, 452);
+      x.fillStyle = v("muted"); x.font = `500 22px ${F}`; x.fillText(clip(x, t(k), cw - 16), at, y(252));
       x.fillStyle = ms == null ? v("muted") : v(msTier(ms)); x.font = `600 40px ${M}`;
-      x.fillText(ms == null ? "–" : fmtMs(ms) + " ms", at, 500);
-      if (jit != null) { x.fillStyle = v("muted"); x.font = `400 19px ${F}`; x.fillText(clip(x, t("jit_v", { ms: fmtMs(jit) }), cw - 16), at, 530); }
+      x.fillText(ms == null ? "–" : fmtMs(ms) + " ms", at, y(300));
+      if (jit != null) { x.fillStyle = v("muted"); x.font = `400 19px ${F}`; x.fillText(clip(x, t("jit_v", { ms: fmtMs(jit) }), cw - 16), at, y(330)); }
     });
     const g = grade(S);
     if (g) {
       const at = P + 3 * cw, col = v(gradeTier(g));
-      x.fillStyle = col + "1f"; roundRect(x, at - 14, 422, cw - 2, 122, 14); x.fill();
-      x.fillStyle = v("muted"); x.font = `500 22px ${F}`; x.fillText(clip(x, t("k_grade"), cw - 30), at, 452);
-      x.fillStyle = col; x.font = `800 48px ${F}`; x.fillText(g, at, 504);
-      x.fillStyle = v("muted"); x.font = `400 19px ${F}`; x.fillText(clip(x, t("grade_sub", { ms: fmtMs(bloat(S)) }), cw - 30), at, 532);
+      x.fillStyle = col + "1f"; roundRect(x, at - 14, y(222), cw - 2, 122, 14); x.fill();
+      x.fillStyle = v("muted"); x.font = `500 22px ${F}`; x.fillText(clip(x, t("k_grade"), cw - 30), at, y(252));
+      x.fillStyle = col; x.font = `800 48px ${F}`; x.fillText(g, at, y(304));
+      x.fillStyle = v("muted"); x.font = `400 19px ${F}`; x.fillText(clip(x, t("grade_sub", { ms: fmtMs(bloat(S)) }), cw - 30), at, y(332));
     }
-    // what it's good for
     const u = uses(S);
     let ux = P;
     x.font = `600 22px ${F}`;
@@ -450,15 +379,24 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
       const label = (u[k] === "poor" ? "✕ " : "✓ ") + t("u_" + k), w = x.measureText(label).width + 32;
       if (ux + w > W - P) break;
       const col = v(u[k] === "good" ? "t1" : u[k] === "ok" ? "t3" : "t5");
-      x.fillStyle = col + "22"; roundRect(x, ux, 574, w, 46, 23); x.fill();
-      x.fillStyle = col; x.fillText(label, ux + 16, 605);
+      x.fillStyle = col + "22"; roundRect(x, ux, y(374), w, 46, 23); x.fill();
+      x.fillStyle = col; x.fillText(label, ux + 16, y(405));
       ux += w + 12;
     }
-    x.fillStyle = v("muted"); x.font = `400 20px ${F}`;
-    const foot = [t("card_sub"), new Date(S.ts).toLocaleDateString(D.lang), where && S.cc && country(S.cc), where && S.colo && "Cloudflare " + S.colo].filter(Boolean).join("  ·  ");
-    x.fillText(clip(x, foot, W - P * 2), P, H - 34);
-    return c;
   }
+  $("#shareBtn").onclick = async () => {
+    if (!LAST) return;
+    const S = LAST, { share } = await import("/assets/share/share.js");
+    share({
+      lang: D.lang, name: t("app_name"), file: "speed-test",
+      show: ["country", "colo"], never: ["ip"], canShow: !!(S.cc || S.colo),
+      link: shareLink, home: location.origin + D.paths[D.lang],
+      text: () => t("share_text", { down: fmtMbps(S.down), up: fmtMbps(S.up), ms: fmtMs(S.idle), grade: grade(S) || "–" }),
+      height: 760, draw: drawResult,
+      foot: show => [t("card_sub"), show && S.cc && country(S.cc), show && S.colo && "Cloudflare " + S.colo],
+      ts: S.ts,
+    }).open();
+  };
 
   /* ---------- a shared result ---------- */
   function showShared(S) {

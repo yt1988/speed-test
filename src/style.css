@@ -171,14 +171,6 @@ details.rblk > summary { cursor: pointer; font-size: 13px; color: var(--ink); }
 .codebox { position: relative; }
 .codebox textarea { width: 100%; resize: vertical; font: 12px/1.5 var(--f-num); background: var(--soft); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; white-space: pre; }
 .codebox .btn { position: absolute; top: 6px; right: 6px; height: 28px; padding: 0 10px; font-size: 12px; }
-/* share: the image, the link, and what to do with them (as on the 1ms.dog home page) */
-.dialog.share { width: 640px; }
-.share-b { padding: 16px; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
-#shareImg { display: block; width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); background: var(--soft); aspect-ratio: 1200 / 760; object-fit: contain; }
-.share-link { display: flex; gap: 8px; }
-.share-link input { flex: 1; min-width: 0; height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--fg); font: 13px var(--f-num); outline: none; }
-.share-acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.chk { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin-left: auto; cursor: pointer; }
 /* a shared result: a banner above the hero, with the way back to one's own test */
 .shared { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 10px 12px 10px 16px; border-radius: var(--r); background: var(--ink-soft); border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent); font-size: 13.5px; }
 .shared .btn { height: 32px; font-size: 13px; }
