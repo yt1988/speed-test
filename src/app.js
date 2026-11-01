@@ -167,6 +167,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     return `<span class="warn">${NET.reasons.map(reasonText).join(" ")}</span> ` + t("r_fix", { rules: `<button type="button" data-rules>${esc(t("rules_btn"))}</button>` }) + eg;
   }
   document.addEventListener("click", e => { if (e.target.closest && e.target.closest("[data-rules]")) $("#rulesBtn").click(); });
+  renderRel();
   exit().then(e => { NET.cf = e; NET.cfDone = true; renderNet(); });
 
   /* ---------- the test ---------- */

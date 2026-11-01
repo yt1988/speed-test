@@ -32,6 +32,8 @@ export default {
   r_dc: "出口網路是 {org}，這是機房網路：代理、VPN 或雲端伺服器。",
   r_fix: "要測自己的線路，加上{rules}。",
   egress_link: "看每個網站看到的 IP",
+  rel_m2c: "到 AWS、Google Cloud 等各雲端廠商的延遲", rel_dns: "網頁開得慢？看看哪個 DNS 對你最快",
+  rel_v6: "這次測速走的是 IPv4，你的網路有 IPv6 嗎？", asn_tip: "AS{n}：查看這個網路的資訊",
   hint_idle: "按「開始」，約 20–30 秒。流量消耗隨網速增加，詳見說明。",
   src_cf: "測速伺服器：Cloudflare",
   net_you: "你的出口",

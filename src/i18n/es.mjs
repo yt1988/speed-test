@@ -32,6 +32,8 @@ export default {
   r_dc: "Tu salida es {org}, una red de centro de datos: un proxy, VPN o servidor en la nube.",
   r_fix: "Para medir tu línea, añade las {rules}.",
   egress_link: "Qué IP ve cada sitio",
+  rel_m2c: "Latencia a AWS, Google Cloud y otras nubes", rel_dns: "¿Las páginas tardan en abrir? Mira qué DNS es el más rápido para ti",
+  rel_v6: "Esta prueba fue por IPv4. ¿Tu red tiene IPv6?", asn_tip: "AS{n}: quién opera esta red",
   hint_idle: "Pulsa Empezar: unos 20–30 segundos. Los datos usados crecen con la velocidad (ver Ayuda).",
   src_cf: "Servidores de prueba: Cloudflare",
   net_you: "Tu salida",

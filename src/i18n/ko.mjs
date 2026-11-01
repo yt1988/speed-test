@@ -32,6 +32,8 @@ export default {
   r_dc: "출구 네트워크: {org}. 데이터센터 네트워크이므로 프록시, VPN 또는 클라우드 서버입니다.",
   r_fix: "내 회선을 재려면 추가하세요: {rules}.",
   egress_link: "사이트별로 보이는 IP",
+  rel_m2c: "AWS, Google Cloud 등 클라우드까지의 지연", rel_dns: "웹페이지가 느리게 열리나요? 나에게 가장 빠른 DNS 찾기",
+  rel_v6: "이번 측정은 IPv4로 이루어졌습니다. 내 네트워크에 IPv6가 있나요?", asn_tip: "AS{n}: 이 네트워크 정보 보기",
   hint_idle: "'시작'을 누르면 약 20~30초 걸립니다. 데이터 사용량은 속도에 비례합니다(도움말 참고).",
   src_cf: "측정 서버: Cloudflare",
   net_you: "내 출구",

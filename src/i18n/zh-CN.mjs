@@ -32,6 +32,8 @@ export default {
   r_dc: "出口网络是 {org}，这是机房网络：代理、VPN 或云服务器。",
   r_fix: "要测自己的线路，加上{rules}。",
   egress_link: "看每个网站看到的 IP",
+  rel_m2c: "到 AWS、阿里云等各云厂商的延迟", rel_dns: "网页打开慢？看看哪个 DNS 对你最快",
+  rel_v6: "这次测速走的是 IPv4，你的网络有 IPv6 吗？", asn_tip: "AS{n}：查看这个网络的信息",
   hint_idle: "点「开始」，约 20–30 秒。流量消耗随网速增加，详见帮助。",
   src_cf: "测速服务器：Cloudflare",
   net_you: "你的出口",
