@@ -158,11 +158,9 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     }
     if (NET.mlDone) {
       const s = NET.ml;
-      // the address M-Lab sees: from its test, or on request (a connection that sends nothing, recorded by M-Lab)
-      // (the button asks the locate service again, so it stays even when the first ask failed)
+      // the address M-Lab sees, read as the page loads (a connection that sends nothing), and its network
       $("#netMl").innerHTML = NET.mlIp ? ipLink(NET.mlIp) + (NET.mlOrg ? ` <span class="m">· ${esc(NET.mlOrg.org)}</span>` : "")
-        : NET.peeking ? `<span class="m">${esc(t("ml_peeking"))}</span>`
-        : `<button class="peek" type="button" id="mlPeek">${esc(t("ml_peek"))}</button> <span class="m">${esc(t(NET.peekFail ? "ml_fail" : s ? "ml_peek_note" : "ml_unreach"))}</span>`;
+        : `<span class="m">${esc(t(!s || NET.peekFail ? "ml_unreach" : "ml_peeking"))}</span>`;
       $("#netMlX").innerHTML = s ? t("net_srv", { srv: flag(s.country) + esc(s.city || s.site || s.machine) }) : "";
     }
     NET.reasons = reasons(e, { tz: TZ, mlabIp: NET.mlIp });
@@ -200,7 +198,14 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   // M-Lab hands out a server with a token that lasts about a minute, and limits how often one may ask: the answer from
   // page load is used again while it is fresh
   const mlServer = async signal => NET.ml && Date.now() - NET.mlAt < 45000 ? NET.ml : (NET.ml = await ndt.locate(signal), NET.mlAt = Date.now(), NET.ml);
-  mlServer(AbortSignal.timeout(6000)).catch(() => {}).finally(() => { NET.mlDone = true; renderNet(); });
+  // Then the address M-Lab sees: an upload connection that sends nothing, closed at the server's first message (no data
+  // moved; M-Lab records the connection, as the M-Lab card and the help say), and whose network that address is on.
+  mlServer(AbortSignal.timeout(6000)).then(async s => {
+    NET.mlDone = true; renderNet();
+    const p = await ndt.peek(s.up);
+    if (!NET.mlIp) { NET.mlIp = hostOf(p.client); NET.mlOpen = p.openMs; NET.mlRtt = p.minRtt; }
+    renderNet(); mlOrgOf(NET.mlIp);
+  }).catch(() => { NET.peekFail = true; }).finally(() => { NET.mlDone = true; renderNet(); });
 
   /* ---------- the test ---------- */
   let RUN = null, LAST = null, META = null;
@@ -353,20 +358,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     }
   }
   $("#mlRun").onclick = runMlab;
-  // only the address M-Lab sees, on the visitor's click: a connection that sends nothing
-  document.addEventListener("click", async e => {
-    if (!e.target.closest || !e.target.closest("#mlPeek") || NET.peeking || ML) return;
-    NET.peeking = true; NET.peekFail = false; renderNet();
-    try {
-      const s = await mlServer(AbortSignal.timeout(6000));
-      const p = await ndt.peek(s.up);
-      NET.mlIp = hostOf(p.client); NET.mlOpen = p.openMs; NET.mlRtt = p.minRtt;
-    } catch (x) { NET.peekFail = true; }
-    NET.peeking = false; renderNet();
-    if (NET.mlIp) mlOrgOf(NET.mlIp);
-  });
-  // whose network the address M-Lab saw is on (ipinfo.io, asked only after the visitor ran M-Lab or clicked for the
-  // address); nothing happens if it can't be reached
+  // whose network the address M-Lab saw is on (ipinfo.io); nothing happens if it can't be reached
   async function mlOrgOf(ip) {
     if (!ip || NET.mlOrgFor === ip) return;
     NET.mlOrgFor = ip; NET.mlOrg = null;
