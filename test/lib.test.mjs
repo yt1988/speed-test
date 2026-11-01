@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { quantile, median, jitter, mbps, serverTime, l4, meta, nextSize, rateNow, steady, settled } from "../src/measure.mjs";
 import { fromMeta, fromTrace, reasons } from "../src/net.mjs";
-import { uses, bloat, bloatLevel, fmtMbps, fmtMs, speedTier } from "../src/verdict.mjs";
+import { uses, bloat, grade, gradeKey, gradeTier, fmtMbps, fmtMs, speedTier } from "../src/verdict.mjs";
 import { encode, decode, sharePath } from "../src/share.mjs";
 import { items, ruleSets, inline, remote, FORMATS } from "../src/rules.mjs";
 
@@ -68,13 +68,28 @@ test("the exit, and signs it isn't the visitor's own line", () => {
 test("what the line is good for", () => {
   const fast = { down: 500, up: 100, idle: 8, jit: 1, ldown: 20, lup: 25 };
   assert.deepEqual(Object.values(uses(fast)), ["good", "good", "good", "good", "good"]);
-  assert.equal(bloat(fast), 17); assert.equal(bloatLevel(17), "low");
+  assert.equal(bloat(fast), 17); assert.equal(grade(fast), "A");
   const far = { down: 30, up: 4, idle: 190, jit: 12, ldown: 400, lup: 230 };
   const u = uses(far);
   assert.equal(u.video, "good"); assert.equal(u.call, "ok"); assert.equal(u.game, "poor"); assert.equal(u.cloud, "poor"); assert.equal(u.live, "poor");
-  assert.equal(bloatLevel(bloat(far)), "high");
+  assert.equal(grade(far), "D", "+210 ms");
   assert.deepEqual(Object.values(uses({})), ["", "", "", "", ""], "nothing measured yet");
   assert.equal(uses({ down: 50 }).game, "", "game needs the latencies");
+});
+
+test("bufferbloat grade: Waveform's thresholds on the worse direction's rise", () => {
+  const at = (ldown, lup = null) => grade({ idle: 20, ldown, lup });
+  assert.equal(at(24.9), "A+"); assert.equal(at(25), "A");
+  assert.equal(at(49.9), "A"); assert.equal(at(50), "B");
+  assert.equal(at(79.9), "B"); assert.equal(at(80), "C");
+  assert.equal(at(219.9), "C"); assert.equal(at(220), "D");
+  assert.equal(at(419.9), "D"); assert.equal(at(420), "F");
+  assert.equal(at(22, 300), "D", "upload worse than download");
+  assert.equal(at(10), "A+", "lower than idle counts as no rise");
+  assert.equal(grade({ idle: 20 }), "", "nothing under load yet");
+  assert.equal(grade({}), "");
+  assert.deepEqual(["A+", "A", "B", "C", "D", "F"].map(gradeKey), ["ap", "a", "b", "c", "d", "f"]);
+  assert.deepEqual(["A+", "A", "B", "C", "D", "F", ""].map(gradeTier), ["t1", "t1", "t2", "t3", "t4", "t5", ""]);
 });
 
 test("numbers as shown", () => {
@@ -84,14 +99,19 @@ test("numbers as shown", () => {
 });
 
 test("a shared result survives the link; other formats refused", () => {
-  const r = { ts: 1793500000000, cc: "CN", colo: "HKG", down: 287.43, up: 41.25, idle: 38.2, jit: 3.1, ldown: 96.4, lup: null };
+  const r = { ts: 1793500000000, cc: "CN", colo: "HKG", down: 287.43, up: 41.25, idle: 38.2, jit: 3.1, ldown: 96.4, lup: null, jdown: 12.3, jup: null };
   const code = encode(r);
-  assert.match(code, /^1~[0-9a-z]+~CN~HKG~/);
+  assert.match(code, /^2~[0-9a-z]+~CN~HKG~/);
   assert.match(code, /^[0-9A-Za-z~._-]+$/, "path-safe");
   const back = decode(code);
   assert.deepEqual({ ...back, v: undefined }, { ...r, v: undefined });
   assert.deepEqual(decode(encode({ ...r, cc: "", colo: "" })).cc, "");
-  assert.equal(decode("2~x~-~-~1~1~1~1~1~1"), null, "a later format");
+  assert.equal(grade(back), "B", "the grade comes back with the latencies");
+  // format 1 links (before the loaded jitters) still read
+  const old = decode("1~t3pdkw~CN~HKG~2n9n~11a1~ei~v~2nw~");
+  assert.equal(old.v, 1); assert.equal(old.down, 1234.67); assert.equal(old.ldown, 345.2); assert.equal(old.jdown, null);
+  assert.equal(decode("3~x~-~-~1~1~1~1~1~1~1~1"), null, "a later format");
+  assert.equal(decode("1~x~-~-~1~1~1~1~1~1~1~1"), null, "format 1 with too many fields");
   assert.equal(decode("1~x~-~-~zz!~1~1~1~1~1"), null, "garbage");
   assert.equal(decode("1~x~-~-~~~~~~"), null, "no speeds");
   assert.deepEqual(sharePath("/zh-cn/r/" + code), { slug: "zh-cn", code });
@@ -116,7 +136,7 @@ test("history: only well-formed records, newest first, at most 20; change and ev
   const { parse, add, change, isPeak, MAX } = await import("../src/history.mjs");
   assert.deepEqual(parse("not json"), []);
   assert.deepEqual(parse('{"a":1}'), []);
-  const r = { ts: 1, down: 100, up: 20, idle: 9, jit: 1, ldown: 20, lup: 30, ip: "1.2.3.4", cc: "CN", org: "X", peak: true };
+  const r = { ts: 1, down: 100, up: 20, idle: 9, jit: 1, ldown: 20, lup: 30, jdown: 2, jup: 3, ip: "1.2.3.4", cc: "CN", org: "X", peak: true };
   assert.deepEqual(parse(JSON.stringify([r, { ts: "x" }, { ts: 2 }, { ...r, cc: "bad", down: "9" }])), [r, { ...r, cc: "", down: null }]);
   let h = [];
   for (let i = 0; i < 25; i++) h = add(h, { ...r, ts: i });

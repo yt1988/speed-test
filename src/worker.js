@@ -5,7 +5,7 @@
 //   anything else         a bare 404; 1ms-shell puts the shared 1ms.dog 404 page in front of it
 
 import { decode, sharePath } from "./share.mjs";
-import { fmtMbps, fmtMs } from "./verdict.mjs";
+import { fmtMbps, fmtMs, grade } from "./verdict.mjs";
 import en from "./i18n/en.mjs";
 import zhCN from "./i18n/zh-CN.mjs";
 import zhTW from "./i18n/zh-TW.mjs";
@@ -40,7 +40,7 @@ async function shared(req, env, url, { slug, code }) {
   const home = "/" + (slug ? slug + "/" : "");
   const r = decode(code);
   if (!r) return Response.redirect(new URL(home, url).toString(), 302);
-  const S = STR[slug], v = { down: fmtMbps(r.down), up: fmtMbps(r.up), ms: fmtMs(r.idle) };
+  const S = STR[slug], v = { down: fmtMbps(r.down), up: fmtMbps(r.up), ms: fmtMs(r.idle), grade: grade(r) || "–" };
   const title = fill(S.share_title, v), desc = fill(S.share_desc, v);
   const page = await env.ASSETS.fetch(new Request(new URL(home, url), { headers: req.headers }));
   if (!page.ok) return page;

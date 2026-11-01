@@ -81,6 +81,11 @@ h2 { font-size: 15px; font-weight: 700; }
 .lat b { display: block; font: 600 22px/30px var(--f-num); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .lat b small { font: 400 12px var(--f-ui); color: var(--muted); margin-left: 3px; }
 .lat b i { font: 500 12px var(--f-num); font-style: normal; color: var(--muted); margin-left: 6px; }
+.lat em { font: 12px/16px var(--f-num); font-style: normal; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* the grade: a letter on a tinted tile */
+.lat [data-l="grade"] b { font: 700 24px/30px var(--f-ui); }
+.lat [data-l="grade"][data-g] { border-color: transparent; background: color-mix(in srgb, currentColor 9%, transparent); }
+.lat [data-l="grade"][data-g] > span, .lat [data-l="grade"][data-g] em { color: var(--muted); }
 
 /* the conclusion: what the line is good for, and one or two sentences (before a test: how it works, or a warning
    about the route) */

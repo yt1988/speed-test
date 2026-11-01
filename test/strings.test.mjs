@@ -15,7 +15,7 @@ test("every key the page uses exists in every language", async () => {
     ...all(app, /\bt\("(\w+)"/g), ...all(build, /\bT\("(\w+)"/g), ...all(worker, /\bS\.(\w+)/g),
     ...all(page, /data-i="(\w+)"/g), ...all(page, /\{\{a:(\w+)\}\}/g), ...all(page, /\{\{(k_\w+)\}\}/g),
     ...["system", "light", "dark"].map(x => "th_" + x), ...USES.map(k => "u_" + k), ...["good", "ok", "poor"].map(x => "lv_" + x),
-    ...["low", "mid", "high"].map(x => "bloat_" + x), ...["chk", "good", "warn", "unk"].map(x => "st_" + x), "start", "stop", "again", "k_idle", "k_jit", "k_ldown", "k_lup",
+    ...["ap", "a", "b", "c", "d", "f"].map(x => "grade_" + x), ...["chk", "good", "warn", "unk"].map(x => "st_" + x), "start", "stop", "again", "k_idle", "k_ldown", "k_lup", "k_grade",
   ].filter(k => !k.endsWith("_")));
   assert.ok(keys.size > 60, "found " + keys.size + " keys");
   for (const [lang] of LANGS) {

@@ -62,11 +62,12 @@
           <span class="g-p"></span>
         </div>
       </div>
+      <!-- latency idle, downloading and uploading (median, its rise over idle, jitter), and the bufferbloat grade -->
       <ul class="lat">
-        <li data-l="idle"><span data-why="{{a:tip_idle}}" tabindex="0">{{k_idle}}</span><b>–</b></li>
-        <li data-l="jit"><span data-why="{{a:tip_jit}}" tabindex="0">{{k_jit}}</span><b>–</b></li>
-        <li data-l="ldown"><span data-why="{{a:tip_loaded}}" tabindex="0">{{k_ldown}}</span><b>–</b></li>
-        <li data-l="lup"><span data-why="{{a:tip_loaded}}" tabindex="0">{{k_lup}}</span><b>–</b></li>
+        <li data-l="idle"><span data-why="{{a:tip_idle}}" tabindex="0">{{k_idle}}</span><b>–</b><em>&nbsp;</em></li>
+        <li data-l="ldown"><span data-why="{{a:tip_loaded}}" tabindex="0">{{k_ldown}}</span><b>–</b><em>&nbsp;</em></li>
+        <li data-l="lup"><span data-why="{{a:tip_loaded}}" tabindex="0">{{k_lup}}</span><b>–</b><em>&nbsp;</em></li>
+        <li data-l="grade"><span data-why="{{a:tip_grade}}" tabindex="0">{{k_grade}}</span><b>–</b><em>&nbsp;</em></li>
       </ul>
       <div class="sum">
         <ul class="uses" id="uses">{{uses}}</ul>

@@ -14,7 +14,7 @@ How fast is your internet, really? [Speed Test](https://speed.1ms.dog) measures 
 | **Download** | Several requests to `GET /__down?bytes=N` in flight at once, every byte counted as it arrives from the response stream. Request sizes grow with the speed so far (about 1.2 s of data each, 256 KB to 50 MB). |
 | **Upload** | The same with `POST /__up` and XHR upload progress (fetch can't report it), random bodies so nothing can compress them. |
 | **Speed** | The average after the first 30% of the time, once the connection has ramped up. Each direction runs at least 5 s and stops as soon as the 1-second speeds over the last 2.5 s agree within 8%; at most 10 s. |
-| **Ping under load** | An empty download every 0.4 s while data flows. The rise over the idle ping is the bufferbloat: up to 30 ms low, up to 100 ms some, more is heavy. |
+| **Ping under load, bufferbloat grade** | An empty download starts every 0.15 s while data flows, on the same connection (up to 4 in flight on a slow path); median and jitter for the download and for the upload. The rise of the worse direction over the idle ping is graded with Waveform's thresholds: under 5 ms A+, under 30 A, under 60 B, under 200 C, under 400 D, more F. |
 
 The test servers are Cloudflare's own speed test endpoints, the ones behind speed.cloudflare.com and Cloudflare's MIT-licensed [@cloudflare/speedtest](https://github.com/cloudflare/speedtest); they answer any origin. In the browser all requests share one HTTP/2 or HTTP/3 connection, so on long paths the result reads lower than tools that open many TCP connections (the help dialog explains this, and why it reads lower still in mainland China, where Cloudflare's data centers are abroad).
 
@@ -34,7 +34,7 @@ A result goes into a link, `/r/<code>` (format in `src/share.mjs`, versioned): t
 src/measure.mjs     the test against Cloudflare: ping, download, upload, under-load ping; pure helpers unit-tested
 src/net.mjs         the exit Cloudflare sees, and signs of a proxy
 src/history.mjs     past results, kept only in the browser
-src/verdict.mjs     tiers, bufferbloat, what the line is good for
+src/verdict.mjs     tiers, bufferbloat and its A+ to F grade, what the line is good for
 src/rules.mjs       direct rules for proxy tools
 src/share.mjs       results in links
 src/app.js          the page script

@@ -33,7 +33,7 @@ test("every language page keeps the shell contract", async () => {
 test("the hero's slots are there before the test", async () => {
   const h = await page("");
   for (const k of USES) assert.match(h, new RegExp(`<li data-u="${k}" data-lv="">`), k);
-  for (const k of ["idle", "jit", "ldown", "lup"]) assert.match(h, new RegExp(`data-l="${k}"`), k);
+  for (const k of ["idle", "ldown", "lup", "grade"]) assert.match(h, new RegExp(`data-l="${k}"`), k);
   assert.match(h, /id="go"/); assert.match(h, /id="auto"/);
   assert.ok(!/id="auto" checked/.test(h), "waits for Start by default");
 });

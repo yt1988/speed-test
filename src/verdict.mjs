@@ -14,7 +14,15 @@ export function bloat(r) {
   const l = [r.ldown, r.lup].filter(v => v != null);
   return r.idle == null || !l.length ? null : Math.max(0, Math.max(...l) - r.idle);
 }
-export const bloatLevel = b => b == null ? "" : b <= 30 ? "low" : b <= 100 ? "mid" : "high";
+// The bufferbloat grade, from that added latency (median while busy minus median while idle, the worse direction).
+// Thresholds as Waveform's bufferbloat test grades: A+ under 5 ms, A under 30, B under 60, C under 200, D under 400,
+// F 400 and over. DSLReports graded the same idea by the ratio of loaded to idle latency; added milliseconds read the
+// same on a near and a far server, so they're used here.
+export const GRADES = [["A+", 5], ["A", 30], ["B", 60], ["C", 200], ["D", 400], ["F", Infinity]];
+export const grade = r => { const b = bloat(r); return b == null ? "" : GRADES.find(([, lim]) => b < lim)[0]; };
+// the grade's key in the strings (grade_ap … grade_f) and its color tier (t1 best … t5 worst)
+export const gradeKey = g => g === "A+" ? "ap" : g.toLowerCase();
+export const gradeTier = g => ({ "A+": "t1", A: "t1", B: "t2", C: "t3", D: "t4", F: "t5" })[g] || "";
 
 // What it's good for, each "good", "ok" or "poor" ("" while a number it needs is missing).
 // r: { down, up (Mbps), idle, jit, ldown, lup (ms) }

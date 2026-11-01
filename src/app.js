@@ -1,9 +1,9 @@
 // Speed Test page. Waits for Start unless the visitor turned on testing when the page opens (remembered here).
 // Order: idle latency, download, upload (src/measure.mjs), each shown live in the hero's fixed slots; at the end what
-// the line is good for and how much latency load adds. Strings: window.L1MS.
+// the line is good for and the bufferbloat grade (how much latency load adds). Strings: window.L1MS.
 import { ping, download, upload, median, jitter, exit } from "./measure.mjs";
 import { reasons } from "./net.mjs";
-import { fmtMbps, fmtMs, msTier, speedTier, bloat, bloatLevel, uses, USES } from "./verdict.mjs";
+import { fmtMbps, fmtMs, msTier, speedTier, bloat, grade, gradeKey, gradeTier, uses, USES } from "./verdict.mjs";
 import { FORMATS, FORMAT_NAMES, items as ruleItems, inline as ruleInline, remote as ruleRemote } from "./rules.mjs";
 import { parse as parseHist, add as addHist, change, isPeak } from "./history.mjs";
 import { encode as encodeShare, decode as decodeShare, sharePath } from "./share.mjs";
@@ -117,11 +117,24 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     g.querySelector(".g-v").textContent = fmtMbps(mbps);
     g.classList.toggle("on", !!on);
   };
-  const latCell = (k, ms, base) => {
-    const b = $(`.lat [data-l="${k}"] b`);
-    if (ms == null) { b.className = ""; b.textContent = "–"; return; }
-    b.className = "n " + (k === "jit" ? msTier(ms * 4) : msTier(ms));
+  // a latency tile: the median (and, under load, its rise over idle), the jitter below
+  const latCell = (k, ms, jit, base) => {
+    const li = $(`.lat [data-l="${k}"]`), b = li.querySelector("b"), em = li.querySelector("em");
+    if (ms == null) { b.className = ""; b.textContent = "–"; em.innerHTML = "&nbsp;"; return; }
+    b.className = "n " + msTier(ms);
     b.innerHTML = `${fmtMs(ms)}<small>ms</small>` + (base != null ? `<i>+${fmtMs(Math.max(0, ms - base))}</i>` : "");
+    em.innerHTML = jit != null ? esc(t("jit_v", { ms: fmtMs(jit) })) : "&nbsp;";
+  };
+  // the grade tile: the letter, tinted by how good it is, and the latency load adds
+  const gradeCell = r => {
+    const li = $('.lat [data-l="grade"]'), g = r ? grade(r) : "";
+    li.className = gradeTier(g); g ? li.dataset.g = g : delete li.dataset.g;
+    li.querySelector("b").textContent = g || "–";
+    li.querySelector("em").innerHTML = g ? esc(t("grade_sub", { ms: fmtMs(bloat(r)) })) : "&nbsp;";
+  };
+  const gradeLine = r => { const g = grade(r); return g ? esc(t("grade_" + gradeKey(g), { ms: fmtMs(bloat(r)) })) : ""; };
+  const showLat = r => {
+    latCell("idle", r.idle, r.jit); latCell("ldown", r.ldown, r.jdown, r.idle); latCell("lup", r.lup, r.jup, r.idle); gradeCell(r);
   };
   function showUses(r) {
     const u = uses(r);
@@ -190,7 +203,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
 
   /* ---------- the test ---------- */
   let RUN = null, LAST = null, META = null;
-  const R = {};                       // this run's numbers: down, up, idle, jit, ldown, lup
+  const R = {};                       // this run's numbers: down, up, idle, jit, ldown, lup, jdown, jup
   const TITLE = document.title;
   const phaseW = { ping: .12, down: .44, up: .44 };
   const ring = f => { $("#ring").style.strokeDasharray = `${(Math.min(1, f) * 100).toFixed(1)} 100`; };
@@ -207,7 +220,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     for (const k in R) delete R[k];
     SERIES.down = []; SERIES.up = []; drawChart();
     gauge("down", null); gauge("up", null);
-    ["idle", "jit", "ldown", "lup"].forEach(k => latCell(k, null));
+    showLat({});
     showUses({}); $("#noteL").innerHTML = warnHTML() || "&nbsp;";
     ring(0); document.title = TITLE;
     LAST = null; $("#shareBtn").disabled = true;
@@ -224,33 +237,35 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
       if (sig.aborted) throw new DOMException("", "AbortError");
       META = p.meta;
       R.idle = median(p.samples); R.jit = jitter(p.samples);
-      latCell("idle", R.idle); latCell("jit", R.jit);
+      latCell("idle", R.idle, R.jit);
 
       setGo("run", t("ph_down"));
       const d = await download({ signal: sig, onTick: s => {
         SERIES.down.push([s.ms, s.mbps]); drawSpark("down"); gauge("down", s.mbps, true);
+        if (s.loaded.length) latCell("ldown", median(s.loaded), jitter(s.loaded), R.idle);
         document.title = "↓ " + fmtMbps(s.mbps) + " Mbps · " + TITLE;
         progress("down", s.ms / SPAN, t("prog_dir", { dir: t("k_down"), s: (s.ms / 1000).toFixed(1), mb: mb(s.bytes) }));
       } });
       bytes += d.bytes;
       if (sig.aborted) throw new DOMException("", "AbortError");
       R.down = d.mbps; gauge("down", R.down);
-      R.ldown = median(d.loaded); latCell("ldown", R.ldown, R.idle);
+      R.ldown = median(d.loaded); R.jdown = jitter(d.loaded); latCell("ldown", R.ldown, R.jdown, R.idle);
 
       setGo("run", t("ph_up"));
       const u = await upload({ signal: sig, onTick: s => {
         SERIES.up.push([s.ms, s.mbps]); drawSpark("up"); gauge("up", s.mbps, true);
+        if (s.loaded.length) latCell("lup", median(s.loaded), jitter(s.loaded), R.idle);
         document.title = "↑ " + fmtMbps(s.mbps) + " Mbps · " + TITLE;
         progress("up", s.ms / SPAN, t("prog_dir", { dir: t("k_up"), s: (s.ms / 1000).toFixed(1), mb: mb(bytes + s.bytes) }));
       } });
       bytes += u.bytes;
       if (sig.aborted) throw new DOMException("", "AbortError");
       R.up = u.mbps; gauge("up", R.up);
-      R.lup = median(u.loaded); latCell("lup", R.lup, R.idle);
+      R.lup = median(u.loaded); R.jup = jitter(u.loaded); latCell("lup", R.lup, R.jup, R.idle);
+      gradeCell(R);
 
       showUses(R);
-      const b = bloat(R), lines = [];
-      if (b != null) lines.push(esc(t("bloat_" + bloatLevel(b), { ms: fmtMs(b) })));
+      const lines = [gradeLine(R)].filter(Boolean);
       const cc = (NET.cf && NET.cf.cc) || META.country;
       if (cc === "CN" && !NET.reasons.length) lines.push(esc(t("cn_note")));
       if (NET.reasons.length) lines.push(warnHTML());
@@ -353,7 +368,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   $("#copyImg").onclick = async e => { try { await navigator.clipboard.write([new ClipboardItem({ "image/png": shareBlob })]); flash(e.target, "copied"); } catch (x) {} };
   $("#dlImg").onclick = () => { const a = document.createElement("a"); a.href = $("#shareImg").src; a.download = "speed-test.png"; a.click(); };
   $("#nativeShare").onclick = async () => {
-    const text = t("share_text", { down: fmtMbps(LAST.down), up: fmtMbps(LAST.up), ms: fmtMs(LAST.idle) });
+    const text = t("share_text", { down: fmtMbps(LAST.down), up: fmtMbps(LAST.up), ms: fmtMs(LAST.idle), grade: grade(LAST) || "–" });
     const file = shareBlob && new File([shareBlob], "speed-test.png", { type: "image/png" });
     try { await navigator.share(file && navigator.canShare && navigator.canShare({ files: [file] }) ? { text, url: $("#shareUrl").value, files: [file] } : { text, url: $("#shareUrl").value }); } catch (e) {}
   };
@@ -391,14 +406,23 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     };
     big("↓ " + t("k_down"), S.down, P, v("ink")); big("↑ " + t("k_up"), S.up, P + 560, v("up"));
     // the latencies
-    const lat = [["k_idle", S.idle], ["k_jit", S.jit], ["k_ldown", S.ldown], ["k_lup", S.lup]], cw = (W - P * 2) / 4;
+    const lat = [["k_idle", S.idle, S.jit], ["k_ldown", S.ldown, S.jdown], ["k_lup", S.lup, S.jup]], cw = (W - P * 2) / 4;
     x.fillStyle = v("line"); x.fillRect(P, 410, W - P * 2, 2);
-    lat.forEach(([k, ms], i) => {
+    lat.forEach(([k, ms, jit], i) => {
       const at = P + i * cw;
-      x.fillStyle = v("muted"); x.font = `500 22px ${F}`; x.fillText(clip(x, t(k), cw - 16), at, 460);
-      x.fillStyle = ms == null ? v("muted") : v(k === "k_jit" ? msTier(ms * 4) : msTier(ms)); x.font = `600 40px ${M}`;
-      x.fillText(ms == null ? "–" : fmtMs(ms) + " ms", at, 510);
+      x.fillStyle = v("muted"); x.font = `500 22px ${F}`; x.fillText(clip(x, t(k), cw - 16), at, 452);
+      x.fillStyle = ms == null ? v("muted") : v(msTier(ms)); x.font = `600 40px ${M}`;
+      x.fillText(ms == null ? "–" : fmtMs(ms) + " ms", at, 500);
+      if (jit != null) { x.fillStyle = v("muted"); x.font = `400 19px ${F}`; x.fillText(clip(x, t("jit_v", { ms: fmtMs(jit) }), cw - 16), at, 530); }
     });
+    const g = grade(S);
+    if (g) {
+      const at = P + 3 * cw, col = v(gradeTier(g));
+      x.fillStyle = col + "1f"; roundRect(x, at - 14, 422, cw - 2, 122, 14); x.fill();
+      x.fillStyle = v("muted"); x.font = `500 22px ${F}`; x.fillText(clip(x, t("k_grade"), cw - 30), at, 452);
+      x.fillStyle = col; x.font = `800 48px ${F}`; x.fillText(g, at, 504);
+      x.fillStyle = v("muted"); x.font = `400 19px ${F}`; x.fillText(clip(x, t("grade_sub", { ms: fmtMs(bloat(S)) }), cw - 30), at, 532);
+    }
     // what it's good for
     const u = uses(S);
     let ux = P;
@@ -408,8 +432,8 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
       const label = (u[k] === "poor" ? "✕ " : "✓ ") + t("u_" + k), w = x.measureText(label).width + 32;
       if (ux + w > W - P) break;
       const col = v(u[k] === "good" ? "t1" : u[k] === "ok" ? "t3" : "t5");
-      x.fillStyle = col + "22"; roundRect(x, ux, 560, w, 46, 23); x.fill();
-      x.fillStyle = col; x.fillText(label, ux + 16, 591);
+      x.fillStyle = col + "22"; roundRect(x, ux, 574, w, 46, 23); x.fill();
+      x.fillStyle = col; x.fillText(label, ux + 16, 605);
       ux += w + 12;
     }
     x.fillStyle = v("muted"); x.font = `400 20px ${F}`;
@@ -422,10 +446,9 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   function showShared(S) {
     reset(); showPrev(null);                // the visitor's own last result says nothing about someone else's
     gauge("down", S.down); gauge("up", S.up);
-    latCell("idle", S.idle); latCell("jit", S.jit); latCell("ldown", S.ldown, S.idle); latCell("lup", S.lup, S.idle);
+    showLat(S);
     showUses(S);
-    const b = bloat(S);
-    $("#noteL").innerHTML = b != null ? esc(t("bloat_" + bloatLevel(b), { ms: fmtMs(b) })) : "&nbsp;";
+    $("#noteL").innerHTML = gradeLine(S) || "&nbsp;";
     $("#sharedTxt").textContent = t("shared_on", { where: S.cc ? t("shared_where", { where: country(S.cc) }) : "", date: new Date(S.ts).toLocaleString(D.lang, { dateStyle: "medium", timeStyle: "short" }) });
     $("#shared").hidden = false;
     LAST = S; $("#shareBtn").disabled = false;

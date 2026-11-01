@@ -13,7 +13,7 @@ export function parse(text) {
   try { a = JSON.parse(text || "[]"); } catch (e) { return []; }
   if (!Array.isArray(a)) return [];
   return a.filter(r => r && typeof r.ts === "number" && (num(r.down) != null || num(r.up) != null)).slice(0, MAX).map(r => ({
-    ts: r.ts, down: num(r.down), up: num(r.up), idle: num(r.idle), jit: num(r.jit), ldown: num(r.ldown), lup: num(r.lup),
+    ts: r.ts, down: num(r.down), up: num(r.up), idle: num(r.idle), jit: num(r.jit), ldown: num(r.ldown), lup: num(r.lup), jdown: num(r.jdown), jup: num(r.jup),
     ip: typeof r.ip === "string" ? r.ip.slice(0, 64) : "", cc: /^[A-Z]{2}$/.test(r.cc || "") ? r.cc : "", org: typeof r.org === "string" ? r.org.slice(0, 80) : "", peak: !!r.peak,
   }));
 }

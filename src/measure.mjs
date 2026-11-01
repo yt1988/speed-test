@@ -5,7 +5,9 @@
 // Latency: empty downloads one after another on a warm connection, each request's time minus the server's own time
 // (Server-Timing: cfSpeedWorker). Download and upload: several requests in flight at once for a few seconds, bytes
 // counted as they arrive (download: the response stream; upload: XHR progress), the speed taken over the part after
-// the ramp-up. While data flows, an empty download every 400 ms measures the latency under load (bufferbloat).
+// the ramp-up. While data flows, an empty download starts every 150 ms (a few may be in flight when the line is slow)
+// measures the latency under load (bufferbloat): its median and jitter, against the idle ones, give the grade
+// (src/verdict.mjs).
 // The pure helpers at the top are unit-tested; the runners need a browser.
 
 import { fromMeta, fromTrace } from "./net.mjs";
@@ -122,14 +124,20 @@ export async function ping({ n = 16, signal, onSample } = {}) {
   return { samples: out, meta: meta(k => first.headers.get(k)), proto: first.l4 ? first.l4.proto : "", tcpMin: tcp.length ? Math.min(...tcp) : null };
 }
 
-// Latency while the line is busy: an empty download every 400 ms until stopped
+// Latency while the line is busy: an empty download starts every 150 ms until stopped, from 0.6 s in (the transfer is
+// under way by then), on the same connection as the data, as a call or a game would see it. A slow path or a full
+// buffer makes each take longer than that, so up to 4 are in flight at once: the cadence holds without piling up.
+const PROBE_MS = 150, PROBE_OPEN = 4;
 function underLoad(signal, out) {
+  let open = 0;
   (async () => {
-    await sleep(800, signal);
+    await sleep(600, signal);
     while (!signal.aborted) {
-      const t = performance.now();
-      try { out.push((await probe(signal)).ms); } catch (e) { if (signal.aborted) return; }
-      await sleep(Math.max(0, 400 - (performance.now() - t)), signal);
+      if (open < PROBE_OPEN) {
+        open++;
+        probe(signal).then(p => { if (!signal.aborted) out.push(p.ms); }, () => {}).finally(() => { open--; });
+      }
+      await sleep(PROBE_MS, signal);
     }
   })();
 }
@@ -145,7 +153,7 @@ async function transfer({ send, streams, hi, min, max, signal, onTick }) {
   const tick = setInterval(() => {
     samples.push([performance.now() - t0, got]);
     const ms = samples[samples.length - 1][0];
-    onTick && onTick({ ms, mbps: rateNow(samples), bytes: got, samples });
+    onTick && onTick({ ms, mbps: rateNow(samples), bytes: got, samples, loaded });
     if (ms >= max || settled(samples, min)) end();
   }, 100);
   underLoad(stop.signal, loaded);

@@ -127,8 +127,8 @@ export async function build({ check = false } = {}) {
   files["robots.txt"] = `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`;
   files["llms.txt"] = `# ${en.app_name} · 1ms.dog
 
-> Free internet speed test in the browser: download and upload speed, idle latency, jitter, and latency under load
-> (bufferbloat), measured from the visitor's own network against Cloudflare's speed test servers (the nearest
+> Free internet speed and bufferbloat test in the browser: download and upload speed, latency and jitter idle, while
+> downloading and while uploading, and an A+ to F bufferbloat grade (Waveform's thresholds on the rise under load), measured from the visitor's own network against Cloudflare's speed test servers (the nearest
 > Cloudflare data center). Several requests in flight, bytes counted as they arrive, speed taken after the ramp-up.
 > Says what the line is good for (4K video, video calls, online games, cloud gaming, live streaming), and whether the
 > test goes through a proxy. Waits for Start by default. Nothing is sent to this site; requests go straight from the
