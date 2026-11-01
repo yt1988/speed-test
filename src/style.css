@@ -82,6 +82,9 @@ h2 { font-size: 15px; font-weight: 700; }
 .lat b small { font: 400 12px var(--f-ui); color: var(--muted); margin-left: 3px; }
 .lat b i { font: 500 12px var(--f-num); font-style: normal; color: var(--muted); margin-left: 6px; }
 .lat em { font: 12px/16px var(--f-num); font-style: normal; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lat b.wait { color: var(--muted); letter-spacing: 2px; animation: lat-wait 1.2s ease-in-out infinite; }
+@keyframes lat-wait { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .lat b.wait { animation: none; } }
 /* the grade: a letter on a tinted tile */
 .lat [data-l="grade"] b { font: 700 24px/30px var(--f-ui); }
 .lat [data-l="grade"][data-g] { border-color: transparent; background: color-mix(in srgb, currentColor 9%, transparent); }

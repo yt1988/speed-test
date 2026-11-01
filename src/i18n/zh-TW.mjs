@@ -47,6 +47,7 @@ export default {
   c_exit: "出口",
   peak: "晚高峰",
   k_grade: "Bufferbloat 等級", jit_v: "抖動 {ms} ms", grade_sub: "滿載 +{ms} ms",
+  lat_wait: "等待中", lat_now: "測量中", lat_n: "{n} 次", grade_wait: "上傳測完後評級",
   tip_grade: "線路跑滿時延遲漲了多少，按 A+ 到 F 評級：低於 5 毫秒 A+，30 以內 A，60 以內 B，200 以內 C，400 以內 D，更多為 F。",
   grade_ap: "Bufferbloat A+：跑滿時延遲只漲 {ms} 毫秒，別人下載時打電話、玩遊戲都不受影響。",
   grade_a: "Bufferbloat A：跑滿時延遲漲 {ms} 毫秒，線路忙時通話和大多數遊戲都沒問題。",

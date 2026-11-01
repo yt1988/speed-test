@@ -47,6 +47,7 @@ export default {
   c_exit: "Sortie",
   peak: "heure de pointe",
   k_grade: "Bufferbloat", jit_v: "gigue {ms} ms", grade_sub: "charge +{ms} ms",
+  lat_wait: "En attente", lat_now: "Mesure…", lat_n: "{n} mesures", grade_wait: "Après l'envoi",
   tip_grade: "De combien le ping monte quand la ligne est pleine, noté de A+ à F : moins de 5 ms A+, moins de 30 A, moins de 60 B, moins de 200 C, moins de 400 D, au-delà F.",
   grade_ap: "Bufferbloat A+ : sous charge le ping ne monte que de {ms} ms. Appels et jeux ne remarquent pas un téléchargement en cours.",
   grade_a: "Bufferbloat A : sous charge le ping monte de {ms} ms. Appels et la plupart des jeux restent fluides quand la ligne est occupée.",

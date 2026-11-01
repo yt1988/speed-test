@@ -117,20 +117,28 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     g.querySelector(".g-v").textContent = fmtMbps(mbps);
     g.classList.toggle("on", !!on);
   };
-  // a latency tile: the median (and, under load, its rise over idle), the jitter below
-  const latCell = (k, ms, jit, base) => {
+  // a latency tile: the median (and, under load, its rise over idle), the jitter below. During a test `note` says
+  // where it stands (waiting, measuring, how many samples so far); a tile with nothing yet shows "···" then.
+  const latCell = (k, ms, jit, base, note) => {
     const li = $(`.lat [data-l="${k}"]`), b = li.querySelector("b"), em = li.querySelector("em");
-    if (ms == null) { b.className = ""; b.textContent = "–"; em.innerHTML = "&nbsp;"; return; }
+    if (ms == null) {
+      b.className = note ? "wait" : ""; b.textContent = note ? "···" : "–";
+      em.innerHTML = note ? esc(note) : "&nbsp;";
+      return;
+    }
     b.className = "n " + msTier(ms);
     b.innerHTML = `${fmtMs(ms)}<small>ms</small>` + (base != null ? `<i>+${fmtMs(Math.max(0, ms - base))}</i>` : "");
-    em.innerHTML = jit != null ? esc(t("jit_v", { ms: fmtMs(jit) })) : "&nbsp;";
+    em.innerHTML = [jit != null && esc(t("jit_v", { ms: fmtMs(jit) })), note && esc(note)].filter(Boolean).join(" · ") || "&nbsp;";
   };
-  // the grade tile: the letter, tinted by how good it is, and the latency load adds
-  const gradeCell = r => {
+  // live, from the samples so far
+  const latLive = (k, a, base) => a.length ? latCell(k, median(a), jitter(a), base, t("lat_n", { n: a.length })) : latCell(k, null, null, null, t("lat_now"));
+  // the grade tile: the letter, tinted by how good it is, and the latency load adds (during a test: when it comes)
+  const gradeCell = (r, note) => {
     const li = $('.lat [data-l="grade"]'), g = r ? grade(r) : "";
     li.className = gradeTier(g); g ? li.dataset.g = g : delete li.dataset.g;
-    li.querySelector("b").textContent = g || "–";
-    li.querySelector("em").innerHTML = g ? esc(t("grade_sub", { ms: fmtMs(bloat(r)) })) : "&nbsp;";
+    li.querySelector("b").className = !g && note ? "wait" : "";
+    li.querySelector("b").textContent = g || (note ? "···" : "–");
+    li.querySelector("em").innerHTML = g ? esc(t("grade_sub", { ms: fmtMs(bloat(r)) })) : note ? esc(note) : "&nbsp;";
   };
   const gradeLine = r => { const g = grade(r); return g ? esc(t("grade_" + gradeKey(g), { ms: fmtMs(bloat(r)) })) : ""; };
   const showLat = r => {
@@ -231,18 +239,27 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     if (!$("#shared").hidden) { $("#shared").hidden = true; history.replaceState(null, "", D.paths[D.lang]); }
     const ctl = RUN = new AbortController(), sig = ctl.signal, t0 = performance.now();
     reset(); showPrev(HIST[0]); setGo("run", t("ph_ping"));
+    // every tile says where it stands while the test runs
+    latLive("idle", []);
+    latCell("ldown", null, null, null, t("lat_wait")); latCell("lup", null, null, null, t("lat_wait"));
+    gradeCell({}, t("grade_wait"));
     let bytes = 0;
     try {
-      const p = await ping({ signal: sig, onSample: (ms, i, n) => progress("ping", i / n, t("prog_ping", { n: i, of: n })) });
+      const idle = [];
+      const p = await ping({ signal: sig, onSample: (ms, i, n) => {
+        progress("ping", i / n, t("prog_ping", { n: i, of: n }));
+        idle.push(ms); latLive("idle", idle);
+      } });
       if (sig.aborted) throw new DOMException("", "AbortError");
       META = p.meta;
       R.idle = median(p.samples); R.jit = jitter(p.samples);
       latCell("idle", R.idle, R.jit);
 
       setGo("run", t("ph_down"));
+      latLive("ldown", []);
       const d = await download({ signal: sig, onTick: s => {
         SERIES.down.push([s.ms, s.mbps]); drawSpark("down"); gauge("down", s.mbps, true);
-        if (s.loaded.length) latCell("ldown", median(s.loaded), jitter(s.loaded), R.idle);
+        latLive("ldown", s.loaded, R.idle);
         document.title = "↓ " + fmtMbps(s.mbps) + " Mbps · " + TITLE;
         progress("down", s.ms / SPAN, t("prog_dir", { dir: t("k_down"), s: (s.ms / 1000).toFixed(1), mb: mb(s.bytes) }));
       } });
@@ -252,9 +269,10 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
       R.ldown = median(d.loaded); R.jdown = jitter(d.loaded); latCell("ldown", R.ldown, R.jdown, R.idle);
 
       setGo("run", t("ph_up"));
+      latLive("lup", []);
       const u = await upload({ signal: sig, onTick: s => {
         SERIES.up.push([s.ms, s.mbps]); drawSpark("up"); gauge("up", s.mbps, true);
-        if (s.loaded.length) latCell("lup", median(s.loaded), jitter(s.loaded), R.idle);
+        latLive("lup", s.loaded, R.idle);
         document.title = "↑ " + fmtMbps(s.mbps) + " Mbps · " + TITLE;
         progress("up", s.ms / SPAN, t("prog_dir", { dir: t("k_up"), s: (s.ms / 1000).toFixed(1), mb: mb(bytes + s.bytes) }));
       } });
@@ -279,7 +297,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
       saveRun({ ts: LAST.ts, ...R, ip: (NET.cf && NET.cf.ip) || META.ip || "", cc: cc || "", org: (NET.cf && NET.cf.org) || "", peak });
       setGo("done", t("used", { mb: mb(bytes) }));
     } catch (e) {
-      gauge("down", R.down); gauge("up", R.up); ring(0); document.title = TITLE;
+      gauge("down", R.down); gauge("up", R.up); showLat(R); ring(0); document.title = TITLE;
       if (sig.aborted) { $("#progTxt").textContent = t("stopped"); setGo("idle"); }
       else { $("#progTxt").innerHTML = "&nbsp;"; $("#noteL").textContent = t("e_fail"); setGo("idle"); }
     } finally {

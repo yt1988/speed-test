@@ -47,6 +47,7 @@ export default {
   c_exit: "出口",
   peak: "夜のピーク",
   k_grade: "バッファーブロート", jit_v: "ジッター {ms} ms", grade_sub: "負荷時 +{ms} ms",
+  lat_wait: "待機中", lat_now: "測定中", lat_n: "{n} 回", grade_wait: "上り測定後に評価",
   tip_grade: "回線がいっぱいのとき Ping がどれだけ増えるかを A+〜F で評価：5 ms 未満 A+、30 未満 A、60 未満 B、200 未満 C、400 未満 D、それ以上 F。",
   grade_ap: "バッファーブロート A+：負荷時の Ping の増加はわずか {ms} ms。誰かがダウンロードしても通話やゲームに影響しません。",
   grade_a: "バッファーブロート A：負荷時に Ping が {ms} ms 増えます。回線が混んでいても通話やほとんどのゲームは問題ありません。",

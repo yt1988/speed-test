@@ -47,6 +47,7 @@ export default {
   c_exit: "Ausgang",
   peak: "Abendspitze",
   k_grade: "Bufferbloat", jit_v: "Jitter {ms} ms", grade_sub: "Last +{ms} ms",
+  lat_wait: "Wartet", lat_now: "Misst", lat_n: "{n} Messungen", grade_wait: "Nach dem Upload",
   tip_grade: "Wie stark der Ping bei voller Leitung steigt, benotet von A+ bis F: unter 5 ms A+, unter 30 A, unter 60 B, unter 200 C, unter 400 D, mehr F.",
   grade_ap: "Bufferbloat A+: Unter Last steigt der Ping nur um {ms} ms. Anrufe und Spiele merken nicht, wenn jemand lädt.",
   grade_a: "Bufferbloat A: Unter Last steigt der Ping um {ms} ms. Anrufe und die meisten Spiele laufen auch bei voller Leitung gut.",

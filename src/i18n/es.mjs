@@ -47,6 +47,7 @@ export default {
   c_exit: "Salida",
   peak: "hora punta",
   k_grade: "Bufferbloat", jit_v: "jitter {ms} ms", grade_sub: "carga +{ms} ms",
+  lat_wait: "En espera", lat_now: "Midiendo", lat_n: "{n} muestras", grade_wait: "Tras la subida",
   tip_grade: "Cuánto sube el ping con la línea llena, de A+ a F: menos de 5 ms A+, menos de 30 A, menos de 60 B, menos de 200 C, menos de 400 D, más F.",
   grade_ap: "Bufferbloat A+: con la línea llena el ping sube solo {ms} ms. Llamadas y juegos no notan que alguien descarga.",
   grade_a: "Bufferbloat A: con la línea llena el ping sube {ms} ms. Llamadas y la mayoría de juegos van bien con la línea ocupada.",

@@ -47,6 +47,7 @@ export default {
   c_exit: "Exit",
   peak: "evening peak",
   k_grade: "Bufferbloat", jit_v: "jitter {ms} ms", grade_sub: "load +{ms} ms",
+  lat_wait: "Waiting", lat_now: "Measuring", lat_n: "{n} samples", grade_wait: "After the upload",
   tip_grade: "How much the ping rises when the line is full, graded A+ to F: under 5 ms A+, under 30 A, under 60 B, under 200 C, under 400 D, more F.",
   grade_ap: "Bufferbloat A+: the ping rises by only {ms} ms under load. Calls and games won't notice someone downloading.",
   grade_a: "Bufferbloat A: the ping rises by {ms} ms under load. Calls and most games are fine while the line is busy.",
