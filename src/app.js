@@ -7,6 +7,7 @@ import { reasons, hostOf } from "./net.mjs";
 import * as ndt from "./mlab.mjs";
 import { fmtMbps, fmtMs, msTier, speedTier, bloat, bloatLevel, uses, USES } from "./verdict.mjs";
 import { FORMATS, FORMAT_NAMES, items as ruleItems, inline as ruleInline, remote as ruleRemote } from "./rules.mjs";
+import { parse as parseHist, add as addHist, change, isPeak } from "./history.mjs";
 import { encode as encodeShare, decode as decodeShare, sharePath } from "./share.mjs";
 
 (function () {
@@ -17,7 +18,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   const t = (k, v) => { let s = L[k] ?? k; if (v) for (const x in v) s = s.split("{" + x + "}").join(v[x]); return s; };
   const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
-  const K = { theme: "speedtest:theme", lang: "speedtest:lang", rules: "speedtest:rules", auto: "speedtest:auto" };
+  const K = { theme: "speedtest:theme", lang: "speedtest:lang", rules: "speedtest:rules", auto: "speedtest:auto", hist: "speedtest:hist" };
 
   /* ---------- theme and language (synced across the 1ms.dog tools) ---------- */
   const thBtn = $("#theme"), TH = ["system", "light", "dark"];
@@ -207,7 +208,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     if (RUN) { RUN.abort(); return; }
     if (!$("#shared").hidden) { $("#shared").hidden = true; history.replaceState(null, "", D.paths[D.lang]); }
     const ctl = RUN = new AbortController(), sig = ctl.signal, t0 = performance.now();
-    reset(); setGo("run", t("ph_ping")); $("#mlRun").disabled = true;
+    reset(); showPrev(HIST[0]); setGo("run", t("ph_ping")); $("#mlRun").disabled = true;
     let bytes = 0;
     try {
       const p = await ping({ signal: sig, onSample: (ms, i, n) => progress("ping", i / n, t("prog_ping", { n: i, of: n })) });
@@ -246,10 +247,12 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
       if (NET.reasons.length) lines.push(warnHTML());
       $("#noteL").innerHTML = lines.join(" ") || "&nbsp;";
       ring(1);
-      $("#progTxt").textContent = t("done", { s: ((performance.now() - t0) / 1000).toFixed(0), mb: mb(bytes) });
+      const peak = isPeak(new Date());
+      $("#progTxt").textContent = t("done", { s: ((performance.now() - t0) / 1000).toFixed(0), mb: mb(bytes) }) + (peak ? " · " + t("peak") : "");
       document.title = `↓ ${fmtMbps(R.down)} ↑ ${fmtMbps(R.up)} Mbps · ${TITLE}`;
       LAST = { ts: Date.now(), cc: cc || "", colo: META.colo || (NET.cf && NET.cf.colo) || "", ...R };
       $("#shareBtn").disabled = false;
+      saveRun({ ts: LAST.ts, ...R, ip: (NET.cf && NET.cf.ip) || META.ip || "", cc: cc || "", org: (NET.cf && NET.cf.org) || "", peak });
       setGo("done", t("used", { mb: mb(bytes) }));
     } catch (e) {
       gauge("down", R.down); gauge("up", R.up); ring(0); document.title = TITLE;
@@ -266,6 +269,33 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   const autoBox = $("#auto");
   autoBox.checked = store.get(K.auto) === "1";
   autoBox.onchange = () => store.set(K.auto, autoBox.checked ? "1" : "0");
+
+  /* ---------- history: past results, kept only in this browser (src/history.mjs) ---------- */
+  let HIST = parseHist(store.get(K.hist));
+  const pct = c => c == null ? "" : ` <span class="${c >= 0 ? "up" : "dn"}">${c >= 0 ? "+" : "−"}${Math.abs(c)}%</span>`;
+  // under each speed: the last result, and once a test ends, the change from it
+  function showPrev(prev, now) {
+    for (const k of ["down", "up"]) {
+      $(k === "down" ? "#gDown .g-p" : "#gUp .g-p").innerHTML = prev && prev[k] != null
+        ? esc(t("prev", { v: fmtMbps(prev[k]) })) + (now ? pct(change(now[k], prev[k])) : "") : "";
+    }
+  }
+  function saveRun(rec) {
+    const prev = HIST[0];
+    HIST = addHist(HIST, rec); store.set(K.hist, JSON.stringify(HIST));
+    showPrev(prev, rec);
+  }
+  function renderHist() {
+    const when = ts => new Date(ts).toLocaleString(D.lang, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    const head = `<div class="hr"><span>${esc(t("c_time"))}</span><span>${esc(t("k_down"))}</span><span>${esc(t("k_up"))}</span><span>${esc(t("k_idle"))}</span><span>${esc(t("c_exit"))}</span></div>`;
+    $("#histBody").innerHTML = HIST.length ? head + HIST.map(r => `<div class="hr"><span>${esc(when(r.ts))}${r.peak ? `<i class="pk">${esc(t("peak"))}</i>` : ""}</span>` +
+      `<span>${fmtMbps(r.down)}</span><span>${fmtMbps(r.up)}</span><span>${fmtMs(r.idle)}</span><span>${flag(r.cc)}${esc(r.org || r.ip)}</span></div>`).join("")
+      : `<p class="empty">${esc(t("hist_empty"))}</p>`;
+    $("#histClear").hidden = !HIST.length;
+  }
+  $("#histBtn").onclick = () => { renderHist(); openDlg("hist"); };
+  $("#histClear").onclick = () => { HIST = []; store.set(K.hist, "[]"); showPrev(null); renderHist(); };
+  showPrev(HIST[0]);
 
   /* ---------- M-Lab: a second opinion, from a server outside the visitor's ISP, on one connection ---------- */
   let ML = null;
@@ -416,7 +446,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
 
   /* ---------- a shared result ---------- */
   function showShared(S) {
-    reset();
+    reset(); showPrev(null);                // the visitor's own last result says nothing about someone else's
     gauge("down", S.down); gauge("up", S.up);
     latCell("idle", S.idle); latCell("jit", S.jit); latCell("ldown", S.ldown, S.idle); latCell("lup", S.lup, S.idle);
     showUses(S);

@@ -35,27 +35,15 @@
   <main>
     <div class="shared" id="shared" hidden><span id="sharedTxt"></span><button class="btn pri" id="testMine" type="button" data-i="test_mine"></button></div>
     <section class="hero card">
-      <!-- which way the test goes: filled as soon as the page loads, before any test -->
-      <div class="net" id="net" data-st="chk">
-        <div class="net-r" data-n="cf">
-          <span class="net-k"><i class="dot"></i><span class="net-st" id="netSt" data-i="st_chk"></span></span>
-          <span class="net-s">Cloudflare</span>
-          <span class="net-v" id="netCf"><i class="skl"></i></span>
-          <span class="net-x" id="netCfX"></span>
-        </div>
-        <div class="net-r" data-n="ml">
-          <span class="net-k"></span>
-          <span class="net-s">M-Lab</span>
-          <span class="net-v" id="netMl"><i class="skl"></i></span>
-          <span class="net-x" id="netMlX"></span>
-        </div>
-      </div>
       <h1>{{h1}}</h1>
+      <!-- where the test runs: Cloudflare, at its data center nearest to the visitor -->
+      <p class="src"><span class="src-k" data-i="src_cf"></span><span class="src-v" id="netCfX">&nbsp;</span></p>
       <div class="dial">
         <div class="g" id="gDown" data-g="down">
           <canvas class="spark" aria-hidden="true"></canvas>
           <span class="g-k"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v11M3.5 8.5 8 13l4.5-4.5"/></svg><span data-i="k_down"></span></span>
           <span class="g-n"><b class="g-v">–</b><span class="g-u">Mbps</span></span>
+          <span class="g-p"></span>
         </div>
         <button class="go" id="go" type="button">
           <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="ring-bg" cx="50" cy="50" r="47"/><circle class="ring-fg" id="ring" cx="50" cy="50" r="47" pathLength="100"/></svg>
@@ -65,6 +53,7 @@
           <canvas class="spark" aria-hidden="true"></canvas>
           <span class="g-k"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14V3M3.5 7.5 8 3l4.5 4.5"/></svg><span data-i="k_up"></span></span>
           <span class="g-n"><b class="g-v">–</b><span class="g-u">Mbps</span></span>
+          <span class="g-p"></span>
         </div>
       </div>
       <ul class="lat">
@@ -77,9 +66,16 @@
         <ul class="uses" id="uses">{{uses}}</ul>
         <p class="note-l" id="noteL" data-i="hint_idle"></p>
       </div>
+      <!-- the exit Cloudflare sees, asked as the page loads: whether this is the visitor's own line -->
+      <div class="net" id="net" data-st="chk">
+        <span class="net-k"><i class="dot"></i><span class="net-st" id="netSt" data-i="st_chk"></span></span>
+        <span class="net-s" data-i="net_you"></span>
+        <span class="net-v" id="netCf"><i class="skl"></i></span>
+      </div>
       <div class="bar">
         <span class="prog-t" id="progTxt">&nbsp;</span>
         <label class="auto"><input type="checkbox" id="auto"><span class="sw" aria-hidden="true"></span><span data-i="auto_label"></span></label>
+        <button class="btn sm" id="histBtn" type="button" aria-haspopup="dialog" aria-controls="hist"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.6V8l2.3 1.5"/></svg><span data-i="hist_btn"></span></button>
         <button class="btn sm" id="rulesBtn" type="button" aria-haspopup="dialog" aria-controls="rules"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h9M8 4.5 11.5 8 8 11.5M14 3v10"/></svg><span data-i="rules_btn"></span></button>
         <button class="btn sm" id="shareBtn" type="button" aria-haspopup="dialog" aria-controls="shareDlg" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2M5 5l3-3 3 3M3 9v4.5h10V9"/></svg><span data-i="share"></span></button>
       </div>
@@ -97,6 +93,12 @@
         <li data-m="rtt"><span data-why="{{a:tip_minrtt}}" tabindex="0">{{k_minrtt}}</span><b>–</b></li>
       </ul>
       <button class="btn" id="mlRun" type="button" data-i="ml_run"></button>
+      <!-- M-Lab's server (picked by its locate service on load) and the address it sees once its test runs -->
+      <div class="net ml-net">
+        <span class="net-x" id="netMlX"></span>
+        <span class="net-s" data-i="net_you"></span>
+        <span class="net-v" id="netMl"><i class="skl"></i></span>
+      </div>
     </section>
 
     <div data-ms-more></div>
@@ -116,6 +118,16 @@
         <label class="chk"><input type="checkbox" id="shareCc"><span data-i="share_cc"></span></label>
       </div>
       <p class="note" data-i="share_note"></p>
+    </div>
+  </div>
+</div>
+<div class="scrim" id="hist" hidden>
+  <div class="dialog hist" role="dialog" aria-modal="true" aria-labelledby="histT">
+    <div class="dlg-h"><div><h2 id="histT" data-i="hist_h"></h2><p class="note" data-i="hist_note"></p></div>
+      <button class="icon-btn" data-close type="button" aria-label="{{a:a_close}}"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
+    <div class="dlg-b">
+      <div class="htbl" id="histBody"></div>
+      <button class="btn sm" id="histClear" type="button" data-i="hist_clear"></button>
     </div>
   </div>
 </div>

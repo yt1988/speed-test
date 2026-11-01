@@ -16,23 +16,27 @@ h2 { font-size: 15px; font-weight: 700; }
 .skl { display: inline-block; width: 220px; max-width: 70%; height: 12px; border-radius: 6px; background: var(--soft); vertical-align: middle; animation: blink 1.4s ease-in-out infinite; }
 @keyframes blink { 50% { opacity: .45; } }
 
-/* which way the test goes: two fixed rows, Cloudflare and M-Lab, filled as answers come */
-.net { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; column-gap: 12px; row-gap: 4px; align-items: center; margin: 0 -10px; padding: 9px 12px; border-radius: 12px; background: var(--soft); font-size: 13px; }
+/* where the test runs: under the heading, which service and which of its data centers */
+.src { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin-top: -10px; font-size: 13px; color: var(--muted); min-height: 22px; }
+.src-k { font-weight: 600; color: var(--fg); }
+/* the exit a service sees: one row in its own card (Cloudflare above the bar, M-Lab at the end of its card) */
+.net { display: flex; align-items: center; gap: 6px 12px; flex-wrap: wrap; padding: 9px 12px; border-radius: 12px; background: var(--soft); font-size: 13px; min-height: 40px; }
+.hero .net { margin-top: -4px; }
 .net[data-st="warn"] { background: var(--warn-soft); }
-.net-r { display: contents; }
-.net-k { display: inline-flex; align-items: center; gap: 7px; min-width: 0; }
+.net-k { display: inline-flex; align-items: center; gap: 7px; flex: none; }
 .net .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
 .net[data-st="good"] .dot { background: var(--t1); box-shadow: 0 0 0 3px color-mix(in srgb, var(--t1) 22%, transparent); }
 .net[data-st="warn"] .dot { background: var(--warn); box-shadow: 0 0 0 3px var(--warn-soft); }
 .net[data-st="chk"] .dot { animation: blink 1s infinite; }
 .net-st { font-weight: 650; white-space: nowrap; }
 .net[data-st="good"] .net-st { color: var(--t1); } .net[data-st="warn"] .net-st { color: var(--warn); }
-.net-s { font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
-.net-v, .net-x { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 22px; }
+.net-s { font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; flex: none; }
+.net-v { flex: 1 1 260px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 22px; }
+.net-x { flex: none; color: var(--muted); white-space: nowrap; line-height: 22px; }
 .net-v .m, .net-x .m { color: var(--muted); }
-.net-x { text-align: right; color: var(--muted); }
 .net a { color: var(--ink); text-decoration: none; font-family: var(--f-num); font-size: 12.5px; }
 .net a:hover { text-decoration: underline; }
+.ml-net { grid-column: 1 / -1; }
 .flag { width: 18px; height: 13.5px; border-radius: 2px; box-shadow: 0 0 0 1px var(--line); vertical-align: -2px; margin-right: 6px; }
 
 /* the two speeds around the start button; each tile draws its own live curve behind the number */
@@ -48,6 +52,9 @@ h2 { font-size: 15px; font-weight: 700; }
 /* left-aligned in its tile: as it counts only the unit beside it moves */
 .g-v { font: 700 clamp(40px, 5.4vw, 58px)/1.05 var(--f-num); font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
 .g-u { font-size: 13px; color: var(--muted); }
+/* the last result, and after a test the change from it; the line keeps its height while empty */
+.g-p { position: relative; min-height: 18px; font: 12px/18px var(--f-num); color: var(--muted); }
+.g-p .up { color: var(--t1); } .g-p .dn { color: var(--t5); }
 .g.on .g-v { color: var(--ink); }
 #gUp.on .g-v { color: var(--up); }
 /* the start button; the ring around it is the test's progress */
@@ -137,6 +144,16 @@ h2 { font-size: 15px; font-weight: 700; }
 .help-pick select { flex: 1; min-width: 0; height: 34px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--fg); font: 600 16px var(--f-ui); text-overflow: ellipsis; } /* 16px: iOS zooms into smaller fields */
 .help-pick .icon-btn:disabled { opacity: .35; cursor: default; }
 .dialog.rules { width: 720px; }
+/* history: one row per past test, newest first */
+.dialog.hist { width: 720px; }
+.htbl { display: flex; flex-direction: column; font-size: 13px; }
+.htbl .hr { display: grid; grid-template-columns: minmax(0, 1.3fr) repeat(3, minmax(0, .8fr)) minmax(0, 1.6fr); gap: 8px; align-items: center; padding: 7px 0; border-top: 1px solid var(--line); }
+.htbl .hr:first-child { border-top: 0; font-size: 11.5px; font-weight: 600; color: var(--muted); }
+.htbl .hr > :nth-child(n+2):nth-child(-n+4) { text-align: right; font-family: var(--f-num); font-variant-numeric: tabular-nums; }
+.htbl .hr > :last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+.htbl .pk { font-style: normal; margin-left: 6px; font: 600 10.5px/16px var(--f-ui); padding: 0 5px; border-radius: 4px; background: var(--warn-soft); color: var(--warn); }
+.htbl .empty { color: var(--muted); padding: 8px 0; }
+.dlg-b > #histClear { align-self: flex-start; }
 .dlg-b { padding: 14px 18px 18px; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
 .tabs { display: flex; flex-wrap: wrap; gap: 6px; }
 .tabs button { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 5px 10px; font-size: 12.5px; cursor: pointer; color: var(--muted); }
@@ -167,11 +184,8 @@ details.rblk > summary { cursor: pointer; font-size: 13px; color: var(--ink); }
 }
 @media (max-width: 720px) {
   .hero { padding: 12px 16px 0; gap: 14px; }
-  /* phones: the exit rows wrap under their labels */
-  .net { grid-template-columns: auto minmax(0, 1fr); margin: 0 -6px; row-gap: 2px; }
-  .net-r[data-n="cf"] .net-k { grid-column: 1 / -1; margin-bottom: 2px; }
-  .net-r[data-n="ml"] .net-k { display: none; }
-  .net-x { grid-column: 2; text-align: left; }
+  /* phones: the exit wraps rather than losing the address */
+  .net-v { flex-basis: 100%; white-space: normal; overflow-wrap: anywhere; }   /* the address must stay visible: wrap, don't cut */
   /* the two speeds side by side, the button under them */
   .dial { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px 10px; }
   .go { grid-row: 2; grid-column: 1 / -1; justify-self: center; width: 116px; height: 116px; margin: 4px 0; }
@@ -182,8 +196,10 @@ details.rblk > summary { cursor: pointer; font-size: 13px; color: var(--ink); }
   .bar { margin: 0 -16px; padding: 10px 16px 12px; flex-wrap: wrap; row-gap: 8px; }
   .prog-t { flex: 1 0 100%; order: -1; }
   .auto { margin-right: auto; }
-  #rulesBtn span { display: none; }
-  #rulesBtn { width: 34px; padding: 0; }
+  #rulesBtn span, #histBtn span, #shareBtn span { display: none; }
+  #rulesBtn, #histBtn, #shareBtn { width: 34px; padding: 0; }
+  .htbl .hr { grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, .8fr)); }
+  .htbl .hr > :last-child { display: none; }
   .note-l { min-height: 4.8em; }
   .mlab { padding: 14px 16px; grid-template-columns: minmax(0, 1fr); }
   .ml-m { grid-row: auto; }

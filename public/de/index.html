@@ -43,7 +43,7 @@
 <meta name="twitter:description" content="Download, Upload, Ping und Bufferbloat in deinem Netz">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Speedtest · 1ms.dog","url":"https://speed.1ms.dog/de/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","description":"Kostenloser Speedtest im Browser: Download- und Upload-Geschwindigkeit, Ping, Jitter und Latenz unter Last (Bufferbloat), gemessen von deinem Netz bis zum nächsten Cloudflare-Rechenzentrum. Keine App, keine Werbung, nichts wird gespeichert.","inLanguage":"de","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Wie funktioniert der Test?","acceptedAnswer":{"@type":"Answer","text":"Dein Browser spricht direkt mit den Testservern von Cloudflare (denen hinter speed.cloudflare.com), im Cloudflare-Rechenzentrum, das deinem Netz am nächsten ist. Nichts läuft über diese Seite. Zuerst messen 16 leere Anfragen Ping und Jitter. Dann der Download: mehrere Anfragen gleichzeitig, jedes Byte wird beim Eintreffen gezählt, 5 bis 10 Sekunden lang; die Geschwindigkeit ist der Durchschnitt nach den ersten 30 % (wenn die Verbindung hochgefahren ist), und der Test endet früher, sobald sie stabil ist. Der Upload läuft genauso in die andere Richtung. Währenddessen misst alle 0,4 s eine kleine Anfrage den Ping bei voller Leitung."}},{"@type":"Question","name":"Warum weniger als mein Tarif oder andere Tests?","acceptedAnswer":{"@type":"Answer","text":"Meist liegt es am WLAN: Um die Leitung selbst zu sehen, per Kabel testen, nah am Router, mit ruhenden anderen Geräten. Der Browser erreicht den Testserver über eine einzige HTTP/2- oder HTTP/3-Verbindung (mehrere Anfragen teilen sie), die Ookla-App öffnet dagegen viele getrennte Verbindungen. Zu einem nahen Rechenzentrum stimmen beide überein; je weiter der Server, desto mehr verliert eine einzelne Verbindung. Ookla misst außerdem oft zu einem Server im Netz deines Anbieters, was besser aussieht als jede Route, die es verlässt. In Festlandchina liegen die Rechenzentren von Cloudflare im Ausland: Gemessen wird dann die internationale Bandbreite, oft weit unter dem Tarif."}},{"@type":"Question","name":"Was ist der Ping unter Last (Bufferbloat)?","acceptedAnswer":{"@type":"Answer","text":"Ist die Leitung voll, stauen Router und Modems Pakete in großen Puffern. Alles, was hinter einem Download wartet, die Pakete eines Spiels oder der Ton eines Anrufs, kommt verspätet an: Das ist Bufferbloat. Der Test misst den Ping während Download und Upload. Ein Anstieg bis 30 ms ist unproblematisch; über 100 ms merkst du es in Anrufen und Spielen, sobald jemand Fotos hochlädt oder ein Backup läuft. Intelligentes Queue-Management im Router (SQM: fq_codel oder CAKE) behebt das meiste, auf Kosten von etwas Spitzentempo."}},{"@type":"Question","name":"Ich nutze einen Proxy oder ein VPN: Wessen Geschwindigkeit ist das?","acceptedAnswer":{"@type":"Answer","text":"Die des Proxys. Mit Proxy oder VPN erreicht der Browser den Testserver über ihn, die Zahlen zeigen also deine Leitung zum Proxy-Knoten, dessen Bandbreite und seine Route zu Cloudflare. Praktisch, um Knoten zu vergleichen. Um deine eigene Leitung zu messen, füge die Direkt-Regeln hinzu (Schaltfläche neben dem Fortschrittsbalken): Nur speed.cloudflare.com und die Server von M-Lab gehen direkt, sonst ändert sich nichts. Unterstützt werden Clash/Mihomo, Surge, Shadowrocket, Quantumult X, Loon, sing-box und Xray, die meisten über einen Regelsatz, der aktuell bleibt. Das Netz unter den Ergebnissen (Rechenzentrum, Netznummer, IP) zeigt, welchen Weg der Test genommen hat."}},{"@type":"Question","name":"Was ist der M-Lab-Test?","acceptedAnswer":{"@type":"Answer","text":"Measurement Lab ist ein offenes Projekt, unterstützt von Google und Universitäten, mit Testservern außerhalb der Endkunden-Anbieter; der Speedtest von Google nutzt es. Sein ndt7-Test nutzt pro Richtung eine Verbindung für 10 Sekunden. Damit ist er eine gute zweite Meinung dazu, wie es einem einzelnen Download auf Routen außerhalb deines Anbieters ergeht, und eine strenge auf langen Strecken: Aus der Ferne liegt er oft deutlich unter dem Haupttest. Er läuft nur, wenn du klickst, denn M-Lab veröffentlicht jeden Test samt deiner IP-Adresse als offene Daten. In manchen Ländern sind seine Server nicht erreichbar."}},{"@type":"Question","name":"Wie viel Datenvolumen braucht ein Test?","acceptedAnswer":{"@type":"Answer","text":"Jede Richtung dauert 5 Sekunden, wenn sich die Geschwindigkeit einpendelt, höchstens 10: Ein Test bewegt also 5 bis 10 Sekunden deiner Höchstgeschwindigkeit pro Richtung, bei 100 Mbit/s insgesamt etwa 100 bis 250 MB, bei 1 Gbit/s 1 bis 2,5 GB. Die Seite zeigt, wie viel verbraucht wurde. Mit begrenztem Tarif oder mobil sparsam testen."}},{"@type":"Question","name":"Warum startet er nicht von selbst?","acceptedAnswer":{"@type":"Answer","text":"Ein Speedtest verbraucht viele Daten, daher wartet die Seite, bis du auf Start klickst. Wenn du oft testest, schalte „Beim Öffnen der Seite testen“ neben dem Fortschrittsbalken ein; die Wahl wird in diesem Browser gespeichert."}},{"@type":"Question","name":"Sammelt ihr meine Daten?","acceptedAnswer":{"@type":"Answer","text":"Nein. Der Test läuft zwischen deinem Browser und den Servern von Cloudflare (und, wenn du willst, von M-Lab); diese Seite sieht die Ergebnisse nie. Cloudflare sieht deine IP-Adresse wie jede Website. Link und Bild zum Teilen entstehen in deinem Browser und enthalten nur die Zahlen. Der Code ist Open Source auf GitHub."}}]}]}</script>
 <link rel="preload" href="/assets/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/app.2f9615ee50.css">
+<link rel="stylesheet" href="/assets/app.557ae0e262.css">
 </head>
 <body>
 <div class="app">
@@ -72,27 +72,15 @@
   <main>
     <div class="shared" id="shared" hidden><span id="sharedTxt"></span><button class="btn pri" id="testMine" type="button" data-i="test_mine">Meine Leitung testen</button></div>
     <section class="hero card">
-      <!-- which way the test goes: filled as soon as the page loads, before any test -->
-      <div class="net" id="net" data-st="chk">
-        <div class="net-r" data-n="cf">
-          <span class="net-k"><i class="dot"></i><span class="net-st" id="netSt" data-i="st_chk">Prüfe</span></span>
-          <span class="net-s">Cloudflare</span>
-          <span class="net-v" id="netCf"><i class="skl"></i></span>
-          <span class="net-x" id="netCfX"></span>
-        </div>
-        <div class="net-r" data-n="ml">
-          <span class="net-k"></span>
-          <span class="net-s">M-Lab</span>
-          <span class="net-v" id="netMl"><i class="skl"></i></span>
-          <span class="net-x" id="netMlX"></span>
-        </div>
-      </div>
       <h1>Wie schnell ist dein Internet?</h1>
+      <!-- where the test runs: Cloudflare, at its data center nearest to the visitor -->
+      <p class="src"><span class="src-k" data-i="src_cf">Testserver: Cloudflare</span><span class="src-v" id="netCfX">&nbsp;</span></p>
       <div class="dial">
         <div class="g" id="gDown" data-g="down">
           <canvas class="spark" aria-hidden="true"></canvas>
           <span class="g-k"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v11M3.5 8.5 8 13l4.5-4.5"/></svg><span data-i="k_down">Download</span></span>
           <span class="g-n"><b class="g-v">–</b><span class="g-u">Mbps</span></span>
+          <span class="g-p"></span>
         </div>
         <button class="go" id="go" type="button">
           <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="ring-bg" cx="50" cy="50" r="47"/><circle class="ring-fg" id="ring" cx="50" cy="50" r="47" pathLength="100"/></svg>
@@ -102,6 +90,7 @@
           <canvas class="spark" aria-hidden="true"></canvas>
           <span class="g-k"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14V3M3.5 7.5 8 3l4.5 4.5"/></svg><span data-i="k_up">Upload</span></span>
           <span class="g-n"><b class="g-v">–</b><span class="g-u">Mbps</span></span>
+          <span class="g-p"></span>
         </div>
       </div>
       <ul class="lat">
@@ -114,9 +103,16 @@
         <ul class="uses" id="uses"><li data-u="video" data-lv=""><span>4K-Video</span><span class="lv"></span></li><li data-u="call" data-lv=""><span>Videoanrufe</span><span class="lv"></span></li><li data-u="game" data-lv=""><span>Online-Spiele</span><span class="lv"></span></li><li data-u="cloud" data-lv=""><span>Cloud-Gaming</span><span class="lv"></span></li><li data-u="live" data-lv=""><span>Livestreams</span><span class="lv"></span></li></ul>
         <p class="note-l" id="noteL" data-i="hint_idle">Auf Start drücken: etwa 20–30 Sekunden. Das Datenvolumen wächst mit der Geschwindigkeit (siehe Hilfe).</p>
       </div>
+      <!-- the exit Cloudflare sees, asked as the page loads: whether this is the visitor's own line -->
+      <div class="net" id="net" data-st="chk">
+        <span class="net-k"><i class="dot"></i><span class="net-st" id="netSt" data-i="st_chk">Prüfe</span></span>
+        <span class="net-s" data-i="net_you">Dein Ausgang</span>
+        <span class="net-v" id="netCf"><i class="skl"></i></span>
+      </div>
       <div class="bar">
         <span class="prog-t" id="progTxt">&nbsp;</span>
         <label class="auto"><input type="checkbox" id="auto"><span class="sw" aria-hidden="true"></span><span data-i="auto_label">Beim Öffnen der Seite testen</span></label>
+        <button class="btn sm" id="histBtn" type="button" aria-haspopup="dialog" aria-controls="hist"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.6V8l2.3 1.5"/></svg><span data-i="hist_btn">Verlauf</span></button>
         <button class="btn sm" id="rulesBtn" type="button" aria-haspopup="dialog" aria-controls="rules"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h9M8 4.5 11.5 8 8 11.5M14 3v10"/></svg><span data-i="rules_btn">Direkt-Regeln</span></button>
         <button class="btn sm" id="shareBtn" type="button" aria-haspopup="dialog" aria-controls="shareDlg" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2M5 5l3-3 3 3M3 9v4.5h10V9"/></svg><span data-i="share">Teilen</span></button>
       </div>
@@ -125,8 +121,8 @@
     <section class="mlab card">
       <div class="ml-t">
         <h2 data-i="ml_h">Zweite Meinung: M-Lab</h2>
-        <p class="note" data-i="ml_sub">Eine einzige Verbindung zu einem Server außerhalb deines Anbieters, wie beim Speedtest von Google. Meist niedriger als der Test oben, je weiter der Server, desto mehr.</p>
-        <p class="note ml-p" id="mlNote" data-i="ml_privacy">M-Lab veröffentlicht jeden Test samt deiner IP-Adresse als offene Daten.</p>
+        <p class="note" data-i="ml_sub">Eine Verbindung zu einem Server außerhalb deines Anbieters. Meist niedriger als der Test oben.</p>
+        <p class="note ml-p" id="mlNote" data-i="ml_privacy">M-Lab veröffentlicht jeden Test samt deiner IP-Adresse.</p>
       </div>
       <ul class="ml-m">
         <li data-m="down"><span data-i="k_down">Download</span><b>–</b></li>
@@ -134,6 +130,12 @@
         <li data-m="rtt"><span data-why="Die kürzeste Umlaufzeit, die der M-Lab-Server auf der Verbindung gesehen hat." tabindex="0">Min. Ping</span><b>–</b></li>
       </ul>
       <button class="btn" id="mlRun" type="button" data-i="ml_run">M-Lab-Test starten</button>
+      <!-- M-Lab's server (picked by its locate service on load) and the address it sees once its test runs -->
+      <div class="net ml-net">
+        <span class="net-x" id="netMlX"></span>
+        <span class="net-s" data-i="net_you">Dein Ausgang</span>
+        <span class="net-v" id="netMl"><i class="skl"></i></span>
+      </div>
     </section>
 
     <div data-ms-more></div>
@@ -153,6 +155,16 @@
         <label class="chk"><input type="checkbox" id="shareCc"><span data-i="share_cc">Land und Rechenzentrum zeigen</span></label>
       </div>
       <p class="note" data-i="share_note">Bild und Link entstehen in deinem Browser und werden nicht hochgeladen. Der Link enthält nur die Zahlen.</p>
+    </div>
+  </div>
+</div>
+<div class="scrim" id="hist" hidden>
+  <div class="dialog hist" role="dialog" aria-modal="true" aria-labelledby="histT">
+    <div class="dlg-h"><div><h2 id="histT" data-i="hist_h">Deine letzten Tests</h2><p class="note" data-i="hist_note">Nur in diesem Browser gespeichert, höchstens 20.</p></div>
+      <button class="icon-btn" data-close type="button" aria-label="Schließen"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
+    <div class="dlg-b">
+      <div class="htbl" id="histBody"></div>
+      <button class="btn sm" id="histClear" type="button" data-i="hist_clear">Löschen</button>
     </div>
   </div>
 </div>
@@ -184,7 +196,7 @@
 </div>
 
 <script type="application/json" id="data">{"lang":"de","paths":{"en":"/","zh-CN":"/zh-cn/","zh-TW":"/zh-tw/","ja":"/ja/","ko":"/ko/","es":"/es/","fr":"/fr/","de":"/de/","pt":"/pt/","ru":"/ru/"}}</script>
-<script src="/assets/l.de.cd0e04bbe1.js"></script>
-<script src="/assets/app.29b315a632.js"></script>
+<script src="/assets/l.de.b1c85d2011.js"></script>
+<script src="/assets/app.bb2e5c5c79.js"></script>
 </body>
 </html>

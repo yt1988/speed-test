@@ -130,3 +130,16 @@ test("direct rules name the test's hosts and M-Lab's domain, nothing broader", (
   assert.equal(remote("xray", "x", { top: "t" }), null);
   assert.ok(remote("clash", "https://speed.1ms.dog", { top: "t" }).includes("https://speed.1ms.dog/rules/clash.yaml"));
 });
+
+test("history: only well-formed records, newest first, at most 20; change and evening peak", async () => {
+  const { parse, add, change, isPeak, MAX } = await import("../src/history.mjs");
+  assert.deepEqual(parse("not json"), []);
+  assert.deepEqual(parse('{"a":1}'), []);
+  const r = { ts: 1, down: 100, up: 20, idle: 9, jit: 1, ldown: 20, lup: 30, ip: "1.2.3.4", cc: "CN", org: "X", peak: true };
+  assert.deepEqual(parse(JSON.stringify([r, { ts: "x" }, { ts: 2 }, { ...r, cc: "bad", down: "9" }])), [r, { ...r, cc: "", down: null }]);
+  let h = [];
+  for (let i = 0; i < 25; i++) h = add(h, { ...r, ts: i });
+  assert.equal(h.length, MAX); assert.equal(h[0].ts, 24);
+  assert.equal(change(110, 100), 10); assert.equal(change(90, 100), -10); assert.equal(change(5, 0), null); assert.equal(change(null, 5), null);
+  assert.ok(isPeak(new Date(2026, 10, 1, 21))); assert.ok(!isPeak(new Date(2026, 10, 1, 23)));
+});
