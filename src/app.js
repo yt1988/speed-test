@@ -144,15 +144,31 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   const IPQS = document.querySelector('meta[name="ipqs"]'), EGRESS = document.querySelector('meta[name="egress"]');
   const TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ""; } })();
   const NET = { cf: null, cfDone: false, reasons: [] };
-  const ipLink = ip => IPQS ? `<a href="${esc(IPQS.content.replace(/\/+$/, "") + D.paths[D.lang] + "?ip=" + encodeURIComponent(ip))}" target="_blank" rel="noopener" title="${esc(t("ipqs_tip"))}">${esc(ip)}</a>` : `<span class="m">${esc(ip)}</span>`;
+  // a link to another 1ms.dog tool: its text, then the external-link icon (the same on every tool)
+  const XL = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2.5h4.5V7M13.5 2.5 7.5 8.5M12 10v3.5H2.5V4H6"/></svg>';
+  const xlink = (href, html, { cls = "", title = "" } = {}) => `<a class="xl${cls ? " " + cls : ""}" href="${esc(href)}" target="_blank" rel="noopener"${title ? ` title="${esc(title)}"` : ""}>${html}${XL}</a>`;
+  const ipLink = ip => IPQS ? xlink(IPQS.content.replace(/\/+$/, "") + D.paths[D.lang] + "?ip=" + encodeURIComponent(ip), esc(ip), { title: t("ipqs_tip") }) : `<span class="m">${esc(ip)}</span>`;
+  // the other 1ms.dog tools, each linked only when the page announces it: Me2Cloud (latency to the other clouds), the
+  // DNS test, ASN Lookup (the exit's network, /AS<n>), the IPv6 test (when the test went over IPv4)
+  const tool = name => { const m = document.querySelector(`meta[name="${name}"]`); return m ? m.content.replace(/\/+$/, "") + D.paths[D.lang] : ""; };
+  const M2C = tool("m2c"), DNS = tool("dns"), ASN = tool("asn"), IPV6 = tool("ipv6");
+  function renderRel() {
+    const e = NET.cf;
+    const v4 = e && e.ip && !e.ip.includes(":");
+    const links = [M2C && xlink(M2C, esc(t("rel_m2c"))), DNS && xlink(DNS, esc(t("rel_dns"))), IPV6 && v4 && xlink(IPV6, esc(t("rel_v6")))].filter(Boolean);
+    $("#rel").innerHTML = links.join("");
+    $("#rel").hidden = !links.length;
+  }
+  const orgHTML = e => !e.org ? "" : ` <span class="m">· ${ASN && e.asn ? xlink(ASN + "AS" + e.asn, esc(e.org), { cls: "asn", title: t("asn_tip", { n: e.asn }) }) : esc(e.org)}</span>`;
   function renderNet() {
     const e = NET.cf;
     if (NET.cfDone) {
       $("#netCf").innerHTML = !e ? `<span class="m">${esc(t("net_fail"))}</span>`
-        : flag(e.cc) + esc([e.city, country(e.cc)].filter(Boolean).join(", ") || "–") + (e.org ? ` <span class="m">· ${esc(e.org)}</span>` : "") + ` <span class="m">·</span> ` + ipLink(e.ip);
+        : flag(e.cc) + esc([e.city, country(e.cc)].filter(Boolean).join(", ") || "–") + orgHTML(e) + ` <span class="m">·</span> ` + ipLink(e.ip);
       $("#netCfX").innerHTML = e && e.colo ? t("net_node", { node: flag(e.coloCc) + esc([e.coloCity, e.colo].filter(Boolean).join(" ")) }) : "";
     }
     NET.reasons = reasons(e, { tz: TZ });
+    renderRel();
     const st = !NET.cfDone ? "chk" : !e ? "unk" : NET.reasons.length ? "warn" : "good";
     $("#net").dataset.st = st; $("#netSt").textContent = t("st_" + st);
     $("#rulesBtn").classList.toggle("warn", st === "warn");
@@ -163,7 +179,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   // the warnings, the way out (the rules), and where to see which IP each site gets (EgressLens, on 1ms.dog)
   function warnHTML() {
     if (!NET.reasons.length) return "";
-    const eg = EGRESS ? ` <a href="${esc(EGRESS.content.replace(/\/+$/, "") + D.paths[D.lang])}" target="_blank" rel="noopener">${esc(t("egress_link"))} ↗</a>` : "";
+    const eg = EGRESS ? " " + xlink(EGRESS.content.replace(/\/+$/, "") + D.paths[D.lang], esc(t("egress_link"))) : "";
     return `<span class="warn">${NET.reasons.map(reasonText).join(" ")}</span> ` + t("r_fix", { rules: `<button type="button" data-rules>${esc(t("rules_btn"))}</button>` }) + eg;
   }
   document.addEventListener("click", e => { if (e.target.closest && e.target.closest("[data-rules]")) $("#rulesBtn").click(); });
