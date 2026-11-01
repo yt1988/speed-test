@@ -155,3 +155,23 @@ test("M-Lab's server tells whether M-Lab sees the visitor elsewhere", async () =
   assert.equal(mlabAway(vn, { country: "SG" }), null, "no servers, no known placement: can't tell");
   assert.equal(mlabAway(null, { country: "JP" }), null);
 });
+
+test("a proxy shows in the gap between the server's round trip and the browser's time to connect", async () => {
+  const { tcpElsewhere } = await import("../src/net.mjs");
+  assert.equal(tcpElsewhere(620, 2), true, "seen through a proxy node near the server");
+  assert.equal(tcpElsewhere(180, 40), false, "direct: a few round trips");
+  assert.equal(tcpElsewhere(30, 2), false, "direct to a server next door");
+  assert.equal(tcpElsewhere(0, 2), null); assert.equal(tcpElsewhere(500, null), null);
+});
+
+test("an address M-Lab sees on a data-center network, while Cloudflare sees a home line", async () => {
+  const { fromIpinfo, dcOnlyMlab } = await import("../src/net.mjs");
+  const aws = fromIpinfo({ org: "AS16509 Amazon.com, Inc." });
+  assert.deepEqual(aws, { asn: 16509, org: "Amazon.com, Inc." });
+  assert.equal(fromIpinfo({}), null);
+  const home = { org: "China Unicom Beijing province network" };
+  assert.equal(dcOnlyMlab(home, aws), true);
+  assert.equal(dcOnlyMlab(home, fromIpinfo({ org: "AS4837 CHINA UNICOM China169 Backbone" })), false, "the same ISP over IPv6");
+  assert.equal(dcOnlyMlab({ org: "Vultr Holdings LLC" }, aws), false, "both through proxies: the main row warns already");
+  assert.equal(dcOnlyMlab(home, null), false);
+});

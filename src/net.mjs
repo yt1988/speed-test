@@ -54,6 +54,21 @@ export function mlabAway(exit, srv) {
   return null;
 }
 
+// Whether the connection M-Lab's server sees ends somewhere other than the browser: the server's own round trip
+// (TCPInfo.MinRTT) far below what opening the connection took in the browser. Direct, opening takes a few round
+// trips (TCP, TLS, the WebSocket upgrade, perhaps a DNS lookup); through a proxy, the proxy opens the TCP connection
+// near the server, so the server sees a tiny round trip while the browser waited for the whole tunnel.
+// (Seen: 2 ms at the server, 620 ms in the browser, through a proxy node near the server.)
+export const tcpElsewhere = (openMs, minRtt) => openMs > 0 && minRtt > 0 ? openMs > 10 * minRtt + 50 : null;
+
+// ipinfo.io's answer for an address ({ org: "AS16509 Amazon.com, Inc." }) → { asn, org }, or null
+export function fromIpinfo(j) {
+  const m = /^AS(\d+)\s+(.+)$/.exec((j && j.org) || "");
+  return m ? { asn: +m[1], org: m[2] } : null;
+}
+// M-Lab sees a data-center network while Cloudflare sees one that isn't: M-Lab's requests go through a proxy or VPN
+export const dcOnlyMlab = (exit, mlOrg) => !!(exit && mlOrg && DC_RE.test(mlOrg.org) && !(exit.org && DC_RE.test(exit.org)));
+
 // Signs that the test doesn't measure the visitor's own line, each { k: string key, ...values }:
 //   r_tz     the device's time zone is in one country, the exit in another (Hong Kong and Macau count as China's)
 //   r_dc     the exit is on a data-center network
@@ -67,3 +82,6 @@ export function reasons(exit, { tz = "", mlabIp = "" } = {}) {
   if (mlabIp && exit.ip && family(mlabIp) === family(exit.ip) && netOf(mlabIp) !== netOf(exit.ip)) out.push({ k: "r_split", a: exit.ip, b: mlabIp });
   return out;
 }
+
+// who an address belongs to, for the address M-Lab saw (open to any origin, no key)
+export const IPINFO = "https://ipinfo.io";

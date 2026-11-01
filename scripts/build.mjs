@@ -18,6 +18,7 @@ import { ruleSets } from "../src/rules.mjs";
 import { CF } from "../src/measure.mjs";
 import { LOCATE } from "../src/mlab.mjs";
 import { USES } from "../src/verdict.mjs";
+import { IPINFO } from "../src/net.mjs";
 
 const SITE = (process.env.SITE_URL || "https://speed.1ms.dog").replace(/\/+$/, "");
 const pub = new URL("../public/", import.meta.url), src = new URL("../src/", import.meta.url);
@@ -44,7 +45,7 @@ async function loadI18n() {
 const BUILD_ONLY = new Set(["name", "seo_title", "seo_desc", "seo_kw", "og_sub", "h1", "docs", "lang_label", "faq_h", "share_desc", "share_title"]);
 
 // every origin the page asks (M-Lab's servers are WebSockets under measurement-lab.org, a wildcard in the CSP)
-export const ORIGINS = [new URL(CF).origin, new URL(LOCATE).origin];
+export const ORIGINS = [new URL(CF).origin, new URL(LOCATE).origin, IPINFO];
 export const WS = "wss://*.measurement-lab.org";
 
 export async function build({ check = false } = {}) {

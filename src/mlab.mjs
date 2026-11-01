@@ -47,10 +47,11 @@ function open(url, signal) {
 
 // Download: the server sends for ~10 s and closes. onTick({ ms, mbps }) about every 250 ms.
 // The address M-Lab's server sees (its first measurement carries ConnectionInfo.Client, "ip:port") is passed to
-// onClient as soon as it arrives.
+// onClient as soon as it arrives, with how long the connection took to open in the browser and the round trip the
+// server measures (both in ms; see tcpElsewhere in net.mjs).
 export function download(url, { signal, onTick, onClient } = {}) {
   return new Promise((res, rej) => {
-    const ws = open(url, signal);
+    const c0 = performance.now(), ws = open(url, signal);
     let t0 = 0, bytes = 0, last = 0, srv = {}, minRtt = null, client = "";
     const guard = setTimeout(() => ws.close(), 15000);
     ws.onopen = () => { t0 = performance.now(); };
@@ -59,7 +60,7 @@ export function download(url, { signal, onTick, onClient } = {}) {
         try {
           const j = JSON.parse(e.data), s = fromServer(j, "down");
           if (s.mbps) srv = s; if (s.minRtt) minRtt = s.minRtt;
-          if (!client && j.ConnectionInfo && j.ConnectionInfo.Client) { client = j.ConnectionInfo.Client; onClient && onClient(client); }
+          if (!client && j.ConnectionInfo && j.ConnectionInfo.Client) { client = j.ConnectionInfo.Client; onClient && onClient(client, { openMs: t0 - c0, minRtt: s.minRtt || null }); }
         } catch (x) {}
         bytes += e.data.length;
       } else bytes += e.data.byteLength;
@@ -106,5 +107,27 @@ export function upload(url, { signal, onTick } = {}) {
       const ms = Math.min(performance.now() - t0, 10000);
       res({ mbps: srv.mbps || Math.max(0, sent - ws.bufferedAmount) * 8 / ms / 1000, minRtt, ms });
     };
+  });
+}
+
+// Just the address M-Lab's server sees, without a test: an upload connection that sends nothing, closed as soon as the
+// server's first measurement arrives (well under a second; no data moved). M-Lab still records the connection, with
+// the address, like any test, so the page does this only when the visitor asks.
+export function peek(url, { signal } = {}) {
+  return new Promise((res, rej) => {
+    const c0 = performance.now(), ws = open(url, signal);
+    let opened = 0, over = false;
+    const done = (v, e) => { if (over) return; over = true; clearTimeout(guard); try { ws.close(); } catch (x) {} e ? rej(e) : res(v); };
+    const guard = setTimeout(() => done(null, new Error("timeout")), 8000);
+    ws.onopen = () => { opened = performance.now() - c0; };
+    ws.onmessage = e => {
+      if (typeof e.data !== "string") return;
+      try {
+        const j = JSON.parse(e.data);
+        if (j.ConnectionInfo && j.ConnectionInfo.Client) done({ client: j.ConnectionInfo.Client, openMs: opened, minRtt: fromServer(j, "up").minRtt || null });
+      } catch (x) {}
+    };
+    ws.onerror = () => done(null, new Error("websocket"));
+    ws.onclose = () => done(null, new Error("closed"));
   });
 }
