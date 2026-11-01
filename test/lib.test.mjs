@@ -3,6 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { quantile, median, jitter, mbps, serverTime, l4, meta, nextSize, rateNow, steady, settled } from "../src/measure.mjs";
 import { fromServer, site } from "../src/mlab.mjs";
+import { fromMeta, fromTrace, reasons, netOf, hostOf } from "../src/net.mjs";
 import { uses, bloat, bloatLevel, fmtMbps, fmtMs, speedTier } from "../src/verdict.mjs";
 import { encode, decode, sharePath } from "../src/share.mjs";
 import { items, ruleSets, inline, remote, FORMATS } from "../src/rules.mjs";
@@ -60,6 +61,25 @@ test("M-Lab server measurements", () => {
   assert.equal(site("ndt-hnd63770-db645cea.ipacyberlab.autojoin.measurement-lab.org"), "HND");
   assert.equal(site("mlab1-sin01.mlab-oti.measurement-lab.org"), "SIN");
   assert.equal(site(""), "");
+});
+
+test("the exit, and signs it isn't the visitor's own line", () => {
+  const e = fromMeta({ clientIp: "114.254.73.157", asn: 4808, asOrganization: "China Unicom Beijing province network", country: "CN", city: "Beijing",
+    colo: { iata: "HKG", city: "Hong Kong", cca2: "HK" } });
+  assert.deepEqual(e, { ip: "114.254.73.157", cc: "CN", city: "Beijing", asn: 4808, org: "China Unicom Beijing province network", colo: "HKG", coloCity: "Hong Kong", coloCc: "HK", http: "" });
+  assert.equal(fromMeta({}), null);
+  assert.deepEqual(fromTrace("fl=1\nip=1.2.3.4\nloc=XX\ncolo=NRT\n"), { ip: "1.2.3.4", cc: "", city: "", asn: null, org: "", colo: "NRT", coloCity: "", coloCc: "", http: "" });
+  assert.deepEqual(reasons(e, { tz: "Asia/Shanghai" }), [], "home line in China");
+  assert.deepEqual(reasons({ ...e, cc: "HK" }, { tz: "Asia/Shanghai" }), [], "Hong Kong counts as China's");
+  assert.deepEqual(reasons({ ...e, cc: "JP", org: "Vultr Holdings LLC", asn: 20473 }, { tz: "Asia/Shanghai" }).map(r => r.k), ["r_tz", "r_dc"]);
+  assert.deepEqual(reasons(e, { tz: "Asia/Shanghai", mlabIp: "114.254.9.9" }), [], "same /16");
+  assert.deepEqual(reasons(e, { tz: "Asia/Shanghai", mlabIp: "45.76.1.1" }).map(r => r.k), ["r_split"]);
+  assert.deepEqual(reasons(e, { tz: "Asia/Shanghai", mlabIp: "2408:8207::1" }), [], "other family: not comparable");
+  assert.equal(netOf("2408:8207:265b:52d0:3451:43d5:b987:5ab3"), netOf("2408:8207:265b:52d0::1"));
+  assert.equal(hostOf("1.2.3.4:5678"), "1.2.3.4");
+  assert.equal(hostOf("[2001:db8::1]:443"), "2001:db8::1");
+  assert.equal(hostOf("garbage"), "");
+  assert.deepEqual(reasons(null), []);
 });
 
 test("what the line is good for", () => {

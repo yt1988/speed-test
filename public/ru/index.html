@@ -43,7 +43,7 @@
 <meta name="twitter:description" content="Загрузка, отдача, пинг и bufferbloat из вашей сети">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Тест скорости · 1ms.dog","url":"https://speed.1ms.dog/ru/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","description":"Бесплатный тест скорости интернета в браузере: скорость загрузки и отдачи, пинг, джиттер и задержка под нагрузкой (bufferbloat) от вашей сети до ближайшего дата-центра Cloudflare. Без приложений, без рекламы, ничего не сохраняется.","inLanguage":"ru","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Как проходит тест?","acceptedAnswer":{"@type":"Answer","text":"Браузер напрямую общается с тестовыми серверами Cloudflare (теми, что стоят за speed.cloudflare.com) в ближайшем к вашей сети дата-центре Cloudflare. Через этот сайт ничего не идёт. Сначала 16 пустых запросов измеряют пинг и джиттер. Затем загрузка: несколько запросов одновременно, каждый байт считается по прибытии, 5–10 секунд; скорость — среднее после первых 30% времени (когда соединение уже разогналось), а если скорость стабилизировалась, тест заканчивается раньше. Отдача измеряется так же в обратную сторону. Во время обоих этапов маленький запрос каждые 0,4 с измеряет пинг при загруженном канале."}},{"@type":"Question","name":"Почему меньше, чем по тарифу или в других тестах?","acceptedAnswer":{"@type":"Answer","text":"Чаще всего виноват Wi-Fi: чтобы увидеть скорость самого канала, подключитесь кабелем, рядом с роутером, остальные устройства пусть не качают. Браузер связывается с сервером по одному соединению HTTP/2 или HTTP/3 (его делят несколько запросов), а приложение Ookla открывает много отдельных соединений. До близкого дата-центра результаты совпадают; чем дальше сервер, тем больше проигрывает одно соединение. К тому же Ookla часто меряет до сервера внутри сети вашего провайдера, а это всегда выглядит лучше любого маршрута наружу. В материковом Китае дата-центры Cloudflare за границей, поэтому измеряется международный канал, часто сильно ниже тарифа."}},{"@type":"Question","name":"Что такое пинг под нагрузкой (bufferbloat)?","acceptedAnswer":{"@type":"Answer","text":"Когда канал заполнен, роутеры и модемы складывают пакеты в большие буферы. Всё, что стоит в очереди за загрузкой — пакеты игры, голос в звонке, — задерживается: это и есть bufferbloat. Тест измеряет пинг во время загрузки и отдачи. Рост до 30 мс — нормально; больше 100 мс вы почувствуете в звонках и играх всякий раз, когда кто-то выгружает фото или идёт бэкап. Умное управление очередями в роутере (SQM: fq_codel или CAKE) решает почти всё ценой небольшой потери максимальной скорости."}},{"@type":"Question","name":"У меня прокси или VPN: чья это скорость?","acceptedAnswer":{"@type":"Answer","text":"Прокси. С включённым прокси или VPN браузер идёт к серверу через него, поэтому цифры отражают ваш канал до узла, пропускную способность самого узла и его маршрут до Cloudflare. Удобно для сравнения узлов. Чтобы измерить свой канал, добавьте прямые правила (кнопка рядом с полосой прогресса): напрямую пойдут только speed.cloudflare.com и серверы M-Lab, остальное не изменится. Поддерживаются Clash/Mihomo, Surge, Shadowrocket, Quantumult X, Loon, sing-box и Xray, большинство — через набор правил, который обновляется сам. Сеть под результатами (дата-центр, номер сети, IP) показывает, каким путём прошёл тест."}},{"@type":"Question","name":"Что за тест M-Lab?","acceptedAnswer":{"@type":"Answer","text":"Measurement Lab — открытый проект при поддержке Google и университетов, который держит тестовые серверы вне домашних провайдеров; на нём работает тест скорости Google. Его тест ndt7 использует одно соединение по 10 секунд в каждую сторону. Поэтому это хорошее второе мнение о том, как одна загрузка ведёт себя на маршрутах за пределами сети провайдера, и строгое — на дальних маршрутах: издалека он часто показывает намного меньше основного теста. Он запускается только по кнопке, потому что M-Lab публикует каждый тест вместе с вашим IP-адресом как открытые данные. В некоторых странах его серверы могут быть недоступны."}},{"@type":"Question","name":"Сколько трафика тратит тест?","acceptedAnswer":{"@type":"Answer","text":"Каждое направление длится 5 секунд, если скорость стабилизировалась, и не больше 10: тест прокачивает 5–10 секунд вашей максимальной скорости в каждую сторону — на канале 100 Мбит/с всего около 100–250 МБ, на 1 Гбит/с — 1–2,5 ГБ. Страница показывает, сколько ушло. На лимитном тарифе или мобильном интернете тестируйте пореже."}},{"@type":"Question","name":"Почему тест не начинается сам?","acceptedAnswer":{"@type":"Answer","text":"Тест скорости тратит много трафика, поэтому страница ждёт, пока вы нажмёте «Старт». Если тестируете часто, включите «Тестировать при открытии» рядом с полосой прогресса; выбор запомнится в этом браузере."}},{"@type":"Question","name":"Вы собираете мои данные?","acceptedAnswer":{"@type":"Answer","text":"Нет. Тест идёт между вашим браузером и серверами Cloudflare (и M-Lab, если вы его запустите); этот сайт результатов не видит. Cloudflare видит ваш IP-адрес, как и любой сайт. Ссылка и картинка для отправки создаются в вашем браузере и содержат только цифры. Код открыт на GitHub."}}]}]}</script>
 <link rel="preload" href="/assets/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/app.c013ad48f8.css">
+<link rel="stylesheet" href="/assets/app.2f9615ee50.css">
 </head>
 <body>
 <div class="app">
@@ -72,30 +72,49 @@
   <main>
     <div class="shared" id="shared" hidden><span id="sharedTxt"></span><button class="btn pri" id="testMine" type="button" data-i="test_mine">Проверить свой канал</button></div>
     <section class="hero card">
+      <!-- which way the test goes: filled as soon as the page loads, before any test -->
+      <div class="net" id="net" data-st="chk">
+        <div class="net-r" data-n="cf">
+          <span class="net-k"><i class="dot"></i><span class="net-st" id="netSt" data-i="st_chk">Проверка</span></span>
+          <span class="net-s">Cloudflare</span>
+          <span class="net-v" id="netCf"><i class="skl"></i></span>
+          <span class="net-x" id="netCfX"></span>
+        </div>
+        <div class="net-r" data-n="ml">
+          <span class="net-k"></span>
+          <span class="net-s">M-Lab</span>
+          <span class="net-v" id="netMl"><i class="skl"></i></span>
+          <span class="net-x" id="netMlX"></span>
+        </div>
+      </div>
       <h1>Насколько быстрый у вас интернет?</h1>
       <div class="dial">
         <div class="g" id="gDown" data-g="down">
+          <canvas class="spark" aria-hidden="true"></canvas>
           <span class="g-k"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v11M3.5 8.5 8 13l4.5-4.5"/></svg><span data-i="k_down">Загрузка</span></span>
-          <b class="g-v">–</b><span class="g-u">Mbps</span>
+          <span class="g-n"><b class="g-v">–</b><span class="g-u">Mbps</span></span>
         </div>
-        <button class="go" id="go" type="button"><span class="go-t" id="goT" data-i="start">Старт</span><span class="go-s" id="goS">&nbsp;</span></button>
+        <button class="go" id="go" type="button">
+          <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="ring-bg" cx="50" cy="50" r="47"/><circle class="ring-fg" id="ring" cx="50" cy="50" r="47" pathLength="100"/></svg>
+          <span class="go-t" id="goT" data-i="start">Старт</span><span class="go-s" id="goS">&nbsp;</span>
+        </button>
         <div class="g" id="gUp" data-g="up">
+          <canvas class="spark" aria-hidden="true"></canvas>
           <span class="g-k"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14V3M3.5 7.5 8 3l4.5 4.5"/></svg><span data-i="k_up">Отдача</span></span>
-          <b class="g-v">–</b><span class="g-u">Mbps</span>
+          <span class="g-n"><b class="g-v">–</b><span class="g-u">Mbps</span></span>
         </div>
       </div>
-      <canvas class="chart" id="chart" aria-hidden="true"></canvas>
       <ul class="lat">
         <li data-l="idle"><span data-why="Время туда и обратно до тестового сервера при свободном канале: медиана 16 запросов." tabindex="0">Пинг</span><b>–</b></li>
         <li data-l="jit"><span data-why="Насколько пинг скачет от запроса к запросу. Для звонков и игр чем меньше, тем лучше." tabindex="0">Джиттер</span><b>–</b></li>
         <li data-l="ldown"><span data-why="Пинг при полностью занятом канале. Если он сильно растёт (bufferbloat), звонки обрываются, когда кто-то качает." tabindex="0">Пинг при загрузке</span><b>–</b></li>
         <li data-l="lup"><span data-why="Пинг при полностью занятом канале. Если он сильно растёт (bufferbloat), звонки обрываются, когда кто-то качает." tabindex="0">Пинг при отдаче</span><b>–</b></li>
       </ul>
-      <ul class="uses" id="uses"><li data-u="video" data-lv=""><span>Видео 4K</span><span class="lv"></span></li><li data-u="call" data-lv=""><span>Видеозвонки</span><span class="lv"></span></li><li data-u="game" data-lv=""><span>Онлайн-игры</span><span class="lv"></span></li><li data-u="cloud" data-lv=""><span>Облачный гейминг</span><span class="lv"></span></li><li data-u="live" data-lv=""><span>Стримы</span><span class="lv"></span></li></ul>
-      <p class="where" id="where">&nbsp;</p>
-      <p class="note-l" id="noteL">&nbsp;</p>
+      <div class="sum">
+        <ul class="uses" id="uses"><li data-u="video" data-lv=""><span>Видео 4K</span><span class="lv"></span></li><li data-u="call" data-lv=""><span>Видеозвонки</span><span class="lv"></span></li><li data-u="game" data-lv=""><span>Онлайн-игры</span><span class="lv"></span></li><li data-u="cloud" data-lv=""><span>Облачный гейминг</span><span class="lv"></span></li><li data-u="live" data-lv=""><span>Стримы</span><span class="lv"></span></li></ul>
+        <p class="note-l" id="noteL" data-i="hint_idle">Нажмите «Старт»: около 20–30 секунд. Расход трафика растёт со скоростью (см. справку).</p>
+      </div>
       <div class="bar">
-        <div class="prog" id="prog"><i></i></div>
         <span class="prog-t" id="progTxt">&nbsp;</span>
         <label class="auto"><input type="checkbox" id="auto"><span class="sw" aria-hidden="true"></span><span data-i="auto_label">Тестировать при открытии</span></label>
         <button class="btn sm" id="rulesBtn" type="button" aria-haspopup="dialog" aria-controls="rules"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h9M8 4.5 11.5 8 8 11.5M14 3v10"/></svg><span data-i="rules_btn">Прямые правила</span></button>
@@ -107,17 +126,14 @@
       <div class="ml-t">
         <h2 data-i="ml_h">Второе мнение: M-Lab</h2>
         <p class="note" data-i="ml_sub">Одно соединение с сервером вне сети вашего провайдера, как в тесте скорости Google. Обычно ниже теста выше, и тем ниже, чем дальше сервер.</p>
+        <p class="note ml-p" id="mlNote" data-i="ml_privacy">M-Lab публикует каждый тест вместе с вашим IP-адресом как открытые данные.</p>
       </div>
       <ul class="ml-m">
         <li data-m="down"><span data-i="k_down">Загрузка</span><b>–</b></li>
         <li data-m="up"><span data-i="k_up">Отдача</span><b>–</b></li>
         <li data-m="rtt"><span data-why="Наименьшее время туда и обратно, которое сервер M-Lab увидел на соединении." tabindex="0">Мин. пинг</span><b>–</b></li>
-        <li data-m="srv"><span data-i="k_server">Сервер</span><b>–</b></li>
       </ul>
-      <div class="ml-a">
-        <button class="btn" id="mlRun" type="button" data-i="ml_run">Запустить тест M-Lab</button>
-        <span class="note" id="mlNote" data-i="ml_privacy">M-Lab публикует каждый тест вместе с вашим IP-адресом как открытые данные.</span>
-      </div>
+      <button class="btn" id="mlRun" type="button" data-i="ml_run">Запустить тест M-Lab</button>
     </section>
 
     <div data-ms-more></div>
@@ -168,7 +184,7 @@
 </div>
 
 <script type="application/json" id="data">{"lang":"ru","paths":{"en":"/","zh-CN":"/zh-cn/","zh-TW":"/zh-tw/","ja":"/ja/","ko":"/ko/","es":"/es/","fr":"/fr/","de":"/de/","pt":"/pt/","ru":"/ru/"}}</script>
-<script src="/assets/l.ru.8f54a987c3.js"></script>
-<script src="/assets/app.c08c968eab.js"></script>
+<script src="/assets/l.ru.e4e4c0218d.js"></script>
+<script src="/assets/app.29b315a632.js"></script>
 </body>
 </html>

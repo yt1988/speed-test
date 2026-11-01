@@ -46,15 +46,21 @@ function open(url, signal) {
 }
 
 // Download: the server sends for ~10 s and closes. onTick({ ms, mbps }) about every 250 ms.
-export function download(url, { signal, onTick } = {}) {
+// The address M-Lab's server sees (its first measurement carries ConnectionInfo.Client, "ip:port") is passed to
+// onClient as soon as it arrives.
+export function download(url, { signal, onTick, onClient } = {}) {
   return new Promise((res, rej) => {
     const ws = open(url, signal);
-    let t0 = 0, bytes = 0, last = 0, srv = {}, minRtt = null;
+    let t0 = 0, bytes = 0, last = 0, srv = {}, minRtt = null, client = "";
     const guard = setTimeout(() => ws.close(), 15000);
     ws.onopen = () => { t0 = performance.now(); };
     ws.onmessage = e => {
       if (typeof e.data === "string") {
-        try { const s = fromServer(JSON.parse(e.data), "down"); if (s.mbps) srv = s; if (s.minRtt) minRtt = s.minRtt; } catch (x) {}
+        try {
+          const j = JSON.parse(e.data), s = fromServer(j, "down");
+          if (s.mbps) srv = s; if (s.minRtt) minRtt = s.minRtt;
+          if (!client && j.ConnectionInfo && j.ConnectionInfo.Client) { client = j.ConnectionInfo.Client; onClient && onClient(client); }
+        } catch (x) {}
         bytes += e.data.length;
       } else bytes += e.data.byteLength;
       const ms = performance.now() - t0;
@@ -65,7 +71,7 @@ export function download(url, { signal, onTick } = {}) {
       clearTimeout(guard);
       if (!t0) return rej(new Error("closed"));
       const ms = performance.now() - t0;
-      res({ mbps: srv.mbps || bytes * 8 / ms / 1000, minRtt, ms });
+      res({ mbps: srv.mbps || bytes * 8 / ms / 1000, minRtt, ms, client });
     };
   });
 }

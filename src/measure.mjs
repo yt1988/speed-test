@@ -8,6 +8,8 @@
 // the ramp-up. While data flows, an empty download every 400 ms measures the latency under load (bufferbloat).
 // The pure helpers at the top are unit-tested; the runners need a browser.
 
+import { fromMeta, fromTrace } from "./net.mjs";
+
 export const CF = "https://speed.cloudflare.com";
 
 export const quantile = (a, q) => {
@@ -74,6 +76,21 @@ export function settled(s, min = 5000) {
 }
 
 /* ---------- in the browser ---------- */
+
+// The exit Cloudflare sees, before any test: /meta (address, city, network, data center; it needs the page's default
+// referrer, the origin), else /cdn-cgi/trace on the same host (address, country, data center), which some filter
+// lists let through when they block the other. Both are tiny and open to any origin.
+export async function exit(signal) {
+  try {
+    const r = await fetch(`${CF}/meta`, { cache: "no-store", signal: signal || AbortSignal.timeout(6000) });
+    const e = r.ok ? fromMeta(await r.json()) : null;
+    if (e) return e;
+  } catch (e) {}
+  try {
+    const r = await fetch(`${CF}/cdn-cgi/trace`, { cache: "no-store", signal: signal || AbortSignal.timeout(6000) });
+    return r.ok ? fromTrace(await r.text()) : null;
+  } catch (e) { return null; }
+}
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 const sleep = (ms, signal) => new Promise(res => { const t = setTimeout(res, ms); signal && signal.addEventListener("abort", () => { clearTimeout(t); res(); }, { once: true }); });

@@ -43,7 +43,7 @@
 <meta name="twitter:description" content="下り・上り・Ping・バッファーブロートを、あなたの回線から実測">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"スピードテスト · 1ms.dog","url":"https://speed.1ms.dog/ja/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","description":"無料のインターネット回線速度テスト。ブラウザだけで下り（ダウンロード）・上り（アップロード）速度、Ping、ジッター、負荷時の遅延（バッファーブロート）を、あなたの回線から最寄りの Cloudflare データセンターまで測ります。アプリ不要、広告なし、データ保存なし。","inLanguage":"ja","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"どうやって測っているの？","acceptedAnswer":{"@type":"Answer","text":"ブラウザが Cloudflare の速度テストサーバー（speed.cloudflare.com と同じもの）に直接つながります。接続先はあなたの回線から最寄りの Cloudflare データセンターで、このサイトは経由しません。 まず空のリクエスト 16 回で Ping とジッターを測ります。次に下り：複数のリクエストを同時に流し、届いたバイトをその場で数えて 5〜10 秒測定。速度は最初の 30% を除いた（接続が加速しきった後の）平均で、速度が安定したら早めに終わります。上りも同じように逆方向で測ります。どちらの間も 0.4 秒ごとに小さなリクエストを送り、回線がいっぱいのときの Ping を測ります。"}},{"@type":"Question","name":"契約速度や他の速度テストより遅いのはなぜ？","acceptedAnswer":{"@type":"Answer","text":"いちばん多い原因は Wi-Fi です。回線そのものの速度を見るには、有線でつなぎ、ほかの端末の通信を止めて測ってください。 ブラウザとテストサーバーの間は HTTP/2 または HTTP/3 の接続 1 本（複数のリクエストで共有）ですが、Ookla のアプリは独立した接続をたくさん開きます。近いデータセンターなら結果はほぼ同じですが、遠いほど 1 本の接続は不利になります。また Ookla はプロバイダー網内のサーバーで測ることが多く、網外へ出る経路より良い数字が出ます。 中国本土では Cloudflare のデータセンターが国外にあるため、国際回線の帯域を測ることになり、契約速度を大きく下回ることがあります。"}},{"@type":"Question","name":"負荷時の Ping（バッファーブロート）とは？","acceptedAnswer":{"@type":"Answer","text":"回線がいっぱいになると、ルーターやモデムはパケットを大きなバッファーにためます。ダウンロードの後ろに並んだゲームのパケットや通話の音声はすべて待たされます。これがバッファーブロートです。 このテストは下りと上りの最中に Ping を測ります。増加が 30 ms までなら問題なし。100 ms を超えると、誰かが写真をアップロードしたりバックアップが走ったりするたびに通話やゲームで体感できます。ルーターのスマートキュー管理（SQM：fq_codel や CAKE）でほとんど解消でき、代わりに最高速度が少し下がります。"}},{"@type":"Question","name":"プロキシや VPN を使っているとき、誰の速度？","acceptedAnswer":{"@type":"Answer","text":"プロキシの速度です。プロキシや VPN がオンだとブラウザはそれを通ってテストサーバーにつながるので、数値はあなたからプロキシノードまでの回線、ノード自身の帯域、ノードから Cloudflare までの経路を表します。ノードの比較には便利です。 自分の回線を測るには、直接接続ルール（プログレスバー横のボタン）を追加してください。speed.cloudflare.com と M-Lab のサーバーだけが直接接続になり、ほかは変わりません。Clash/Mihomo、Surge、Shadowrocket、Quantumult X、Loon、sing-box、Xray に対応し、多くは自動更新されるルールセットで使えます。結果の下に出るデータセンター、ネットワーク番号、IP で、テストがどちらの経路を通ったか分かります。"}},{"@type":"Question","name":"M-Lab のテストとは？","acceptedAnswer":{"@type":"Answer","text":"Measurement Lab は Google や大学が支えるオープンなプロジェクトで、家庭向けプロバイダーの外にテストサーバーを置いています。Google 自身の速度テストもこれを使っています。ndt7 テストは各方向 1 本の接続で 10 秒測ります。 そのため、プロバイダーの外へ出る経路で 1 本のダウンロードがどうなるかを見るセカンドオピニオンに向いています。遠い経路には厳しく、サーバーが遠いとメインのテストよりかなり低く出ます。M-Lab は各テストを IP アドレス付きでオープンデータとして公開するため、クリックしたときだけ実行します。国によってはサーバーにつながらないことがあります。"}},{"@type":"Question","name":"1 回のテストで通信量はどれくらい？","acceptedAnswer":{"@type":"Answer","text":"各方向は速度が安定すれば 5 秒、長くても 10 秒で終わるので、上り下りそれぞれ最高速度で 5〜10 秒分です。100 Mbps の回線なら合計約 100〜250 MB、1 Gbps なら 1〜2.5 GB。テスト後に使った量を表示します。従量制やモバイル回線では控えめに。"}},{"@type":"Question","name":"なぜ自動で始まらないの？","acceptedAnswer":{"@type":"Answer","text":"速度テストは通信量が多いので、「開始」を押すまで待ちます。よく測るなら、プログレスバー横の「ページを開いたら自動で測定」をオンにしてください。この設定はこのブラウザに保存されます。"}},{"@type":"Question","name":"データを集めていますか？","acceptedAnswer":{"@type":"Answer","text":"いいえ。テストはブラウザと Cloudflare（選んだ場合は M-Lab）のサーバーの間で行われ、このサイトは結果を受け取りません。どのサイトとも同じく、Cloudflare にはあなたの IP アドレスが見えます。共有リンクと画像はブラウザ内で作られ、数値だけを含みます。コードは GitHub で公開しています。"}}]}]}</script>
 <link rel="preload" href="/assets/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/app.c013ad48f8.css">
+<link rel="stylesheet" href="/assets/app.2f9615ee50.css">
 </head>
 <body>
 <div class="app">
@@ -72,30 +72,49 @@
   <main>
     <div class="shared" id="shared" hidden><span id="sharedTxt"></span><button class="btn pri" id="testMine" type="button" data-i="test_mine">自分の回線を測る</button></div>
     <section class="hero card">
+      <!-- which way the test goes: filled as soon as the page loads, before any test -->
+      <div class="net" id="net" data-st="chk">
+        <div class="net-r" data-n="cf">
+          <span class="net-k"><i class="dot"></i><span class="net-st" id="netSt" data-i="st_chk">確認中</span></span>
+          <span class="net-s">Cloudflare</span>
+          <span class="net-v" id="netCf"><i class="skl"></i></span>
+          <span class="net-x" id="netCfX"></span>
+        </div>
+        <div class="net-r" data-n="ml">
+          <span class="net-k"></span>
+          <span class="net-s">M-Lab</span>
+          <span class="net-v" id="netMl"><i class="skl"></i></span>
+          <span class="net-x" id="netMlX"></span>
+        </div>
+      </div>
       <h1>あなたの回線はどれくらい速い？</h1>
       <div class="dial">
         <div class="g" id="gDown" data-g="down">
+          <canvas class="spark" aria-hidden="true"></canvas>
           <span class="g-k"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v11M3.5 8.5 8 13l4.5-4.5"/></svg><span data-i="k_down">下り</span></span>
-          <b class="g-v">–</b><span class="g-u">Mbps</span>
+          <span class="g-n"><b class="g-v">–</b><span class="g-u">Mbps</span></span>
         </div>
-        <button class="go" id="go" type="button"><span class="go-t" id="goT" data-i="start">開始</span><span class="go-s" id="goS">&nbsp;</span></button>
+        <button class="go" id="go" type="button">
+          <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="ring-bg" cx="50" cy="50" r="47"/><circle class="ring-fg" id="ring" cx="50" cy="50" r="47" pathLength="100"/></svg>
+          <span class="go-t" id="goT" data-i="start">開始</span><span class="go-s" id="goS">&nbsp;</span>
+        </button>
         <div class="g" id="gUp" data-g="up">
+          <canvas class="spark" aria-hidden="true"></canvas>
           <span class="g-k"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14V3M3.5 7.5 8 3l4.5 4.5"/></svg><span data-i="k_up">上り</span></span>
-          <b class="g-v">–</b><span class="g-u">Mbps</span>
+          <span class="g-n"><b class="g-v">–</b><span class="g-u">Mbps</span></span>
         </div>
       </div>
-      <canvas class="chart" id="chart" aria-hidden="true"></canvas>
       <ul class="lat">
         <li data-l="idle"><span data-why="回線が空いているときのテストサーバーまでの往復時間：16 回の中央値。" tabindex="0">Ping</span><b>–</b></li>
         <li data-l="jit"><span data-why="Ping が 1 回ごとにどれだけ揺れるか。通話やゲームでは小さいほど良い。" tabindex="0">ジッター</span><b>–</b></li>
         <li data-l="ldown"><span data-why="回線がいっぱいのときの Ping。大きく増える（バッファーブロート）と、誰かがダウンロードすると通話が途切れます。" tabindex="0">下り中の Ping</span><b>–</b></li>
         <li data-l="lup"><span data-why="回線がいっぱいのときの Ping。大きく増える（バッファーブロート）と、誰かがダウンロードすると通話が途切れます。" tabindex="0">上り中の Ping</span><b>–</b></li>
       </ul>
-      <ul class="uses" id="uses"><li data-u="video" data-lv=""><span>4K 動画</span><span class="lv"></span></li><li data-u="call" data-lv=""><span>ビデオ通話</span><span class="lv"></span></li><li data-u="game" data-lv=""><span>オンラインゲーム</span><span class="lv"></span></li><li data-u="cloud" data-lv=""><span>クラウドゲーム</span><span class="lv"></span></li><li data-u="live" data-lv=""><span>ライブ配信</span><span class="lv"></span></li></ul>
-      <p class="where" id="where">&nbsp;</p>
-      <p class="note-l" id="noteL">&nbsp;</p>
+      <div class="sum">
+        <ul class="uses" id="uses"><li data-u="video" data-lv=""><span>4K 動画</span><span class="lv"></span></li><li data-u="call" data-lv=""><span>ビデオ通話</span><span class="lv"></span></li><li data-u="game" data-lv=""><span>オンラインゲーム</span><span class="lv"></span></li><li data-u="cloud" data-lv=""><span>クラウドゲーム</span><span class="lv"></span></li><li data-u="live" data-lv=""><span>ライブ配信</span><span class="lv"></span></li></ul>
+        <p class="note-l" id="noteL" data-i="hint_idle">「開始」を押すと約 20〜30 秒で終わります。通信量は速度に比例します（ヘルプ参照）。</p>
+      </div>
       <div class="bar">
-        <div class="prog" id="prog"><i></i></div>
         <span class="prog-t" id="progTxt">&nbsp;</span>
         <label class="auto"><input type="checkbox" id="auto"><span class="sw" aria-hidden="true"></span><span data-i="auto_label">ページを開いたら自動で測定</span></label>
         <button class="btn sm" id="rulesBtn" type="button" aria-haspopup="dialog" aria-controls="rules"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h9M8 4.5 11.5 8 8 11.5M14 3v10"/></svg><span data-i="rules_btn">直接接続ルール</span></button>
@@ -107,17 +126,14 @@
       <div class="ml-t">
         <h2 data-i="ml_h">セカンドオピニオン：M-Lab</h2>
         <p class="note" data-i="ml_sub">プロバイダーの外にあるサーバーへ 1 本の接続で測定（Google の速度テストと同じ方式）。上のテストより低く出ることが多く、サーバーが遠いほど差が開きます。</p>
+        <p class="note ml-p" id="mlNote" data-i="ml_privacy">M-Lab は各テストを IP アドレス付きでオープンデータとして公開します。</p>
       </div>
       <ul class="ml-m">
         <li data-m="down"><span data-i="k_down">下り</span><b>–</b></li>
         <li data-m="up"><span data-i="k_up">上り</span><b>–</b></li>
         <li data-m="rtt"><span data-why="M-Lab のサーバーがこの接続で観測した最小の往復時間。" tabindex="0">最小 Ping</span><b>–</b></li>
-        <li data-m="srv"><span data-i="k_server">サーバー</span><b>–</b></li>
       </ul>
-      <div class="ml-a">
-        <button class="btn" id="mlRun" type="button" data-i="ml_run">M-Lab で測定</button>
-        <span class="note" id="mlNote" data-i="ml_privacy">M-Lab は各テストを IP アドレス付きでオープンデータとして公開します。</span>
-      </div>
+      <button class="btn" id="mlRun" type="button" data-i="ml_run">M-Lab で測定</button>
     </section>
 
     <div data-ms-more></div>
@@ -168,7 +184,7 @@
 </div>
 
 <script type="application/json" id="data">{"lang":"ja","paths":{"en":"/","zh-CN":"/zh-cn/","zh-TW":"/zh-tw/","ja":"/ja/","ko":"/ko/","es":"/es/","fr":"/fr/","de":"/de/","pt":"/pt/","ru":"/ru/"}}</script>
-<script src="/assets/l.ja.8e53400518.js"></script>
-<script src="/assets/app.c08c968eab.js"></script>
+<script src="/assets/l.ja.6d63f6e67c.js"></script>
+<script src="/assets/app.29b315a632.js"></script>
 </body>
 </html>

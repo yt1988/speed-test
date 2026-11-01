@@ -11,57 +11,92 @@ h2 { font-size: 15px; font-weight: 700; }
 .note { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
 
 /* hero */
-.hero { padding: 20px 22px 0; display: flex; flex-direction: column; gap: 14px; }
-.hero h1 { text-align: center; font-size: clamp(20px, 2.6vw, 26px); line-height: 1.25; letter-spacing: -.015em; font-weight: 700; }
-.dial { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 24px; max-width: 760px; width: 100%; margin: 0 auto; }
-.g { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+.hero { padding: 14px 22px 0; display: flex; flex-direction: column; gap: 18px; }
+.hero h1 { text-align: center; font-size: clamp(20px, 2.6vw, 26px); line-height: 1.25; letter-spacing: -.015em; font-weight: 700; margin-top: 2px; }
+.skl { display: inline-block; width: 220px; max-width: 70%; height: 12px; border-radius: 6px; background: var(--soft); vertical-align: middle; animation: blink 1.4s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: .45; } }
+
+/* which way the test goes: two fixed rows, Cloudflare and M-Lab, filled as answers come */
+.net { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; column-gap: 12px; row-gap: 4px; align-items: center; margin: 0 -10px; padding: 9px 12px; border-radius: 12px; background: var(--soft); font-size: 13px; }
+.net[data-st="warn"] { background: var(--warn-soft); }
+.net-r { display: contents; }
+.net-k { display: inline-flex; align-items: center; gap: 7px; min-width: 0; }
+.net .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+.net[data-st="good"] .dot { background: var(--t1); box-shadow: 0 0 0 3px color-mix(in srgb, var(--t1) 22%, transparent); }
+.net[data-st="warn"] .dot { background: var(--warn); box-shadow: 0 0 0 3px var(--warn-soft); }
+.net[data-st="chk"] .dot { animation: blink 1s infinite; }
+.net-st { font-weight: 650; white-space: nowrap; }
+.net[data-st="good"] .net-st { color: var(--t1); } .net[data-st="warn"] .net-st { color: var(--warn); }
+.net-s { font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+.net-v, .net-x { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 22px; }
+.net-v .m, .net-x .m { color: var(--muted); }
+.net-x { text-align: right; color: var(--muted); }
+.net a { color: var(--ink); text-decoration: none; font-family: var(--f-num); font-size: 12.5px; }
+.net a:hover { text-decoration: underline; }
+.flag { width: 18px; height: 13.5px; border-radius: 2px; box-shadow: 0 0 0 1px var(--line); vertical-align: -2px; margin-right: 6px; }
+
+/* the two speeds around the start button; each tile draws its own live curve behind the number */
+.dial { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 28px; }
+.g { position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; height: 168px; padding: 16px 20px; border-radius: 16px; background: var(--soft); }
+/* the curve keeps to the lower part of the tile, under the number */
+.spark { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 42%; pointer-events: none; }
+.g-k, .g-n { position: relative; }
 .g-k { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
 .g-k svg { width: 15px; height: 15px; stroke-width: 1.8; }
 #gDown .g-k svg { color: var(--ink); } #gUp .g-k svg { color: var(--up); }
-/* fixed width for the number, so it doesn't push anything around as it counts */
-.g-v { font: 700 clamp(40px, 6.4vw, 64px)/1.05 var(--f-num); font-variant-numeric: tabular-nums; letter-spacing: -.04em; min-width: 5ch; text-align: center; }
-.g-u { font-size: 12.5px; color: var(--muted); }
+.g-n { display: flex; align-items: baseline; gap: 8px; }
+/* left-aligned in its tile: as it counts only the unit beside it moves */
+.g-v { font: 700 clamp(40px, 5.4vw, 58px)/1.05 var(--f-num); font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+.g-u { font-size: 13px; color: var(--muted); }
 .g.on .g-v { color: var(--ink); }
 #gUp.on .g-v { color: var(--up); }
-.go { width: 132px; height: 132px; border-radius: 50%; border: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  background: var(--ink); color: var(--ink-fg); box-shadow: 0 0 0 8px var(--ink-soft), 0 10px 30px var(--shadow); transition: transform .15s; }
+/* the start button; the ring around it is the test's progress */
+.go { position: relative; width: 140px; height: 140px; border-radius: 50%; border: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  background: var(--ink); color: var(--ink-fg); box-shadow: 0 10px 30px color-mix(in srgb, var(--ink) 35%, transparent); transition: transform .15s, background .2s; }
 .go:hover { transform: scale(1.03); }
 .go:active { transform: scale(.98); }
 .go:disabled { opacity: .5; cursor: default; transform: none; }
-.go-t { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
-.go-s { font-size: 11.5px; opacity: .85; max-width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.go[data-st="run"] { background: var(--panel); color: var(--fg); box-shadow: 0 0 0 2px var(--ink), 0 0 0 8px var(--ink-soft); animation: ring 1.6s ease-in-out infinite; }
+.ring { position: absolute; inset: -9px; width: calc(100% + 18px); height: calc(100% + 18px); transform: rotate(-90deg); pointer-events: none; }
+.ring circle { fill: none; stroke-width: 3.5; }
+.ring-bg { stroke: var(--ink-soft); }
+.ring-fg { stroke: var(--ink); stroke-dasharray: 0 100; stroke-linecap: round; transition: stroke-dasharray .3s linear; }
+.go[data-st="idle"] .ring-fg { opacity: 0; }   /* a round cap at zero length would show as a dot */
+.go-t { position: relative; font-size: 21px; font-weight: 700; letter-spacing: -.01em; }
+.go-s { position: relative; font-size: 11.5px; opacity: .85; max-width: 112px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.go[data-st="run"] { background: var(--panel); color: var(--fg); box-shadow: 0 0 0 1px var(--line); }
+.go[data-st="run"] .go-t { font-size: 17px; }
 .go[data-st="done"] .go-t { font-size: 17px; }
-@keyframes ring { 50% { box-shadow: 0 0 0 2px var(--ink), 0 0 0 14px transparent; } }
-.chart { display: block; width: 100%; height: 72px; }
-.lat { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.lat li { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0 8px; border-left: 1px solid var(--line); min-width: 0; text-align: center; }
-.lat li:first-child { border-left: 0; }
-.lat li > span { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; cursor: help; text-decoration: underline dotted; text-underline-offset: 3px; outline: none; }
+
+/* latencies: four tiles */
+.lat { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.lat li { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px 11px; border-radius: 12px; border: 1px solid var(--line); min-width: 0; }
+.lat li > span { align-self: flex-start; font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; cursor: help; text-decoration: underline dotted; text-underline-offset: 3px; outline: none; }
 .lat b { display: block; font: 600 22px/30px var(--f-num); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .lat b small, .ml-m b small { font: 400 12px var(--f-ui); color: var(--muted); margin-left: 3px; }
 .lat b i { font: 500 12px var(--f-num); font-style: normal; color: var(--muted); margin-left: 6px; }
-/* what the line is good for: five chips, always there; the level fills in at the end */
-.uses { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+
+/* the conclusion: what the line is good for, and one or two sentences (before a test: how it works, or a warning
+   about the route) */
+.sum { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.uses { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .uses li { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 15px; background: var(--soft); font-size: 13px; color: var(--muted); }
 .uses li .lv { font-weight: 600; min-width: 2em; }
 .uses li .lv:empty::before { content: "–"; font-weight: 400; }
 .uses li[data-lv="good"] { background: color-mix(in srgb, var(--t1) 14%, transparent); color: var(--fg); } .uses li[data-lv="good"] .lv { color: var(--t1); }
 .uses li[data-lv="ok"] { background: color-mix(in srgb, var(--t3) 14%, transparent); color: var(--fg); } .uses li[data-lv="ok"] .lv { color: var(--t3); }
 .uses li[data-lv="poor"] .lv { color: var(--t5); }
-.where, .note-l { text-align: center; font-size: 12.5px; color: var(--muted); min-height: 1.6em; line-height: 1.6; }
-.where b { color: var(--fg); font-weight: 600; }
-.where a { color: var(--ink); text-decoration: none; font-family: var(--f-num); }
-.where a:hover { text-decoration: underline; }
-.where .dot { margin: 0 8px; opacity: .6; }
-.note-l { min-height: 3.2em; max-width: 720px; margin: -6px auto 0; }
+.note-l { text-align: center; font-size: 13px; color: var(--muted); line-height: 1.6; min-height: 3.2em; max-width: 760px; }
+.note-l b { color: var(--fg); font-weight: 600; }
+.note-l .warn { color: var(--warn); }
+.note-l button { border: 0; background: none; padding: 0; color: var(--ink); cursor: pointer; font: inherit; }
+.note-l button:hover, .note-l a:hover { text-decoration: underline; }
+.note-l a { color: var(--ink); text-decoration: none; }
+
 .bar { position: relative; display: flex; align-items: center; gap: 12px; margin: 0 -22px; padding: 11px 22px 13px; border-top: 1px solid var(--line); }
-.prog { position: absolute; left: 0; right: 0; top: -1px; height: 2px; overflow: hidden; }
-.prog i { display: block; height: 100%; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform .25s, opacity .4s .3s; }
-.prog.end i { opacity: 0; }
 .prog-t { font: 12.5px var(--f-num); color: var(--muted); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
 .bar .btn.sm { height: 30px; padding: 0 10px; font-size: 12.5px; color: var(--muted); flex: none; }
 .bar .btn.sm:hover:not(:disabled) { color: var(--fg); border-color: var(--ink); }
+.bar #rulesBtn.warn { color: var(--warn); border-color: var(--warn); background: var(--warn-soft); }
 .auto { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); cursor: pointer; user-select: none; flex: none; }
 .auto input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .auto .sw { position: relative; width: 26px; height: 15px; border-radius: 15px; background: var(--line); transition: background .15s; flex: none; }
@@ -72,19 +107,16 @@ h2 { font-size: 15px; font-weight: 700; }
 .tip { position: fixed; z-index: 50; white-space: pre-line; max-width: min(340px, calc(100vw - 16px)); background: var(--fg); color: var(--bg); font: 500 12.5px/1.45 var(--f-ui); padding: 6px 10px; border-radius: 7px; pointer-events: none; opacity: 0; transition: opacity .12s; }
 .tip.on { opacity: 1; }
 
-/* M-Lab */
-.mlab { padding: 16px 22px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 12px 24px; align-items: center; }
-.ml-t p { margin-top: 2px; }
-.ml-m { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.ml-m li { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; border-left: 1px solid var(--line); min-width: 0; }
-.ml-m li:first-child { border-left: 0; padding-left: 0; }
+/* M-Lab: one row, what it is, its three numbers, the button */
+.mlab { padding: 16px 22px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) auto; gap: 12px 28px; align-items: center; }
+.ml-t p { margin-top: 3px; }
+.ml-t .ml-p { color: var(--warn); }
+.ml-m { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.ml-m li { display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border-radius: 10px; background: var(--soft); min-width: 0; }
 .ml-m li > span { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ml-m li > span[data-why] { cursor: help; text-decoration: underline dotted; text-underline-offset: 3px; outline: none; }
+.ml-m li > span[data-why] { align-self: flex-start; cursor: help; text-decoration: underline dotted; text-underline-offset: 3px; outline: none; }
 .ml-m b { font: 600 17px/24px var(--f-num); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ml-m [data-m="srv"] b { font: 500 13px/24px var(--f-ui); }
-.ml-a { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; }
-.ml-a .btn { height: 32px; font-size: 13px; flex: none; }
-.ml-a .note { min-width: 0; }
+.mlab #mlRun { height: 34px; font-size: 13px; }
 
 /* dialogs (as in the other 1ms.dog tools) */
 .scrim { position: fixed; inset: 0; z-index: 40; background: #0006; display: flex; align-items: center; justify-content: center; padding: 16px; }
@@ -128,28 +160,34 @@ details.rblk > summary { cursor: pointer; font-size: 13px; color: var(--ink); }
 .shared { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 10px 12px 10px 16px; border-radius: var(--r); background: var(--ink-soft); border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent); font-size: 13.5px; }
 .shared .btn { height: 32px; font-size: 13px; }
 
-@media (prefers-reduced-motion: reduce) { .go { animation: none !important; transition: none !important; } }
-@media (max-width: 860px) {
-  .mlab { grid-template-columns: minmax(0, 1fr); }
+@media (prefers-reduced-motion: reduce) { .skl, .net .dot, .ring-fg { animation: none !important; transition: none !important; } }
+@media (max-width: 900px) {
+  .mlab { grid-template-columns: minmax(0, 1fr) auto; }
+  .ml-m { grid-column: 1 / -1; grid-row: 2; }
 }
 @media (max-width: 720px) {
-  .hero { padding: 16px 16px 0; gap: 12px; }
-  /* phones: the two speeds side by side, the button under them */
-  .dial { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px 8px; }
-  .go { grid-row: 2; grid-column: 1 / -1; justify-self: center; width: 112px; height: 112px; }
-  .g-v { font-size: 40px; }
-  .lat { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 10px; }
-  .lat li:nth-child(3) { border-left: 0; }
+  .hero { padding: 12px 16px 0; gap: 14px; }
+  /* phones: the exit rows wrap under their labels */
+  .net { grid-template-columns: auto minmax(0, 1fr); margin: 0 -6px; row-gap: 2px; }
+  .net-r[data-n="cf"] .net-k { grid-column: 1 / -1; margin-bottom: 2px; }
+  .net-r[data-n="ml"] .net-k { display: none; }
+  .net-x { grid-column: 2; text-align: left; }
+  /* the two speeds side by side, the button under them */
+  .dial { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px 10px; }
+  .go { grid-row: 2; grid-column: 1 / -1; justify-self: center; width: 116px; height: 116px; margin: 4px 0; }
+  .g { height: 132px; padding: 12px 14px; }
+  .spark { height: 36%; }
+  .g-v { font-size: 36px; }
+  .lat { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .bar { margin: 0 -16px; padding: 10px 16px 12px; flex-wrap: wrap; row-gap: 8px; }
   .prog-t { flex: 1 0 100%; order: -1; }
   .auto { margin-right: auto; }
   #rulesBtn span { display: none; }
   #rulesBtn { width: 34px; padding: 0; }
   .note-l { min-height: 4.8em; }
-  .mlab { padding: 14px 16px; }
-  .ml-m { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 10px; }
-  .ml-m li:nth-child(3) { border-left: 0; padding-left: 0; }
-  .ml-a { flex-direction: column; align-items: flex-start; }
+  .mlab { padding: 14px 16px; grid-template-columns: minmax(0, 1fr); }
+  .ml-m { grid-row: auto; }
+  .mlab #mlRun { justify-self: start; }
   .dialog.help { height: calc(100vh - 32px); }
   .help-b { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
   .help-nav { display: none; }

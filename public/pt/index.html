@@ -43,7 +43,7 @@
 <meta name="twitter:description" content="Download, upload, ping e bufferbloat, da sua rede">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Teste de velocidade · 1ms.dog","url":"https://speed.1ms.dog/pt/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","description":"Teste de velocidade da internet grátis no navegador: velocidade de download e upload, ping, jitter e latência sob carga (bufferbloat), medidos da sua rede até o data center da Cloudflare mais próximo. Sem app, sem anúncios, nada é salvo.","inLanguage":"pt","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Como o teste funciona?","acceptedAnswer":{"@type":"Answer","text":"Seu navegador fala direto com os servidores de teste da Cloudflare (os de speed.cloudflare.com), no data center da Cloudflare mais próximo da sua rede. Nada passa por este site. Primeiro, 16 requisições vazias medem o ping e o jitter. Depois o download: várias requisições ao mesmo tempo, cada byte contado ao chegar, por 5 a 10 segundos; a velocidade é a média depois dos primeiros 30% (quando a conexão já acelerou), e o teste termina antes se a velocidade estabilizar. O upload funciona igual, no sentido contrário. Durante os dois, uma requisição pequena a cada 0,4 s mede o ping com a linha cheia."}},{"@type":"Question","name":"Por que deu menos que meu plano ou que outros testes?","acceptedAnswer":{"@type":"Answer","text":"O motivo mais comum é o Wi-Fi: para ver o que a linha entrega, teste no cabo, perto do roteador, com os outros aparelhos parados. O navegador chega ao servidor por uma única conexão HTTP/2 ou HTTP/3 (compartilhada por várias requisições), enquanto o app da Ookla abre muitas conexões separadas. Até um data center próximo os dois concordam; quanto mais longe o servidor, mais uma conexão só perde. A Ookla também costuma testar contra um servidor dentro da rede da sua operadora, o que rende números melhores que qualquer rota que saia dela. Na China continental, os data centers da Cloudflare ficam fora do país: o teste mede a banda internacional, muitas vezes bem abaixo do plano."}},{"@type":"Question","name":"O que é ping sob carga (bufferbloat)?","acceptedAnswer":{"@type":"Answer","text":"Com a linha cheia, roteadores e modems acumulam pacotes em buffers grandes. Tudo o que espera atrás de um download, os pacotes de um jogo ou o áudio de uma chamada, atrasa: isso é bufferbloat. O teste mede o ping durante o download e o upload. Uma alta de até 30 ms é tranquila; acima de 100 ms você sente em chamadas e jogos sempre que alguém envia fotos ou um backup roda. O gerenciamento inteligente de filas no roteador (SQM: fq_codel ou CAKE) resolve quase tudo, ao custo de um pouco da velocidade máxima."}},{"@type":"Question","name":"Uso proxy ou VPN: de quem é essa velocidade?","acceptedAnswer":{"@type":"Answer","text":"Do proxy. Com proxy ou VPN ligado, o navegador chega ao servidor através dele, então os números são sua linha até o nó, a banda do próprio nó e a rota dele até a Cloudflare. Útil para comparar nós. Para testar sua própria linha, adicione as regras diretas (botão ao lado da barra de progresso): só speed.cloudflare.com e os servidores do M-Lab vão direto, nada mais muda. Funcionam com Clash/Mihomo, Surge, Shadowrocket, Quantumult X, Loon, sing-box e Xray, a maioria com um conjunto de regras que se atualiza sozinho. A rede mostrada abaixo dos resultados (data center, número da rede, IP) diz por onde o teste passou."}},{"@type":"Question","name":"O que é o teste do M-Lab?","acceptedAnswer":{"@type":"Answer","text":"O Measurement Lab é um projeto aberto, apoiado pelo Google e por universidades, com servidores de teste fora das operadoras residenciais; o teste de velocidade do Google usa ele. O teste ndt7 usa uma conexão por 10 segundos em cada sentido. Por isso é uma boa segunda opinião sobre como um único download se sai em rotas que saem da sua operadora, e uma opinião dura em rotas longas: de longe costuma dar bem menos que o teste principal. Só roda quando você clica, porque o M-Lab publica cada teste, com seu endereço IP, como dados abertos. Em alguns países os servidores podem estar inacessíveis."}},{"@type":"Question","name":"Quantos dados um teste consome?","acceptedAnswer":{"@type":"Answer","text":"Cada sentido dura 5 segundos se a velocidade estabilizar, no máximo 10: um teste usa de 5 a 10 segundos da sua velocidade máxima em cada sentido, cerca de 100 a 250 MB no total numa linha de 100 Mbps, de 1 a 2,5 GB em 1 Gbps. A página mostra quanto foi usado. Em plano limitado ou dados móveis, teste com moderação."}},{"@type":"Question","name":"Por que não começa sozinho?","acceptedAnswer":{"@type":"Answer","text":"Um teste de velocidade consome muitos dados, então a página espera você clicar em Iniciar. Se testa com frequência, ative “Testar ao abrir a página” ao lado da barra de progresso; a escolha fica salva neste navegador."}},{"@type":"Question","name":"Vocês coletam meus dados?","acceptedAnswer":{"@type":"Answer","text":"Não. O teste acontece entre o seu navegador e os servidores da Cloudflare (e do M-Lab, se você escolher); este site nunca vê os resultados. A Cloudflare vê seu endereço IP, como qualquer site. O link e a imagem de compartilhamento são criados no seu navegador e levam só os números. O código é aberto, no GitHub."}}]}]}</script>
 <link rel="preload" href="/assets/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/app.c013ad48f8.css">
+<link rel="stylesheet" href="/assets/app.2f9615ee50.css">
 </head>
 <body>
 <div class="app">
@@ -72,30 +72,49 @@
   <main>
     <div class="shared" id="shared" hidden><span id="sharedTxt"></span><button class="btn pri" id="testMine" type="button" data-i="test_mine">Testar minha conexão</button></div>
     <section class="hero card">
+      <!-- which way the test goes: filled as soon as the page loads, before any test -->
+      <div class="net" id="net" data-st="chk">
+        <div class="net-r" data-n="cf">
+          <span class="net-k"><i class="dot"></i><span class="net-st" id="netSt" data-i="st_chk">Verificando</span></span>
+          <span class="net-s">Cloudflare</span>
+          <span class="net-v" id="netCf"><i class="skl"></i></span>
+          <span class="net-x" id="netCfX"></span>
+        </div>
+        <div class="net-r" data-n="ml">
+          <span class="net-k"></span>
+          <span class="net-s">M-Lab</span>
+          <span class="net-v" id="netMl"><i class="skl"></i></span>
+          <span class="net-x" id="netMlX"></span>
+        </div>
+      </div>
       <h1>Qual a velocidade da sua internet?</h1>
       <div class="dial">
         <div class="g" id="gDown" data-g="down">
+          <canvas class="spark" aria-hidden="true"></canvas>
           <span class="g-k"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v11M3.5 8.5 8 13l4.5-4.5"/></svg><span data-i="k_down">Download</span></span>
-          <b class="g-v">–</b><span class="g-u">Mbps</span>
+          <span class="g-n"><b class="g-v">–</b><span class="g-u">Mbps</span></span>
         </div>
-        <button class="go" id="go" type="button"><span class="go-t" id="goT" data-i="start">Iniciar</span><span class="go-s" id="goS">&nbsp;</span></button>
+        <button class="go" id="go" type="button">
+          <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="ring-bg" cx="50" cy="50" r="47"/><circle class="ring-fg" id="ring" cx="50" cy="50" r="47" pathLength="100"/></svg>
+          <span class="go-t" id="goT" data-i="start">Iniciar</span><span class="go-s" id="goS">&nbsp;</span>
+        </button>
         <div class="g" id="gUp" data-g="up">
+          <canvas class="spark" aria-hidden="true"></canvas>
           <span class="g-k"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14V3M3.5 7.5 8 3l4.5 4.5"/></svg><span data-i="k_up">Upload</span></span>
-          <b class="g-v">–</b><span class="g-u">Mbps</span>
+          <span class="g-n"><b class="g-v">–</b><span class="g-u">Mbps</span></span>
         </div>
       </div>
-      <canvas class="chart" id="chart" aria-hidden="true"></canvas>
       <ul class="lat">
         <li data-l="idle"><span data-why="Ida e volta até o servidor com a linha ociosa: a mediana de 16 requisições." tabindex="0">Ping</span><b>–</b></li>
         <li data-l="jit"><span data-why="Quanto o ping varia de uma requisição para outra. Para chamadas e jogos, quanto menor, melhor." tabindex="0">Jitter</span><b>–</b></li>
         <li data-l="ldown"><span data-why="O ping com a linha cheia. Se sobe muito (bufferbloat), as chamadas travam quando alguém baixa algo." tabindex="0">Ping no download</span><b>–</b></li>
         <li data-l="lup"><span data-why="O ping com a linha cheia. Se sobe muito (bufferbloat), as chamadas travam quando alguém baixa algo." tabindex="0">Ping no upload</span><b>–</b></li>
       </ul>
-      <ul class="uses" id="uses"><li data-u="video" data-lv=""><span>Vídeo 4K</span><span class="lv"></span></li><li data-u="call" data-lv=""><span>Videochamadas</span><span class="lv"></span></li><li data-u="game" data-lv=""><span>Jogos online</span><span class="lv"></span></li><li data-u="cloud" data-lv=""><span>Jogos na nuvem</span><span class="lv"></span></li><li data-u="live" data-lv=""><span>Lives</span><span class="lv"></span></li></ul>
-      <p class="where" id="where">&nbsp;</p>
-      <p class="note-l" id="noteL">&nbsp;</p>
+      <div class="sum">
+        <ul class="uses" id="uses"><li data-u="video" data-lv=""><span>Vídeo 4K</span><span class="lv"></span></li><li data-u="call" data-lv=""><span>Videochamadas</span><span class="lv"></span></li><li data-u="game" data-lv=""><span>Jogos online</span><span class="lv"></span></li><li data-u="cloud" data-lv=""><span>Jogos na nuvem</span><span class="lv"></span></li><li data-u="live" data-lv=""><span>Lives</span><span class="lv"></span></li></ul>
+        <p class="note-l" id="noteL" data-i="hint_idle">Clique em Iniciar: cerca de 20–30 segundos. Os dados usados crescem com a velocidade (veja a Ajuda).</p>
+      </div>
       <div class="bar">
-        <div class="prog" id="prog"><i></i></div>
         <span class="prog-t" id="progTxt">&nbsp;</span>
         <label class="auto"><input type="checkbox" id="auto"><span class="sw" aria-hidden="true"></span><span data-i="auto_label">Testar ao abrir a página</span></label>
         <button class="btn sm" id="rulesBtn" type="button" aria-haspopup="dialog" aria-controls="rules"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h9M8 4.5 11.5 8 8 11.5M14 3v10"/></svg><span data-i="rules_btn">Regras diretas</span></button>
@@ -107,17 +126,14 @@
       <div class="ml-t">
         <h2 data-i="ml_h">Segunda opinião: M-Lab</h2>
         <p class="note" data-i="ml_sub">Uma única conexão até um servidor fora da sua operadora, como o teste de velocidade do Google. Costuma dar menos que o teste acima, mais ainda se o servidor estiver longe.</p>
+        <p class="note ml-p" id="mlNote" data-i="ml_privacy">O M-Lab publica cada teste, com seu endereço IP, como dados abertos.</p>
       </div>
       <ul class="ml-m">
         <li data-m="down"><span data-i="k_down">Download</span><b>–</b></li>
         <li data-m="up"><span data-i="k_up">Upload</span><b>–</b></li>
         <li data-m="rtt"><span data-why="A menor ida e volta que o servidor do M-Lab viu na conexão." tabindex="0">Ping mínimo</span><b>–</b></li>
-        <li data-m="srv"><span data-i="k_server">Servidor</span><b>–</b></li>
       </ul>
-      <div class="ml-a">
-        <button class="btn" id="mlRun" type="button" data-i="ml_run">Rodar teste M-Lab</button>
-        <span class="note" id="mlNote" data-i="ml_privacy">O M-Lab publica cada teste, com seu endereço IP, como dados abertos.</span>
-      </div>
+      <button class="btn" id="mlRun" type="button" data-i="ml_run">Rodar teste M-Lab</button>
     </section>
 
     <div data-ms-more></div>
@@ -168,7 +184,7 @@
 </div>
 
 <script type="application/json" id="data">{"lang":"pt","paths":{"en":"/","zh-CN":"/zh-cn/","zh-TW":"/zh-tw/","ja":"/ja/","ko":"/ko/","es":"/es/","fr":"/fr/","de":"/de/","pt":"/pt/","ru":"/ru/"}}</script>
-<script src="/assets/l.pt.c2f2378383.js"></script>
-<script src="/assets/app.c08c968eab.js"></script>
+<script src="/assets/l.pt.804f03509b.js"></script>
+<script src="/assets/app.29b315a632.js"></script>
 </body>
 </html>

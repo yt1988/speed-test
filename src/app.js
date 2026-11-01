@@ -2,7 +2,8 @@
 // Order: idle latency, download, upload (src/measure.mjs), each shown live in the hero's fixed slots; at the end what
 // the line is good for and how much latency load adds. M-Lab's single-connection test runs only when asked
 // (src/mlab.mjs). Strings: window.L1MS.
-import { ping, download, upload, median, jitter } from "./measure.mjs";
+import { ping, download, upload, median, jitter, exit } from "./measure.mjs";
+import { reasons, hostOf } from "./net.mjs";
 import * as ndt from "./mlab.mjs";
 import { fmtMbps, fmtMs, msTier, speedTier, bloat, bloatLevel, uses, USES } from "./verdict.mjs";
 import { FORMATS, FORMAT_NAMES, items as ruleItems, inline as ruleInline, remote as ruleRemote } from "./rules.mjs";
@@ -86,30 +87,29 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   document.addEventListener("mouseover", e => { const el = e.target.closest && e.target.closest("[data-why]"); if (el) showTip(el); else if (tipEl) tipEl.classList.remove("on"); });
   document.addEventListener("focusin", e => { const el = e.target.closest && e.target.closest("[data-why]"); if (el) showTip(el); });
 
-  /* ---------- the live chart: download on the left half, upload on the right ---------- */
-  const chart = $("#chart"), SERIES = { down: [], up: [] }, SPAN = 10000;
-  function drawChart() {
-    if (!chart) return;
-    const dpr = devicePixelRatio || 1, W = chart.clientWidth, H = chart.clientHeight;
-    if (!W) return;
-    if (chart.width !== Math.round(W * dpr)) { chart.width = Math.round(W * dpr); chart.height = Math.round(H * dpr); }
-    const x = chart.getContext("2d"), css = getComputedStyle(document.documentElement), v = n => css.getPropertyValue("--" + n).trim();
+  /* ---------- live curves: each speed tile draws its own, behind the number ---------- */
+  const SPAN = 10000, SERIES = { down: [], up: [] };
+  function drawSpark(k) {
+    const cv = $(k === "down" ? "#gDown .spark" : "#gUp .spark");
+    const dpr = devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
+    if (!W || !H) return;
+    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+    const x = cv.getContext("2d"), c = getComputedStyle(document.documentElement).getPropertyValue(k === "down" ? "--ink" : "--up").trim();
     x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H);
-    const all = [...SERIES.down, ...SERIES.up].map(p => p[1]), top = Math.max(1, ...all) * 1.15, half = W / 2;
-    x.fillStyle = v("line"); x.fillRect(half - .5, 6, 1, H - 12); x.fillRect(0, H - 1, W, 1);
-    [["down", 0, v("ink")], ["up", half + 1, v("up")]].forEach(([k, x0, c]) => {
-      const s = SERIES[k];
-      if (s.length < 2) return;
-      const px = p => x0 + Math.min(1, p[0] / SPAN) * (half - 2), py = p => H - 2 - (p[1] / top) * (H - 10);
-      x.beginPath(); x.moveTo(px(s[0]), H - 1);
-      s.forEach(p => x.lineTo(px(p), py(p)));
-      x.lineTo(px(s[s.length - 1]), H - 1); x.closePath();
-      x.fillStyle = c + "26"; x.fill();
-      x.beginPath(); s.forEach((p, i) => i ? x.lineTo(px(p), py(p)) : x.moveTo(px(p), py(p)));
-      x.strokeStyle = c; x.lineWidth = 1.6; x.lineJoin = "round"; x.stroke();
-    });
+    const s = SERIES[k];
+    if (s.length < 2) return;
+    const top = Math.max(1, ...s.map(p => p[1])) * 1.12;
+    const px = p => Math.min(1, p[0] / SPAN) * W, py = p => H - (p[1] / top) * (H - 4);
+    x.beginPath(); x.moveTo(px(s[0]), H);
+    s.forEach(p => x.lineTo(px(p), py(p)));
+    x.lineTo(px(s[s.length - 1]), H); x.closePath();
+    const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, c + "40"); g.addColorStop(1, c + "00");
+    x.fillStyle = g; x.fill();
+    x.beginPath(); s.forEach((p, i) => i ? x.lineTo(px(p), py(p)) : x.moveTo(px(p), py(p)));
+    x.strokeStyle = c; x.lineWidth = 2; x.lineJoin = "round"; x.stroke();
   }
-  addEventListener("resize", () => drawChart());
+  function drawChart() { drawSpark("down"); drawSpark("up"); }
+  addEventListener("resize", drawChart);
   applyTheme(TH.includes(store.get(K.theme)) ? store.get(K.theme) : "system");
 
   /* ---------- the hero's slots ---------- */
@@ -133,32 +133,59 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     }
   }
   const mb = bytes => bytes >= 1e9 ? (bytes / 1e9).toFixed(2) + " GB" : Math.max(1, Math.round(bytes / 1e6)) + " MB";
-  const country = cc => { try { return new Intl.DisplayNames([D.lang], { type: "region" }).of(cc); } catch (e) { return cc; } };
+  const country = cc => { if (!cc) return ""; try { return new Intl.DisplayNames([D.lang], { type: "region" }).of(cc); } catch (e) { return cc; } };
+  // self-hosted flag-icons SVG (MIT), one small file per country, no third-party request; Taiwan is shown with
+  // China's flag, as in the other 1ms.dog tools
+  const flag = cc => /^[A-Z]{2}$/.test(cc || "") ? `<img class="flag" src="/flags/${cc === "TW" ? "cn" : cc.toLowerCase()}.svg" alt="${esc(country(cc))}" width="18" height="14">` : "";
+  document.addEventListener("error", e => { if (e.target.matches && e.target.matches("img.flag")) e.target.remove(); }, true);
 
-  // where the test ran: the data center, the visitor's network and address (the address links to the IP quality
-  // check on 1ms.dog)
-  const IPQS = document.querySelector('meta[name="ipqs"]');
-  // Cloudflare names the data center and network (cf-meta-colo, -asn) only for some visitors; the address always
-  function showWhere(m) {
-    const parts = [];
-    if (m.colo) parts.push(t("where_colo", { colo: `<b>${esc(m.colo)}</b>` }));
-    if (m.asn) parts.push(t("where_net", { asn: `<b>AS${esc(m.asn)}</b>` }));
-    if (m.ip) parts.push(t("where_ip", { ip: IPQS ? `<a href="${esc(IPQS.content.replace(/\/+$/, "") + D.paths[D.lang] + "?ip=" + encodeURIComponent(m.ip))}" target="_blank" rel="noopener" title="${esc(t("ipqs_tip"))}">${esc(m.ip)} ↗</a>` : `<b>${esc(m.ip)}</b>` }));
-    if (m.country) parts.push(esc(country(m.country)));
-    $("#where").innerHTML = parts.join('<span class="dot">·</span>') || "&nbsp;";
+  /* ---------- which way the test goes: asked as the page loads, before any test ---------- */
+  // Cloudflare: the exit it sees (/meta). M-Lab: the server its locate service picks for this visitor, and, once its
+  // test runs, the address its server sees (no M-Lab service tells it otherwise). A mismatch between the device's
+  // time zone and the exit, a data-center exit, or the two services seeing different networks means the test isn't
+  // measuring the visitor's own line (src/net.mjs); the direct rules fix that.
+  const IPQS = document.querySelector('meta[name="ipqs"]'), EGRESS = document.querySelector('meta[name="egress"]');
+  const TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ""; } })();
+  const NET = { cf: null, ml: null, mlIp: "", cfDone: false, mlDone: false, reasons: [] };
+  const ipLink = ip => IPQS ? `<a href="${esc(IPQS.content.replace(/\/+$/, "") + D.paths[D.lang] + "?ip=" + encodeURIComponent(ip))}" target="_blank" rel="noopener" title="${esc(t("ipqs_tip"))}">${esc(ip)}</a>` : `<span class="m">${esc(ip)}</span>`;
+  function renderNet() {
+    const e = NET.cf;
+    if (NET.cfDone) {
+      $("#netCf").innerHTML = !e ? `<span class="m">${esc(t("net_fail"))}</span>`
+        : flag(e.cc) + esc([e.city, country(e.cc)].filter(Boolean).join(", ") || "–") + (e.org ? ` <span class="m">· ${esc(e.org)}</span>` : "") + ` <span class="m">·</span> ` + ipLink(e.ip);
+      $("#netCfX").innerHTML = e && e.colo ? t("net_node", { node: flag(e.coloCc) + esc([e.coloCity, e.colo].filter(Boolean).join(" ")) }) : "";
+    }
+    if (NET.mlDone) {
+      const s = NET.ml;
+      $("#netMl").innerHTML = NET.mlIp ? ipLink(NET.mlIp) : `<span class="m">${esc(t(s ? "ml_ip_later" : "ml_unreach"))}</span>`;
+      $("#netMlX").innerHTML = s ? t("net_srv", { srv: flag(s.country) + esc(s.city || s.site || s.machine) }) : "";
+    }
+    NET.reasons = reasons(e, { tz: TZ, mlabIp: NET.mlIp });
+    const st = !NET.cfDone ? "chk" : !e ? "unk" : NET.reasons.length ? "warn" : "good";
+    $("#net").dataset.st = st; $("#netSt").textContent = t("st_" + st);
+    $("#rulesBtn").classList.toggle("warn", st === "warn");
+    if (!RUN && !LAST) $("#noteL").innerHTML = warnHTML() || esc(t("hint_idle"));
   }
-  // the visitor's country, from Cloudflare's trace on this site (it serves the page): for the mainland China note,
-  // when the test server's headers don't carry it
-  let CC = "";
-  fetch("/cdn-cgi/trace", { cache: "no-store" }).then(r => r.ok ? r.text() : "").then(s => { const m = /\bloc=([A-Z]{2})/.exec(s); if (m) CC = m[1]; }).catch(() => {});
+  const reasonText = r => r.k === "r_tz" ? t("r_tz", { a: esc(country(r.a)), b: esc(country(r.b)) })
+    : r.k === "r_dc" ? t("r_dc", { org: esc(r.org) }) : t("r_split", { a: esc(r.a), b: esc(r.b) });
+  // the warnings, the way out (the rules), and where to see which IP each site gets (EgressLens, on 1ms.dog)
+  function warnHTML() {
+    if (!NET.reasons.length) return "";
+    const eg = EGRESS ? ` <a href="${esc(EGRESS.content.replace(/\/+$/, "") + D.paths[D.lang])}" target="_blank" rel="noopener">${esc(t("egress_link"))} ↗</a>` : "";
+    return `<span class="warn">${NET.reasons.map(reasonText).join(" ")}</span> ` + t("r_fix", { rules: `<button type="button" data-rules>${esc(t("rules_btn"))}</button>` }) + eg;
+  }
+  document.addEventListener("click", e => { if (e.target.closest && e.target.closest("[data-rules]")) $("#rulesBtn").click(); });
+  exit().then(e => { NET.cf = e; NET.cfDone = true; renderNet(); });
+  ndt.locate(AbortSignal.timeout(6000)).then(s => { NET.ml = s; }, () => {}).finally(() => { NET.mlDone = true; renderNet(); });
 
   /* ---------- the test ---------- */
   let RUN = null, LAST = null, META = null;
   const R = {};                       // this run's numbers: down, up, idle, jit, ldown, lup
+  const TITLE = document.title;
   const phaseW = { ping: .12, down: .44, up: .44 };
+  const ring = f => { $("#ring").style.strokeDasharray = `${(Math.min(1, f) * 100).toFixed(1)} 100`; };
   function progress(phase, frac, label) {
-    const done = { ping: 0, down: phaseW.ping, up: phaseW.ping + phaseW.down }[phase] + phaseW[phase] * Math.min(1, frac);
-    $("#prog i").style.transform = `scaleX(${done})`;
+    ring({ ping: 0, down: phaseW.ping, up: phaseW.ping + phaseW.down }[phase] + phaseW[phase] * Math.min(1, frac));
     $("#progTxt").textContent = label;
   }
   function setGo(state, sub) {
@@ -171,8 +198,8 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     SERIES.down = []; SERIES.up = []; drawChart();
     gauge("down", null); gauge("up", null);
     ["idle", "jit", "ldown", "lup"].forEach(k => latCell(k, null));
-    showUses({}); $("#noteL").innerHTML = "&nbsp;";
-    $("#prog").classList.remove("end");
+    showUses({}); $("#noteL").innerHTML = warnHTML() || "&nbsp;";
+    ring(0); document.title = TITLE;
     LAST = null; $("#shareBtn").disabled = true;
   }
 
@@ -185,13 +212,14 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     try {
       const p = await ping({ signal: sig, onSample: (ms, i, n) => progress("ping", i / n, t("prog_ping", { n: i, of: n })) });
       if (sig.aborted) throw new DOMException("", "AbortError");
-      META = p.meta; if (!META.country && /^[A-Z]{2}$/.test(CC) && CC !== "XX") META.country = CC; showWhere(META);
+      META = p.meta;
       R.idle = median(p.samples); R.jit = jitter(p.samples);
       latCell("idle", R.idle); latCell("jit", R.jit);
 
       setGo("run", t("ph_down"));
       const d = await download({ signal: sig, onTick: s => {
-        SERIES.down.push([s.ms, s.mbps]); drawChart(); gauge("down", s.mbps, true);
+        SERIES.down.push([s.ms, s.mbps]); drawSpark("down"); gauge("down", s.mbps, true);
+        document.title = "↓ " + fmtMbps(s.mbps) + " Mbps · " + TITLE;
         progress("down", s.ms / SPAN, t("prog_dir", { dir: t("k_down"), s: (s.ms / 1000).toFixed(1), mb: mb(s.bytes) }));
       } });
       bytes += d.bytes;
@@ -201,7 +229,8 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
 
       setGo("run", t("ph_up"));
       const u = await upload({ signal: sig, onTick: s => {
-        SERIES.up.push([s.ms, s.mbps]); drawChart(); gauge("up", s.mbps, true);
+        SERIES.up.push([s.ms, s.mbps]); drawSpark("up"); gauge("up", s.mbps, true);
+        document.title = "↑ " + fmtMbps(s.mbps) + " Mbps · " + TITLE;
         progress("up", s.ms / SPAN, t("prog_dir", { dir: t("k_up"), s: (s.ms / 1000).toFixed(1), mb: mb(bytes + s.bytes) }));
       } });
       bytes += u.bytes;
@@ -211,17 +240,19 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
 
       showUses(R);
       const b = bloat(R), lines = [];
-      if (b != null) lines.push(t("bloat_" + bloatLevel(b), { ms: fmtMs(b) }));
-      if (META && META.country === "CN") lines.push(t("cn_note"));
-      $("#noteL").innerHTML = lines.map(esc).join(" ") || "&nbsp;";
-      $("#prog").classList.add("end");
+      if (b != null) lines.push(esc(t("bloat_" + bloatLevel(b), { ms: fmtMs(b) })));
+      const cc = (NET.cf && NET.cf.cc) || META.country;
+      if (cc === "CN" && !NET.reasons.length) lines.push(esc(t("cn_note")));
+      if (NET.reasons.length) lines.push(warnHTML());
+      $("#noteL").innerHTML = lines.join(" ") || "&nbsp;";
+      ring(1);
       $("#progTxt").textContent = t("done", { s: ((performance.now() - t0) / 1000).toFixed(0), mb: mb(bytes) });
-      LAST = { ts: Date.now(), cc: META ? META.country : "", colo: META ? META.colo : "", ...R };
+      document.title = `↓ ${fmtMbps(R.down)} ↑ ${fmtMbps(R.up)} Mbps · ${TITLE}`;
+      LAST = { ts: Date.now(), cc: cc || "", colo: META.colo || (NET.cf && NET.cf.colo) || "", ...R };
       $("#shareBtn").disabled = false;
       setGo("done", t("used", { mb: mb(bytes) }));
     } catch (e) {
-      gauge("down", R.down); gauge("up", R.up);
-      $("#prog").classList.add("end");
+      gauge("down", R.down); gauge("up", R.up); ring(0); document.title = TITLE;
       if (sig.aborted) { $("#progTxt").textContent = t("stopped"); setGo("idle"); }
       else { $("#progTxt").innerHTML = "&nbsp;"; $("#noteL").textContent = t("e_fail"); setGo("idle"); }
     } finally {
@@ -239,25 +270,28 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   /* ---------- M-Lab: a second opinion, from a server outside the visitor's ISP, on one connection ---------- */
   let ML = null;
   const mlCell = (k, html) => { $(`.ml-m [data-m="${k}"] b`).innerHTML = html; };
+  const mlMbps = v => `<span class="n">${fmtMbps(v)}</span><small>Mbps</small>`;
   async function runMlab() {
     if (RUN) return;
     if (ML) { ML.abort(); return; }
     const ctl = ML = new AbortController();
     $("#go").disabled = true; $("#mlRun").textContent = t("stop");
-    ["down", "up", "rtt", "srv"].forEach(k => mlCell(k, "–"));
+    ["down", "up", "rtt"].forEach(k => mlCell(k, "–"));
     $("#mlNote").textContent = t("ml_locating");
     try {
+      // a fresh server and token: the ones asked for on load expire within minutes
       const s = await ndt.locate(ctl.signal);
-      mlCell("srv", esc([s.city || s.site, s.country].filter(Boolean).join(", ") || s.machine));
+      NET.ml = s; NET.mlDone = true; renderNet();
       $("#mlNote").textContent = t("ph_down");
-      const d = await ndt.download(s.down, { signal: ctl.signal, onTick: x => mlCell("down", `<span class="n">${fmtMbps(x.mbps)}</span><small>Mbps</small>`) });
+      const d = await ndt.download(s.down, { signal: ctl.signal, onTick: x => mlCell("down", mlMbps(x.mbps)),
+        onClient: c => { NET.mlIp = hostOf(c); renderNet(); } });
       if (ctl.signal.aborted) throw new Error("stopped");
-      mlCell("down", `<span class="n">${fmtMbps(d.mbps)}</span><small>Mbps</small>`);
+      mlCell("down", mlMbps(d.mbps));
       if (d.minRtt != null) mlCell("rtt", `<span class="n ${msTier(d.minRtt)}">${fmtMs(d.minRtt)}</span><small>ms</small>`);
       $("#mlNote").textContent = t("ph_up");
-      const u = await ndt.upload(s.up, { signal: ctl.signal, onTick: x => mlCell("up", `<span class="n">${fmtMbps(x.mbps)}</span><small>Mbps</small>`) });
+      const u = await ndt.upload(s.up, { signal: ctl.signal, onTick: x => mlCell("up", mlMbps(x.mbps)) });
       if (ctl.signal.aborted) throw new Error("stopped");
-      mlCell("up", `<span class="n">${fmtMbps(u.mbps)}</span><small>Mbps</small>`);
+      mlCell("up", mlMbps(u.mbps));
       $("#mlNote").textContent = t("ml_done");
     } catch (e) {
       $("#mlNote").textContent = ctl.signal.aborted ? t("stopped") : t("ml_fail");
@@ -386,10 +420,10 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     gauge("down", S.down); gauge("up", S.up);
     latCell("idle", S.idle); latCell("jit", S.jit); latCell("ldown", S.ldown, S.idle); latCell("lup", S.lup, S.idle);
     showUses(S);
-    showWhere({ colo: S.colo, country: S.cc });
+    const b = bloat(S);
+    $("#noteL").innerHTML = b != null ? esc(t("bloat_" + bloatLevel(b), { ms: fmtMs(b) })) : "&nbsp;";
     $("#sharedTxt").textContent = t("shared_on", { where: S.cc ? t("shared_where", { where: country(S.cc) }) : "", date: new Date(S.ts).toLocaleString(D.lang, { dateStyle: "medium", timeStyle: "short" }) });
     $("#shared").hidden = false;
-    $("#prog").classList.add("end");
     LAST = S; $("#shareBtn").disabled = false;
     setGo("idle");
   }
