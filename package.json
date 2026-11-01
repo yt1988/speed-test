@@ -1,0 +1,25 @@
+{
+  "name": "speed-test",
+  "private": true,
+  "type": "module",
+  "description": "Speed Test: download, upload, latency and bufferbloat, measured in your browser against Cloudflare's speed test servers, with an optional M-Lab second opinion and direct rules for proxy tools",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node scripts/build.mjs --check && node --test \"test/*.test.mjs\"",
+    "verify": "node scripts/verify.mjs",
+    "assets": "node scripts/assets.mjs",
+    "dev": "wrangler dev --port 8796",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "esbuild": "0.25.10",
+    "qrcode-generator": "^2.0.4"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yt1988/speed-test"
+  },
+  "homepage": "https://speed.1ms.dog"
+}

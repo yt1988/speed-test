@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "speed.cloudflare.com",
+        "locate.measurementlab.net"
+      ],
+      "domain_suffix": [
+        "measurement-lab.org"
+      ]
+    }
+  ]
+}

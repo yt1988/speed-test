@@ -1,0 +1,15 @@
+# Cloudflare Workers with static assets: `npx wrangler deploy` uploads ./public.
+# Files in ./public are served as they are, before the Worker runs (free and not metered). src/worker.js only sees
+# paths that are not files: /r/<code> (a shared result's page, with the speeds in its preview title) and answers
+# anything else with a bare 404.
+# No routes or custom domain here: on 1ms.dog the site routes the domain to this Worker. To self-host, bind your own
+# domain in the dashboard (see README).
+name = "speed-test"
+main = "src/worker.js"
+compatibility_date = "2025-10-01"
+workers_dev = false
+preview_urls = false
+
+[assets]
+directory = "./public"
+binding = "ASSETS"   # the Worker reads a language's page for shared results (/r/<code>)

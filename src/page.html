@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="{{lang}}" data-paths="{{pathsAttr}}"{{rootAttr}}>
+<head>
+<meta charset="utf-8">
+<script>{{prepaint}}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+{{head}}
+<link rel="preload" href="/assets/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/{{css}}">
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <a class="brand" href="{{homeHref}}" aria-current="page">
+      <span class="logo"><img class="logo-light" src="/assets/logo-light.svg" width="90" height="36" alt="{{a:a_logo}}"><img class="logo-dark" src="/assets/logo-dark.svg" width="90" height="36" alt="{{a:a_logo}}"></span>
+      <span class="brand-name" data-i="app_name"></span>
+    </a>
+    <div class="top-acts">
+      <label class="sel"><span class="sr" data-i="lang_label"></span>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M1.5 8h13M8 1.5c2 2 2.8 4 2.8 6.5S10 12.5 8 14.5C6 12.5 5.2 10.5 5.2 8S6 3.5 8 1.5z"/></svg>
+        <select id="lang">{{langOpts}}</select>
+      </label>
+      <button class="icon-btn" id="helpBtn" type="button" aria-haspopup="dialog" aria-controls="help"><span class="sr" data-i="faq_h"></span>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M6.3 6.2a1.8 1.8 0 1 1 2.5 1.7c-.5.2-.8.6-.8 1.1v.4M8 11.3v.1"/></svg>
+      </button>
+      <a class="icon-btn gh" href="https://github.com/yt1988/speed-test" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .2a8 8 0 0 0-2.5 15.6c.4 0 .5-.2.5-.4v-1.5c-2.2.5-2.7-1-2.7-1-.4-.9-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.3 1.9.9 2.4.7 0-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-4 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.4 7.4 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.4 1.1.2 1.9.1 2.1.5.6.8 1.3.8 2.1 0 3.1-1.9 3.7-3.6 3.9.3.3.6.8.6 1.5v2.2c0 .2.1.5.6.4A8 8 0 0 0 8 .2z"/></svg></a>
+      <button class="icon-btn" id="theme" type="button" aria-label="{{a:a_theme}}">
+        <svg class="i-sys" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="9" rx="1.5"/><path d="M5.5 14h5M8 11.5V14"/></svg>
+        <svg class="i-light" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v1.6M8 13.4V15M1 8h1.6M13.4 8H15M3 3l1.1 1.1M11.9 11.9 13 13M3 13l1.1-1.1M11.9 4.1 13 3"/></svg>
+        <svg class="i-dark" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 9.8A5.8 5.8 0 0 1 6.2 2.5a5.8 5.8 0 1 0 7.3 7.3z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div class="shared" id="shared" hidden><span id="sharedTxt"></span><button class="btn pri" id="testMine" type="button" data-i="test_mine"></button></div>
+    <section class="hero card">
+      <h1>{{h1}}</h1>
+      <div class="dial">
+        <div class="g" id="gDown" data-g="down">
+          <span class="g-k"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v11M3.5 8.5 8 13l4.5-4.5"/></svg><span data-i="k_down"></span></span>
+          <b class="g-v">–</b><span class="g-u">Mbps</span>
+        </div>
+        <button class="go" id="go" type="button"><span class="go-t" id="goT" data-i="start"></span><span class="go-s" id="goS">&nbsp;</span></button>
+        <div class="g" id="gUp" data-g="up">
+          <span class="g-k"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14V3M3.5 7.5 8 3l4.5 4.5"/></svg><span data-i="k_up"></span></span>
+          <b class="g-v">–</b><span class="g-u">Mbps</span>
+        </div>
+      </div>
+      <canvas class="chart" id="chart" aria-hidden="true"></canvas>
+      <ul class="lat">
+        <li data-l="idle"><span data-why="{{a:tip_idle}}" tabindex="0">{{k_idle}}</span><b>–</b></li>
+        <li data-l="jit"><span data-why="{{a:tip_jit}}" tabindex="0">{{k_jit}}</span><b>–</b></li>
+        <li data-l="ldown"><span data-why="{{a:tip_loaded}}" tabindex="0">{{k_ldown}}</span><b>–</b></li>
+        <li data-l="lup"><span data-why="{{a:tip_loaded}}" tabindex="0">{{k_lup}}</span><b>–</b></li>
+      </ul>
+      <ul class="uses" id="uses">{{uses}}</ul>
+      <p class="where" id="where">&nbsp;</p>
+      <p class="note-l" id="noteL">&nbsp;</p>
+      <div class="bar">
+        <div class="prog" id="prog"><i></i></div>
+        <span class="prog-t" id="progTxt">&nbsp;</span>
+        <label class="auto"><input type="checkbox" id="auto"><span class="sw" aria-hidden="true"></span><span data-i="auto_label"></span></label>
+        <button class="btn sm" id="rulesBtn" type="button" aria-haspopup="dialog" aria-controls="rules"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h9M8 4.5 11.5 8 8 11.5M14 3v10"/></svg><span data-i="rules_btn"></span></button>
+        <button class="btn sm" id="shareBtn" type="button" aria-haspopup="dialog" aria-controls="shareDlg" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2M5 5l3-3 3 3M3 9v4.5h10V9"/></svg><span data-i="share"></span></button>
+      </div>
+    </section>
+
+    <section class="mlab card">
+      <div class="ml-t">
+        <h2 data-i="ml_h"></h2>
+        <p class="note" data-i="ml_sub"></p>
+      </div>
+      <ul class="ml-m">
+        <li data-m="down"><span data-i="k_down"></span><b>–</b></li>
+        <li data-m="up"><span data-i="k_up"></span><b>–</b></li>
+        <li data-m="rtt"><span data-why="{{a:tip_minrtt}}" tabindex="0">{{k_minrtt}}</span><b>–</b></li>
+        <li data-m="srv"><span data-i="k_server"></span><b>–</b></li>
+      </ul>
+      <div class="ml-a">
+        <button class="btn" id="mlRun" type="button" data-i="ml_run"></button>
+        <span class="note" id="mlNote" data-i="ml_privacy"></span>
+      </div>
+    </section>
+
+    <div data-ms-more></div>
+  </main>
+</div>
+<div class="scrim" id="shareDlg" hidden>
+  <div class="dialog share" role="dialog" aria-modal="true" aria-labelledby="shareT">
+    <div class="dlg-h"><h2 id="shareT" data-i="share_h"></h2>
+      <button class="icon-btn" data-close type="button" aria-label="{{a:a_close}}"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
+    <div class="share-b">
+      <img id="shareImg" alt="" width="1200" height="760">
+      <div class="share-link"><input id="shareUrl" readonly aria-label="{{a:a_link}}"><button class="btn pri" id="copyLink" type="button" data-i="copy_link"></button></div>
+      <div class="share-acts">
+        <button class="btn" id="copyImg" type="button" data-i="copy_img"></button>
+        <button class="btn" id="dlImg" type="button" data-i="dl_img"></button>
+        <button class="btn" id="nativeShare" type="button" data-i="more_share" hidden></button>
+        <label class="chk"><input type="checkbox" id="shareCc"><span data-i="share_cc"></span></label>
+      </div>
+      <p class="note" data-i="share_note"></p>
+    </div>
+  </div>
+</div>
+<div class="scrim" id="rules" hidden>
+  <div class="dialog rules" role="dialog" aria-modal="true" aria-labelledby="rulesT">
+    <div class="dlg-h"><div><h2 id="rulesT" data-i="rules_h"></h2><p class="note" data-i="rules_sub"></p></div>
+      <button class="icon-btn" data-close type="button" aria-label="{{a:a_close}}"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
+    <div class="dlg-b">
+      <div class="tabs" id="ruleTabs" role="tablist"></div>
+      <div id="ruleBody" class="rbody"></div>
+      <p class="note" data-i="rules_after"></p>
+    </div>
+  </div>
+</div>
+<div class="scrim" id="help" hidden>
+  <div class="dialog help" role="dialog" aria-modal="true" aria-labelledby="helpT">
+    <div class="dlg-h"><h2 id="helpT" data-i="faq_h"></h2>
+      <button class="icon-btn" data-close type="button" aria-label="{{a:a_close}}"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
+    <div class="help-b">
+      <nav class="help-nav" id="helpNav" role="tablist">{{helpNav}}</nav>
+      <div class="help-pick">
+        <button class="icon-btn" type="button" data-hstep="-1" aria-label="{{a:a_prev}}"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 4L6 8l4 4"/></svg></button>
+        <select id="helpSel" aria-labelledby="helpT"></select>
+        <button class="icon-btn" type="button" data-hstep="1" aria-label="{{a:a_next}}"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4 4-4 4"/></svg></button>
+      </div>
+      <div class="help-c" id="helpC">{{helpC}}</div>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" id="data">{{data}}</script>
+<script src="/assets/{{strings}}"></script>
+<script src="/assets/{{js}}"></script>
+</body>
+</html>

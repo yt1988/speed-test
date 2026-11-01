@@ -1,0 +1,16 @@
+# Every Monday (and by hand): check, with tiny requests, that Cloudflare's speed test endpoints and M-Lab's locate
+# service still answer as the page expects (CORS, Server-Timing, WebSocket URLs). A failure means the page needs a look.
+name: verify
+on:
+  schedule:
+    - cron: "23 4 * * 1"
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/verify.mjs
