@@ -56,7 +56,7 @@ npm run dev        # http://localhost:8796
 npx wrangler deploy
 ```
 
-Static files on a Cloudflare Worker: files are served without running the script (not metered); `src/worker.js` only answers `/r/<code>` and 404s. `wrangler.toml` binds no domain: on 1ms.dog the shared shell routes `speed.1ms.dog` to it. To self-host, bind your domain to the Worker in the Cloudflare dashboard and build with `SITE_URL=https://your.domain npm run build`.
+Static files on a Cloudflare Worker: files are served without running the script (not metered); `src/worker.js` only answers `/r/<code>` and 404s. On 1ms.dog, pushes to `main` deploy through Workers Builds (`npm ci && npm test`, then `npx wrangler deploy`; nothing ships when `public/` is stale or a test fails). `wrangler.toml` binds no domain: on 1ms.dog the shared shell routes `speed.1ms.dog` to it. To self-host, bind your domain to the Worker in the Cloudflare dashboard and build with `SITE_URL=https://your.domain npm run build`.
 
 ## License
 

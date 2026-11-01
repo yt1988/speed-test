@@ -56,7 +56,7 @@ npm run dev        # http://localhost:8796
 npx wrangler deploy
 ```
 
-整站是 Cloudflare Worker 上的静态文件：文件直接返回，不运行脚本，这部分请求不计费；`src/worker.js` 只处理 `/r/<code>` 和 404。`wrangler.toml` 不绑定域名：在 1ms.dog 上由公共外壳把 `speed.1ms.dog` 路由过来。自己部署时，在 Cloudflare 控制台给 Worker 绑定你的域名，并用 `SITE_URL=https://你的域名 npm run build` 构建。
+整站是 Cloudflare Worker 上的静态文件：文件直接返回，不运行脚本，这部分请求不计费；`src/worker.js` 只处理 `/r/<code>` 和 404。在 1ms.dog 上，推送到 `main` 后由 Workers Builds 自动部署（先 `npm ci && npm test`，再 `npx wrangler deploy`；`public/` 没有重新生成或测试不通过时不会部署）。`wrangler.toml` 不绑定域名：在 1ms.dog 上由公共外壳把 `speed.1ms.dog` 路由过来。自己部署时，在 Cloudflare 控制台给 Worker 绑定你的域名，并用 `SITE_URL=https://你的域名 npm run build` 构建。
 
 ## 许可
 
