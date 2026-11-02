@@ -376,6 +376,8 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   // It makes the link short, draws the card's frame (logo, name, QR code, date) and offers copy, download and the
   // system share sheet; this page gives the link, the card's middle and the footer. The box adds the country and the
   // Cloudflare data center to both; the address is never in either.
+  // the component, its version in the address: a copy cached before an update must not answer for the new one
+  const SHARE_JS = "/assets/share/share.js?v=2";
   const shareLink = show => location.origin + D.paths[D.lang] + "r/" + encodeShare({ ...LAST, cc: show ? LAST.cc : "", colo: show ? LAST.colo : "" });
   // the card's middle: the two speeds, the latencies and the grade, what the line is good for
   async function drawResult(x, kit) {
@@ -420,7 +422,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   }
   $("#shareBtn").onclick = async () => {
     if (!LAST) return;
-    const S = LAST, { share } = await import("/assets/share/share.js");
+    const S = LAST, { share } = await import(SHARE_JS);
     share({
       lang: D.lang, name: t("app_name"), file: "speed-test",
       show: ["country", "colo"], never: ["ip"], canShow: !!(S.cc || S.colo),
@@ -441,7 +443,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     $("#noteL").innerHTML = gradeLine(S) || "&nbsp;";
     LAST = S; $("#shareBtn").disabled = false;
     setGo("idle");
-    const { received } = await import("/assets/share/share.js");
+    const { received } = await import(SHARE_JS);
     if (!RUN && LAST === S) RECV = received({ lang: D.lang, ts: S.ts, at: $(".hero"), test: () => { if (!RUN) start(); } });
   }
 
