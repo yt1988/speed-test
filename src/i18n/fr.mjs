@@ -68,8 +68,6 @@ export default {
   rules_after: "Rechargez la configuration du proxy, puis relancez le test. Pour mesurer un nœud du proxy, n'ajoutez pas les règles.",
   copy: "Copier", copied: "Copié",
   share: "Partager",
-  test_mine: "Tester ma connexion",
-  shared_on: "Un résultat partagé{where} · {date}", shared_where: " depuis {where}",
   share_text: "Ma connexion : ↓ {down} Mbps ↑ {up} Mbps, ping {ms} ms, bufferbloat {grade}. Et la vôtre ?",
   share_title: "Ma connexion : ↓ {down} Mbps ↑ {up} Mbps · ping {ms} ms · bufferbloat {grade} · Test de débit",
   share_desc: "Descendant {down} Mbps, montant {up} Mbps, ping {ms} ms, note de bufferbloat {grade}, mesurés dans le navigateur. Testez votre ligne.",

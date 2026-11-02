@@ -68,6 +68,11 @@ h2 { font-size: 15px; font-weight: 700; }
 .ring-bg { stroke: var(--ink-soft); }
 .ring-fg { stroke: var(--ink); stroke-dasharray: 0 100; stroke-linecap: round; transition: stroke-dasharray .3s linear; }
 .go[data-st="idle"] .ring-fg { opacity: 0; }   /* a round cap at zero length would show as a dot */
+/* share, right under the start button: outlined in the accent; its place is kept while there is nothing to share */
+.mid { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.share-go { height: 34px; padding: 0 16px; border-color: var(--ink); color: var(--ink); background: transparent; font-weight: 600; }
+.share-go:hover { background: var(--ink-soft); }
+.share-go:disabled { visibility: hidden; }
 .go-t { position: relative; font-size: 21px; font-weight: 700; letter-spacing: -.01em; }
 .go-s { position: relative; font-size: 11.5px; opacity: .85; max-width: 112px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .go[data-st="run"] { background: var(--panel); color: var(--fg); box-shadow: 0 0 0 1px var(--line); }
@@ -171,9 +176,6 @@ details.rblk > summary { cursor: pointer; font-size: 13px; color: var(--ink); }
 .codebox { position: relative; }
 .codebox textarea { width: 100%; resize: vertical; font: 12px/1.5 var(--f-num); background: var(--soft); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; white-space: pre; }
 .codebox .btn { position: absolute; top: 6px; right: 6px; height: 28px; padding: 0 10px; font-size: 12px; }
-/* a shared result: a banner above the hero, with the way back to one's own test */
-.shared { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 10px 12px 10px 16px; border-radius: var(--r); background: var(--ink-soft); border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent); font-size: 13.5px; }
-.shared .btn { height: 32px; font-size: 13px; }
 
 @media (prefers-reduced-motion: reduce) { .skl, .net .dot, .ring-fg { animation: none !important; transition: none !important; } }
 @media (max-width: 720px) {
@@ -182,7 +184,8 @@ details.rblk > summary { cursor: pointer; font-size: 13px; color: var(--ink); }
   .net-v { flex-basis: 100%; white-space: normal; overflow-wrap: anywhere; }   /* the address must stay visible: wrap, don't cut */
   /* the two speeds side by side, the button under them */
   .dial { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px 10px; }
-  .go { grid-row: 2; grid-column: 1 / -1; justify-self: center; width: 116px; height: 116px; margin: 4px 0; }
+  .mid { grid-row: 2; grid-column: 1 / -1; justify-self: center; gap: 16px; margin: 4px 0; }
+  .go { width: 116px; height: 116px; }
   .g { height: 132px; padding: 12px 14px; }
   .spark { height: 36%; }
   .g-v { font-size: 36px; }
@@ -190,8 +193,8 @@ details.rblk > summary { cursor: pointer; font-size: 13px; color: var(--ink); }
   .bar { margin: 0 -16px; padding: 10px 16px 12px; flex-wrap: wrap; row-gap: 8px; }
   .prog-t { flex: 1 0 100%; order: -1; }
   .auto { margin-right: auto; }
-  #rulesBtn span, #histBtn span, #shareBtn span { display: none; }
-  #rulesBtn, #histBtn, #shareBtn { width: 34px; padding: 0; }
+  #rulesBtn span, #histBtn span { display: none; }
+  #rulesBtn, #histBtn { width: 34px; padding: 0; }
   .htbl .hr { grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, .8fr)); }
   .htbl .hr > :last-child { display: none; }
   .note-l { min-height: 4.8em; }
@@ -204,7 +207,7 @@ details.rblk > summary { cursor: pointer; font-size: 13px; color: var(--ink); }
 /* embedded in the Connection Checkup (check.1ms.dog, ?embed=checkup; app.js sets data-embed once the parent checks
    out): only the two speeds, the latencies, the grade and the progress, compact; the test starts by itself */
 html[data-embed] .app { padding: 0; gap: 0; }
-html[data-embed] .top, html[data-embed] .shared, html[data-embed] .hero h1, html[data-embed] .src, html[data-embed] .net, html[data-embed] .g-p,
+html[data-embed] .top, html[data-embed] .share-go, html[data-embed] .hero h1, html[data-embed] .src, html[data-embed] .net, html[data-embed] .g-p,
 html[data-embed] .sum, html[data-embed] .rel, html[data-embed] .bar > :not(.prog-t), html[data-embed] [data-ms-more], html[data-embed] .scrim { display: none !important; }
 html[data-embed] .hero { padding: 12px 14px 0; gap: 12px; }
 html[data-embed] .go { pointer-events: none; width: 104px; height: 104px; margin: 0; }

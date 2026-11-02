@@ -68,8 +68,6 @@ export default {
   rules_after: "Reload your proxy's config, then test again. To measure a proxy node instead, leave the rules out.",
   copy: "Copy", copied: "Copied",
   share: "Share",
-  test_mine: "Test my own line",
-  shared_on: "A shared result{where} · {date}", shared_where: " from {where}",
   share_text: "My internet: ↓ {down} Mbps ↑ {up} Mbps, ping {ms} ms, bufferbloat {grade}. What's yours?",
   share_title: "My internet: ↓ {down} Mbps ↑ {up} Mbps · ping {ms} ms · bufferbloat {grade} · Speed Test",
   share_desc: "Download {down} Mbps, upload {up} Mbps, ping {ms} ms, bufferbloat grade {grade}, measured in the browser. Test your own line.",

@@ -68,8 +68,6 @@ export default {
   rules_after: "加好後重新載入代理設定，再測一次。想測代理節點的速度，就不要加這些規則。",
   copy: "複製", copied: "已複製",
   share: "分享",
-  test_mine: "測我自己的網速",
-  shared_on: "這是一份{where}分享的測試結果 · {date}", shared_where: "來自{where}",
   share_text: "我的網速：下載 {down} Mbps，上傳 {up} Mbps，延遲 {ms} 毫秒，Bufferbloat {grade}。你的呢？",
   share_title: "我的網速：下載 {down} Mbps，上傳 {up} Mbps · 延遲 {ms} 毫秒 · Bufferbloat {grade} · 網速測試",
   share_desc: "下載 {down} Mbps，上傳 {up} Mbps，延遲 {ms} 毫秒，Bufferbloat 等級 {grade}，在瀏覽器裡實測。測測你的網速。",

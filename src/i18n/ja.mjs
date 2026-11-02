@@ -68,8 +68,6 @@ export default {
   rules_after: "プロキシの設定を再読み込みして、もう一度測定してください。プロキシノードの速度を測りたいときは、ルールを入れないでください。",
   copy: "コピー", copied: "コピーしました",
   share: "共有",
-  test_mine: "自分の回線を測る",
-  shared_on: "共有された結果{where} · {date}", shared_where: "（{where}）",
   share_text: "私の回線：下り {down} Mbps、上り {up} Mbps、Ping {ms} ms、バッファーブロート {grade}。あなたは？",
   share_title: "私の回線：下り {down} Mbps・上り {up} Mbps・Ping {ms} ms・バッファーブロート {grade} · スピードテスト",
   share_desc: "下り {down} Mbps、上り {up} Mbps、Ping {ms} ms、バッファーブロート評価 {grade} をブラウザで実測。あなたの回線も測ってみよう。",

@@ -238,7 +238,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   });
 
   /* ---------- the test ---------- */
-  let RUN = null, LAST = null, META = null;
+  let RUN = null, LAST = null, META = null, RECV = null;   // RECV: the shared-result banner, while one shows
   const R = {};                       // this run's numbers: down, up, idle, jit, ldown, lup, jdown, jup
   const TITLE = document.title;
   const phaseW = { ping: .12, down: .44, up: .44 };
@@ -266,7 +266,8 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
 
   async function start() {
     if (RUN) { RUN.abort(); return; }
-    if (!$("#shared").hidden) { $("#shared").hidden = true; history.replaceState(null, "", D.paths[D.lang]); }
+    // someone else's result gives way to the visitor's own (no compare mode here: the banner goes with it)
+    if (RECV) { RECV.remove(); RECV = null; history.replaceState(null, "", D.paths[D.lang]); }
     const ctl = RUN = new AbortController(), sig = ctl.signal, t0 = performance.now();
     reset(); showPrev(HIST[0]); setGo("run", t("ph_ping"));
     // every tile says where it stands while the test runs
@@ -339,7 +340,6 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     }
   }
   $("#go").onclick = start;
-  $("#testMine").onclick = () => { if (!RUN) start(); };
 
   const autoBox = $("#auto");
   autoBox.checked = store.get(K.auto) === "1";
@@ -432,17 +432,17 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     }).open();
   };
 
-  /* ---------- a shared result ---------- */
-  function showShared(S) {
+  /* ---------- a shared result: the 1ms.dog banner above it (/assets/share/), whose button runs the visitor's own test ---------- */
+  async function showShared(S) {
     reset(); showPrev(null);                // the visitor's own last result says nothing about someone else's
     gauge("down", S.down); gauge("up", S.up);
     showLat(S);
     showUses(S);
     $("#noteL").innerHTML = gradeLine(S) || "&nbsp;";
-    $("#sharedTxt").textContent = t("shared_on", { where: S.cc ? t("shared_where", { where: country(S.cc) }) : "", date: new Date(S.ts).toLocaleString(D.lang, { dateStyle: "medium", timeStyle: "short" }) });
-    $("#shared").hidden = false;
     LAST = S; $("#shareBtn").disabled = false;
     setGo("idle");
+    const { received } = await import("/assets/share/share.js");
+    if (!RUN && LAST === S) RECV = received({ lang: D.lang, ts: S.ts, at: $(".hero"), test: () => { if (!RUN) start(); } });
   }
 
   /* ---------- the result for the Connection Checkup ---------- */

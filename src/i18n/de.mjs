@@ -68,8 +68,6 @@ export default {
   rules_after: "Proxy-Konfiguration neu laden und erneut testen. Um einen Proxy-Knoten zu messen, die Regeln weglassen.",
   copy: "Kopieren", copied: "Kopiert",
   share: "Teilen",
-  test_mine: "Meine Leitung testen",
-  shared_on: "Ein geteiltes Ergebnis{where} · {date}", shared_where: " aus {where}",
   share_text: "Mein Internet: ↓ {down} Mbit/s ↑ {up} Mbit/s, Ping {ms} ms, Bufferbloat {grade}. Und deins?",
   share_title: "Mein Internet: ↓ {down} Mbit/s ↑ {up} Mbit/s · Ping {ms} ms · Bufferbloat {grade} · Speedtest",
   share_desc: "Download {down} Mbit/s, Upload {up} Mbit/s, Ping {ms} ms, Bufferbloat-Note {grade}, im Browser gemessen. Miss deine eigene Leitung.",

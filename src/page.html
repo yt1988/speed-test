@@ -33,7 +33,6 @@
   </header>
 
   <main>
-    <div class="shared" id="shared" hidden><span id="sharedTxt"></span><button class="btn pri" id="testMine" type="button" data-i="test_mine"></button></div>
     <section class="hero card">
       <h1>{{h1}}</h1>
       <!-- where the test runs: Cloudflare, at its data center nearest to the visitor -->
@@ -51,10 +50,14 @@
           <span class="g-n"><b class="g-v">–</b><span class="g-u">Mbps</span></span>
           <span class="g-p"></span>
         </div>
+        <!-- the start button, and under it, once there is a result, the way to share it -->
+        <div class="mid">
         <button class="go" id="go" type="button">
           <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="ring-bg" cx="50" cy="50" r="47"/><circle class="ring-fg" id="ring" cx="50" cy="50" r="47" pathLength="100"/></svg>
           <span class="go-t" id="goT" data-i="start"></span><span class="go-s" id="goS">&nbsp;</span>
         </button>
+        <button class="btn share-go" id="shareBtn" type="button" aria-haspopup="dialog" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2M5 5l3-3 3 3M3 9v4.5h10V9"/></svg><span data-i="share"></span></button>
+        </div>
         <div class="g" id="gUp" data-g="up">
           <canvas class="spark" aria-hidden="true"></canvas>
           <span class="g-k"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14V3M3.5 7.5 8 3l4.5 4.5"/></svg><span data-i="k_up"></span></span>
@@ -80,7 +83,6 @@
         <label class="auto"><input type="checkbox" id="auto"><span class="sw" aria-hidden="true"></span><span data-i="auto_label"></span></label>
         <button class="btn sm" id="histBtn" type="button" aria-haspopup="dialog" aria-controls="hist"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.6V8l2.3 1.5"/></svg><span data-i="hist_btn"></span></button>
         <button class="btn sm" id="rulesBtn" type="button" aria-haspopup="dialog" aria-controls="rules"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h9M8 4.5 11.5 8 8 11.5M14 3v10"/></svg><span data-i="rules_btn"></span></button>
-        <button class="btn sm" id="shareBtn" type="button" aria-haspopup="dialog" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2M5 5l3-3 3 3M3 9v4.5h10V9"/></svg><span data-i="share"></span></button>
       </div>
     </section>
 

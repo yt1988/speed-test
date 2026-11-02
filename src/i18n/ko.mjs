@@ -68,8 +68,6 @@ export default {
   rules_after: "프록시 설정을 다시 불러온 뒤 다시 측정하세요. 프록시 노드 속도를 재려면 규칙을 넣지 마세요.",
   copy: "복사", copied: "복사됨",
   share: "공유",
-  test_mine: "내 회선 측정하기",
-  shared_on: "공유된 결과{where} · {date}", shared_where: " ({where})",
   share_text: "내 인터넷: 다운로드 {down} Mbps, 업로드 {up} Mbps, 핑 {ms} ms, 버퍼블로트 {grade}. 당신은요?",
   share_title: "내 인터넷: 다운로드 {down} Mbps · 업로드 {up} Mbps · 핑 {ms} ms · 버퍼블로트 {grade} · 인터넷 속도 측정",
   share_desc: "다운로드 {down} Mbps, 업로드 {up} Mbps, 핑 {ms} ms, 버퍼블로트 등급 {grade}. 브라우저에서 직접 측정했습니다. 내 회선도 재 보세요.",

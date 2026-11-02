@@ -68,8 +68,6 @@ export default {
   rules_after: "Recarregue a configuração do proxy e teste de novo. Para medir um nó do proxy, não adicione as regras.",
   copy: "Copiar", copied: "Copiado",
   share: "Compartilhar",
-  test_mine: "Testar minha conexão",
-  shared_on: "Um resultado compartilhado{where} · {date}", shared_where: " de {where}",
   share_text: "Minha internet: ↓ {down} Mbps ↑ {up} Mbps, ping {ms} ms, bufferbloat {grade}. E a sua?",
   share_title: "Minha internet: ↓ {down} Mbps ↑ {up} Mbps · ping {ms} ms · bufferbloat {grade} · Teste de velocidade",
   share_desc: "Download {down} Mbps, upload {up} Mbps, ping {ms} ms, nota de bufferbloat {grade}, medidos no navegador. Teste a sua linha.",
