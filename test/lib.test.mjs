@@ -2,7 +2,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { quantile, median, jitter, mbps, serverTime, l4, meta, nextSize, rateNow, steady, settled } from "../src/measure.mjs";
-import { fromMeta, fromTrace, reasons } from "../src/net.mjs";
+import { fromMeta, fromMe, fromTrace, reasons } from "../src/net.mjs";
+import worker from "../src/worker.js";
 import { uses, bloat, grade, gradeKey, gradeTier, fmtMbps, fmtMs, speedTier } from "../src/verdict.mjs";
 import { encode, decode, sharePath } from "../src/share.mjs";
 import { items, ruleSets, inline, remote, FORMATS } from "../src/rules.mjs";
@@ -58,6 +59,9 @@ test("the exit, and signs it isn't the visitor's own line", () => {
     colo: { iata: "HKG", city: "Hong Kong", cca2: "HK" } });
   assert.deepEqual(e, { ip: "114.254.73.157", cc: "CN", city: "Beijing", asn: 4808, org: "China Unicom Beijing province network", colo: "HKG", coloCity: "Hong Kong", coloCc: "HK", http: "" });
   assert.equal(fromMeta({}), null);
+  assert.deepEqual(fromMe({ ip: "1.2.3.4", family: 4, country: "JP", city: "Tokyo", asn: 2516, org: "KDDI", colo: "NRT", http: "HTTP/2", region: null }),
+    { ip: "1.2.3.4", cc: "JP", city: "Tokyo", asn: 2516, org: "KDDI", colo: "NRT", coloCity: "", coloCc: "", http: "HTTP/2" });
+  assert.equal(fromMe(null), null);
   assert.deepEqual(fromTrace("fl=1\nip=1.2.3.4\nloc=XX\ncolo=NRT\n"), { ip: "1.2.3.4", cc: "", city: "", asn: null, org: "", colo: "NRT", coloCity: "", coloCc: "", http: "" });
   assert.deepEqual(reasons(e, { tz: "Asia/Shanghai" }), [], "home line in China");
   assert.deepEqual(reasons({ ...e, cc: "HK" }, { tz: "Asia/Shanghai" }), [], "Hong Kong counts as China's");
@@ -145,3 +149,8 @@ test("history: only well-formed records, newest first, at most 20; change and ev
   assert.ok(isPeak(new Date(2026, 10, 1, 21))); assert.ok(!isPeak(new Date(2026, 10, 1, 23)));
 });
 
+
+test("a result link whose code can't be read is a 404, not a redirect", async () => {
+  const env = { ASSETS: { fetch: () => { throw new Error("not reached"); } } };
+  for (const p of ["/r/zz", "/zh-cn/r/zz", "/r/2~x"]) assert.equal((await worker.fetch(new Request("https://speed.1ms.dog" + p), env)).status, 404, p);
+});

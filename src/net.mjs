@@ -23,6 +23,11 @@ export function fromMeta(j) {
   return { ip: j.clientIp, cc: j.country || "", city: j.city || "", asn: j.asn || null, org: j.asOrganization || "",
     colo: c.iata || "", coloCity: c.city || "", coloCc: c.cca2 || "", http: j.httpProtocol || "" };
 }
+// 1ms-shell's /_ms/me: what Cloudflare knows of this connection to the page's own host (a 404 when self-hosted)
+export function fromMe(j) {
+  if (!j || !j.ip) return null;
+  return { ip: j.ip, cc: j.country || "", city: j.city || "", asn: j.asn || null, org: j.org || "", colo: j.colo || "", coloCity: "", coloCc: "", http: j.http || "" };
+}
 export function fromTrace(text) {
   const d = Object.fromEntries(String(text || "").trim().split("\n").map(l => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1)]));
   return d.ip ? { ip: d.ip, cc: d.loc && d.loc !== "XX" ? d.loc : "", city: "", asn: null, org: "", colo: d.colo || "", coloCity: "", coloCc: "", http: d.http || "" } : null;

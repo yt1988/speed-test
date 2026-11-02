@@ -2,7 +2,7 @@
 // Order: idle latency, download, upload (src/measure.mjs), each shown live in the hero's fixed slots; at the end what
 // the line is good for and the bufferbloat grade (how much latency load adds). Strings: window.L1MS.
 import { ping, download, upload, median, jitter, exit } from "./measure.mjs";
-import { reasons } from "./net.mjs";
+import { reasons, fromMe } from "./net.mjs";
 import { fmtMbps, fmtMs, msTier, speedTier, bloat, grade, gradeKey, gradeTier, uses, USES } from "./verdict.mjs";
 import { FORMATS, FORMAT_NAMES, items as ruleItems, inline as ruleInline, remote as ruleRemote } from "./rules.mjs";
 import { parse as parseHist, add as addHist, change, isPeak } from "./history.mjs";
@@ -178,8 +178,11 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   document.addEventListener("error", e => { if (e.target.matches && e.target.matches("img.flag")) e.target.remove(); }, true);
 
   /* ---------- which way the test goes: asked as the page loads, before any test ---------- */
-  // The exit Cloudflare sees (/meta). The device's time zone in another country than the exit, or a data-center exit,
-  // means the test isn't measuring the visitor's own line (src/net.mjs); the direct rules fix that.
+  // The exit Cloudflare sees: first from 1ms-shell's /_ms/me on this page's host, then from the test's own host (/meta,
+  // which the test reaches anyway). The test host's answer wins when its address differs (a proxy that splits by
+  // host, or the direct rules in use: what counts is the way the test goes) and adds its data center's city.
+  // The device's time zone in another country than the exit, or a data-center exit, means the test isn't measuring
+  // the visitor's own line (src/net.mjs); the direct rules fix that.
   const IPQS = document.querySelector('meta[name="ipqs"]'), EGRESS = document.querySelector('meta[name="egress"]');
   const TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ""; } })();
   const NET = { cf: null, cfDone: false, reasons: [] };
@@ -226,7 +229,13 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   }
   document.addEventListener("click", e => { if (e.target.closest && e.target.closest("[data-rules]")) $("#rulesBtn").click(); });
   renderRel();
-  exit().then(e => { NET.cf = e; NET.cfDone = true; renderNet(); });
+  const ME = fetch("/_ms/me", { cache: "no-store", signal: AbortSignal.timeout(6000) }).then(r => r.ok ? r.json() : null).then(fromMe).catch(() => null);
+  ME.then(e => { if (e && !NET.cfDone) { NET.cf = e; NET.cfDone = true; renderNet(); } });
+  exit().then(async c => {
+    const m = await ME;
+    NET.cf = c && (!m || c.ip !== m.ip) ? c : m && c ? { ...m, colo: c.colo || m.colo, coloCity: c.coloCity, coloCc: c.coloCc } : m;
+    NET.cfDone = true; renderNet();
+  });
 
   /* ---------- the test ---------- */
   let RUN = null, LAST = null, META = null;

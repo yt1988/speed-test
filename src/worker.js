@@ -2,6 +2,7 @@
 //   /r/<code>, /<lang>/r/<code>   a shared result: that language's page with the speeds in its title and description
 //                         (what chat apps show as the link's preview), not indexed; the page itself reads the code and
 //                         shows the result (src/share.mjs)
+//                         A code it can't read is a 404 like any other path.
 //   anything else         a bare 404; 1ms-shell puts the shared 1ms.dog 404 page in front of it
 
 import { decode, sharePath } from "./share.mjs";
@@ -26,7 +27,8 @@ export default {
     const url = new URL(req.url);
     if (req.method !== "GET" && req.method !== "HEAD") return new Response("Method not allowed\n", { status: 405 });
     const sp = sharePath(url.pathname);
-    if (sp && STR[sp.slug] && env.ASSETS) return shared(req, env, url, sp);
+    const r = sp && STR[sp.slug] && env.ASSETS && decode(sp.code);
+    if (r) return shared(req, env, url, sp.slug, r);
     return new Response(req.method === "HEAD" ? null : "Not found\n", {
       status: 404,
       headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=0, must-revalidate" },
@@ -35,11 +37,9 @@ export default {
 };
 
 // A shared result: the language's page as it is, with the title, description and their Open Graph and Twitter copies
-// carrying the speeds. A code this page can't read goes to the language's page instead.
-async function shared(req, env, url, { slug, code }) {
+// carrying the speeds.
+async function shared(req, env, url, slug, r) {
   const home = "/" + (slug ? slug + "/" : "");
-  const r = decode(code);
-  if (!r) return Response.redirect(new URL(home, url).toString(), 302);
   const S = STR[slug], v = { down: fmtMbps(r.down), up: fmtMbps(r.up), ms: fmtMs(r.idle), grade: grade(r) || "–" };
   const title = fill(S.share_title, v), desc = fill(S.share_desc, v);
   const page = await env.ASSETS.fetch(new Request(new URL(home, url), { headers: req.headers }));

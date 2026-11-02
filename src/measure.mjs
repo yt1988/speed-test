@@ -112,12 +112,21 @@ async function probe(signal) {
   return { ms: Math.max(0.1, ms - serverTime(st)), l4: l4(st), headers: r.headers };
 }
 
-// Idle latency: one request to open the connection (not counted), then `n` one after another
+// `signal`, or `ms` passing: an empty request that takes that long means the server can't be reached from here
+function within(signal, ms) {
+  const c = new AbortController(), t = setTimeout(() => c.abort(new DOMException("", "TimeoutError")), ms);
+  signal && signal.addEventListener("abort", () => c.abort(), { once: true });
+  return { signal: c.signal, done: () => clearTimeout(t) };
+}
+const probeWithin = async (signal, ms) => { const w = within(signal, ms); try { return await probe(w.signal); } finally { w.done(); } };
+
+// Idle latency: one request to open the connection (not counted), then `n` one after another. Each gives up after
+// 10 s (the first after 10 s too, so a blocked server fails the test in seconds, not never).
 export async function ping({ n = 16, signal, onSample } = {}) {
-  const first = await probe(signal);
+  const first = await probeWithin(signal, 10000);
   const out = [], tcp = [];
   for (let i = 0; i < n && !signal?.aborted; i++) {
-    const p = await probe(signal);
+    const p = await probeWithin(signal, 10000);
     out.push(p.ms); if (p.l4 && p.l4.minRtt) tcp.push(p.l4.minRtt);
     onSample && onSample(p.ms, i + 1, n);
   }
