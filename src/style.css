@@ -200,3 +200,12 @@ details.rblk > summary { cursor: pointer; font-size: 13px; color: var(--ink); }
   .help-nav { display: none; }
   .help-b .help-pick { display: flex; }
 }
+
+/* embedded in the Connection Checkup (check.1ms.dog, ?embed=checkup; app.js sets data-embed once the parent checks
+   out): only the two speeds, the latencies, the grade and the progress, compact; the test starts by itself */
+html[data-embed] .app { padding: 0; gap: 0; }
+html[data-embed] .top, html[data-embed] .shared, html[data-embed] .hero h1, html[data-embed] .src, html[data-embed] .net, html[data-embed] .g-p,
+html[data-embed] .sum, html[data-embed] .rel, html[data-embed] .bar > :not(.prog-t), html[data-embed] [data-ms-more], html[data-embed] .scrim { display: none !important; }
+html[data-embed] .hero { padding: 12px 14px 0; gap: 12px; }
+html[data-embed] .go { pointer-events: none; width: 104px; height: 104px; margin: 0; }
+html[data-embed] .bar { margin: 0 -14px; padding: 8px 14px 10px; }

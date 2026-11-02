@@ -18,6 +18,24 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
   const K = { theme: "speedtest:theme", lang: "speedtest:lang", rules: "speedtest:rules", auto: "speedtest:auto", hist: "speedtest:hist" };
 
+  /* ---------- embedded in the Connection Checkup (1ms-shell docs/checkup.md) ---------- */
+  // ?embed=checkup, and only when the page embedding this one is the checkup the shell announces (<meta name="check">);
+  // otherwise the parameter is ignored. Messages go to that origin only.
+  const EMBED = (() => {
+    const m = document.querySelector('meta[name="check"]');
+    if (!m || new URLSearchParams(location.search).get("embed") !== "checkup" || parent === window) return "";
+    try { const o = new URL(m.content).origin; return new URL(document.referrer).origin === o ? o : ""; } catch (e) { return ""; }
+  })();
+  const post = msg => { if (EMBED) parent.postMessage({ ms: "checkup", v: 1, tool: "speed", ...msg }, EMBED); };
+  if (EMBED) {
+    document.documentElement.dataset.embed = "checkup";
+    let lastH = 0;
+    new ResizeObserver(() => {
+      const h = Math.ceil($(".app").getBoundingClientRect().height);
+      if (h !== lastH) post({ type: "size", height: lastH = h });
+    }).observe($(".app"));
+  }
+
   /* ---------- theme and language (synced across the 1ms.dog tools) ---------- */
   const thBtn = $("#theme"), TH = ["system", "light", "dark"];
   const applyTheme = th => {
@@ -216,8 +234,10 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   const phaseW = { ping: .12, down: .44, up: .44 };
   const ring = f => { $("#ring").style.strokeDasharray = `${(Math.min(1, f) * 100).toFixed(1)} 100`; };
   function progress(phase, frac, label) {
-    ring({ ping: 0, down: phaseW.ping, up: phaseW.ping + phaseW.down }[phase] + phaseW[phase] * Math.min(1, frac));
+    const f = { ping: 0, down: phaseW.ping, up: phaseW.ping + phaseW.down }[phase] + phaseW[phase] * Math.min(1, frac);
+    ring(f);
     $("#progTxt").textContent = label;
+    post({ type: "progress", done: Math.round(f * 100), total: 100, text: label });
   }
   function setGo(state, sub) {
     $("#go").dataset.st = state;
@@ -296,10 +316,14 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
       $("#shareBtn").disabled = false;
       saveRun({ ts: LAST.ts, ...R, ip: (NET.cf && NET.cf.ip) || META.ip || "", cc: cc || "", org: (NET.cf && NET.cf.org) || "", peak });
       setGo("done", t("used", { mb: mb(bytes) }));
+      if (EMBED) {
+        post({ type: "progress", done: 100, total: 100, text: $("#progTxt").textContent });
+        post(checkup(cc));
+      }
     } catch (e) {
       gauge("down", R.down); gauge("up", R.up); showLat(R); ring(0); document.title = TITLE;
       if (sig.aborted) { $("#progTxt").textContent = t("stopped"); setGo("idle"); }
-      else { $("#progTxt").innerHTML = "&nbsp;"; $("#noteL").textContent = t("e_fail"); setGo("idle"); }
+      else { $("#progTxt").innerHTML = "&nbsp;"; $("#noteL").textContent = t("e_fail"); setGo("idle"); post({ type: "error", text: t("e_fail") }); }
     } finally {
       if (RUN === ctl) RUN = null;
     }
@@ -411,8 +435,39 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     setGo("idle");
   }
 
+  /* ---------- the result for the Connection Checkup ---------- */
+  // the grade line as the headline; the speeds, latency and grade; what needs attention (a test that isn't measuring the
+  // visitor's own line, what the line struggles with), worst first; the facts its cross-tool rules read; the share
+  // link without the country and data center, as the share box starts
+  function checkup(cc) {
+    const plain = h => { const d = document.createElement("div"); d.innerHTML = h; return d.textContent; };
+    const g = grade(R), u = uses(R), n1 = v => v == null ? undefined : Math.round(v * 10) / 10;
+    const good = USES.filter(k => u[k] === "good").map(k => t("u_" + k));
+    const lv = { bad: 0, warn: 1, ok: 2 };
+    const findings = [
+      ...NET.reasons.map(r => ({ level: "warn", text: plain(reasonText(r)) })),
+      ...(cc === "CN" && !NET.reasons.length ? [{ level: "warn", text: t("cn_note") }] : []),
+      ...USES.filter(k => u[k] === "poor" || u[k] === "ok").map(k => ({ level: u[k] === "poor" ? "bad" : "warn", text: t("u_" + k) + " · " + t("lv_" + u[k]) })),
+      ...(good.length ? [{ level: "ok", text: new Intl.ListFormat(D.lang).format(good) + " · " + t("lv_good") }] : []),
+    ].sort((a, b) => lv[a.level] - lv[b.level]).slice(0, 4);
+    const facts = { down: n1(R.down), up: n1(R.up), idle: n1(R.idle), jitter: n1(R.jit), ldown: n1(R.ldown), lup: n1(R.lup), bloat: g || undefined };
+    for (const k in facts) if (facts[k] === undefined) delete facts[k];
+    return {
+      type: "result", lang: D.lang,
+      path: D.paths[D.lang] + "r/" + encodeShare({ ...LAST, cc: "", colo: "" }),
+      grade: g || null, score: null,
+      headline: plain(gradeLine(R)),
+      stats: [
+        { label: t("k_down"), value: fmtMbps(R.down) + " Mbps" }, { label: t("k_up"), value: fmtMbps(R.up) + " Mbps" },
+        { label: t("k_idle"), value: fmtMs(R.idle) + " ms" }, { label: t("k_grade"), value: g || "–" },
+      ],
+      findings, facts,
+    };
+  }
+
   setGo("idle");
   const SP = sharePath(location.pathname), SHARED = SP && decodeShare(SP.code);
-  if (SHARED) showShared(SHARED);
+  if (EMBED) start();
+  else if (SHARED) showShared(SHARED);
   else if (autoBox.checked) start();
 })();
