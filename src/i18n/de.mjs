@@ -32,7 +32,7 @@ export default {
   r_dc: "Dein Ausgang ist {org}, ein Rechenzentrumsnetz: ein Proxy, VPN oder Cloud-Server.",
   r_fix: "Um deine eigene Leitung zu messen, füge die {rules} hinzu.",
   egress_link: "Welche IP jede Website sieht",
-  rel_m2c: "Latenz zu AWS, Google Cloud und anderen Clouds", rel_dns: "Seiten laden langsam? Finde den schnellsten DNS für dich",
+  rel_check: "Vollständigen Check starten", rel_m2c: "Latenz zu AWS, Google Cloud und anderen Clouds", rel_dns: "Seiten laden langsam? Finde den schnellsten DNS für dich",
   rel_v6: "Dieser Test lief über IPv4. Hat dein Netz IPv6?", asn_tip: "AS{n}: wer dieses Netz betreibt",
   hint_idle: "Auf Start drücken: etwa 20–30 Sekunden. Das Datenvolumen wächst mit der Geschwindigkeit (siehe Hilfe).",
   src_cf: "Testserver: Cloudflare",

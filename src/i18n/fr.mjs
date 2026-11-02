@@ -32,7 +32,7 @@ export default {
   r_dc: "Votre sortie est {org}, un réseau de centre de données : proxy, VPN ou serveur cloud.",
   r_fix: "Pour tester votre ligne, ajoutez les {rules}.",
   egress_link: "Quelle IP voit chaque site",
-  rel_m2c: "Latence vers AWS, Google Cloud et autres clouds", rel_dns: "Pages lentes à s'ouvrir ? Voyez quel DNS est le plus rapide pour vous",
+  rel_check: "Lancer un bilan complet", rel_m2c: "Latence vers AWS, Google Cloud et autres clouds", rel_dns: "Pages lentes à s'ouvrir ? Voyez quel DNS est le plus rapide pour vous",
   rel_v6: "Ce test est passé par IPv4. Votre réseau a-t-il IPv6 ?", asn_tip: "AS{n} : qui exploite ce réseau",
   hint_idle: "Cliquez sur Lancer : environ 20 à 30 secondes. Les données consommées augmentent avec le débit (voir l'aide).",
   src_cf: "Serveurs de test : Cloudflare",

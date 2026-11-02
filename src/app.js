@@ -189,14 +189,15 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   // a data value (an IP, a network) linked to its page on another tool: no icon, a dotted underline, where it goes in the title
   const dlink = (href, html, title, cls = "") => `<a class="dv${cls ? " " + cls : ""}" href="${esc(href)}" target="_blank" rel="noopener" title="${esc(title)}">${html}</a>`;
   const ipLink = ip => IPQS ? dlink(IPQS.content.replace(/\/+$/, "") + D.paths[D.lang] + "?ip=" + encodeURIComponent(ip), esc(ip), t("ipqs_tip"), "ip") : `<span class="m">${esc(ip)}</span>`;
-  // the other 1ms.dog tools, each linked only when the page announces it: Me2Cloud (latency to the other clouds), the
-  // DNS test, ASN Lookup (the exit's network, /AS<n>), the IPv6 test (when the test went over IPv4)
+  // the other 1ms.dog tools, each linked only when the page announces it: the full checkup (check.1ms.dog; not in
+  // embed mode), Me2Cloud (latency to the other clouds), the DNS test, ASN Lookup (the exit's network, /AS<n>), the
+  // IPv6 test (when the test went over IPv4)
   const tool = name => { const m = document.querySelector(`meta[name="${name}"]`); return m ? m.content.replace(/\/+$/, "") + D.paths[D.lang] : ""; };
-  const M2C = tool("m2c"), DNS = tool("dns"), ASN = tool("asn"), IPV6 = tool("ipv6");
+  const CHECK = tool("check"), M2C = tool("m2c"), DNS = tool("dns"), ASN = tool("asn"), IPV6 = tool("ipv6");
   function renderRel() {
     const e = NET.cf;
     const v4 = e && e.ip && !e.ip.includes(":");
-    const links = [M2C && xlink(M2C, esc(t("rel_m2c"))), DNS && xlink(DNS, esc(t("rel_dns"))), IPV6 && v4 && xlink(IPV6, esc(t("rel_v6")))].filter(Boolean);
+    const links = [CHECK && !EMBED && xlink(CHECK, esc(t("rel_check"))), M2C && xlink(M2C, esc(t("rel_m2c"))), DNS && xlink(DNS, esc(t("rel_dns"))), IPV6 && v4 && xlink(IPV6, esc(t("rel_v6")))].filter(Boolean);
     $("#rel").innerHTML = links.join("");
     $("#rel").hidden = !links.length;
   }
