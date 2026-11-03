@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <script>(function(){var d=document.documentElement,th=null,s=null;try{th=localStorage.getItem("speedtest:theme");s=localStorage.getItem("speedtest:lang")}catch(e){}if(th==="light"||th==="dark")d.setAttribute("data-theme",th);if(!d.hasAttribute("data-root"))return;var P=JSON.parse(d.getAttribute("data-paths")||"{}"),l=null;try{var q=new URLSearchParams(location.search).get("lang");if(P[q])l=q}catch(e){}if(!l&&P[s])l=s;for(var ls=navigator.languages||[navigator.language||"en"],i=0;!l&&!s&&i<ls.length;i++){var x=String(ls[i]).toLowerCase(),b=x.split("-")[0];l=b==="zh"?(/tw|hk|mo|hant/.test(x)?"zh-TW":"zh-CN"):P[b]?b:null}if(l&&l!=="en")location.replace(P[l]+location.search+location.hash)})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>網速測試：線上測下載、上傳、延遲抖動和 Bufferbloat（寬頻測速）· 網速測試</title>
-<meta name="description" content="免費線上網速測試，直接在瀏覽器裡測下載速度、上傳速度，以及閒置和滿載時的延遲、抖動，並給出 A+ 到 F 的 Bufferbloat（緩衝膨脹）等級，從你的網路測到最近的 Cloudflare 節點。不用安裝軟體，沒有廣告，不保存資料。">
-<meta name="keywords" content="網速測試, 測網速, 寬頻測速, 網路延遲測試, 網路抖動測試, 延遲抖動測試, bufferbloat 測試, 緩衝膨脹, ping 測試, WiFi 測速">
+<title>網路測速：寬頻測速，測下載、上傳、延遲、抖動與 Bufferbloat · 網速測試</title>
+<meta name="description" content="免費線上網路測速：直接在瀏覽器裡測下載和上傳速度、延遲和抖動，再看網路一忙延遲會增加多少（Bufferbloat，以 A+ 到 F 評級）。連到離你最近的 Cloudflare 節點。不用安裝軟體、沒有廣告，本站不保存你的測試結果。">
+<meta name="keywords" content="網速測試, 網路測速, 寬頻測速, 測網速, 網路延遲測試, 網路抖動測試, ping 測試, bufferbloat 測試, 滿載延遲, WiFi 測速">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="application-name" content="網速測試">
 <meta name="theme-color" content="#f6f6f7" media="(prefers-color-scheme: light)">
@@ -29,19 +29,19 @@
 <link rel="preconnect" href="https://speed.cloudflare.com" crossorigin>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="1ms.dog">
-<meta property="og:title" content="網速測試：線上測下載、上傳、延遲抖動和 Bufferbloat（寬頻測速）· 網速測試">
-<meta property="og:description" content="下載、上傳、延遲和緩衝膨脹，從你自己的網路實測">
+<meta property="og:title" content="網路測速：寬頻測速，測下載、上傳、延遲、抖動與 Bufferbloat · 網速測試">
+<meta property="og:description" content="下載、上傳、延遲，網路一忙會不會卡，一次測清楚">
 <meta property="og:url" content="https://speed.1ms.dog/zh-tw/">
 <meta property="og:locale" content="zh_TW">
 <meta property="og:image" content="https://speed.1ms.dog/og/zh-tw.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="網速測試：線上測下載、上傳、延遲抖動和 Bufferbloat（寬頻測速）· 網速測試">
+<meta property="og:image:alt" content="網路測速：寬頻測速，測下載、上傳、延遲、抖動與 Bufferbloat · 網速測試">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://speed.1ms.dog/og/zh-tw.png">
-<meta name="twitter:title" content="網速測試：線上測下載、上傳、延遲抖動和 Bufferbloat（寬頻測速）· 網速測試">
-<meta name="twitter:description" content="下載、上傳、延遲和緩衝膨脹，從你自己的網路實測">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"網速測試 · 1ms.dog","url":"https://speed.1ms.dog/zh-tw/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","description":"免費線上網速測試，直接在瀏覽器裡測下載速度、上傳速度，以及閒置和滿載時的延遲、抖動，並給出 A+ 到 F 的 Bufferbloat（緩衝膨脹）等級，從你的網路測到最近的 Cloudflare 節點。不用安裝軟體，沒有廣告，不保存資料。","inLanguage":"zh-TW","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"測試是怎麼進行的？","acceptedAnswer":{"@type":"Answer","text":"你的瀏覽器直接連 Cloudflare 的測速伺服器（speed.cloudflare.com 背後那套），連的是離你的網路最近的 Cloudflare 節點，不經過本站。 先發 16 個空請求測延遲和抖動。然後測下載：同時保持幾個請求在傳輸，每個位元組到達時就計數，持續 5 到 10 秒；速度取前 30% 時間之後（連線已經提速完畢）的平均值，速度穩定下來就提前結束。上傳反方向同樣測一遍。兩個階段裡，每 0.15 秒再發一個小請求，測線路跑滿時的延遲。"}},{"@type":"Question","name":"為什麼比簽約速率或別的測速低？","acceptedAnswer":{"@type":"Answer","text":"最常見的原因是 Wi-Fi：想看線路本身的速度，用網路線連接，靠近路由器，讓其他裝置別占用網路。 瀏覽器和測速伺服器之間只有一條 HTTP/2 或 HTTP/3 連線（幾個請求共用它），而 Ookla 的 App 會開很多條獨立連線。離節點近的時候兩者結果一致；伺服器越遠，單條連線越吃虧。Ookla 還經常測到電信業者自己網內的伺服器，比任何出網的線路都好看。 在中國大陸，Cloudflare 的節點在境外，測到的是國際出口頻寬，常常遠低於簽約速率。"}},{"@type":"Question","name":"什麼是 Bufferbloat（緩衝膨脹）？等級怎麼算？","acceptedAnswer":{"@type":"Answer","text":"線路跑滿時，路由器和數據機會把封包排進很大的緩衝區。排在下載後面的遊戲封包、通話語音都得等著，延遲就漲上去了，這就是 Bufferbloat（緩衝膨脹）。 測試先測閒置時的延遲，再在下載和上傳的同時每 0.15 秒測一次，各取中位數和抖動。跑滿時比閒置多出的延遲（下載和上傳取較差的一個）決定等級，門檻和 Waveform 的 Bufferbloat 測試一致：低於 5 毫秒 A+，低於 30 毫秒 A，低於 60 毫秒 B，低於 200 毫秒 C，低於 400 毫秒 D，再高就是 F。 C 以下，只要有人在下載或上傳，打電話、玩遊戲就會卡。在路由器裡開啟智慧佇列管理（SQM：fq_codel 或 CAKE）能解決大部分問題，代價是最高速度略降一點。"}},{"@type":"Question","name":"怎麼測網路延遲和抖動？","acceptedAnswer":{"@type":"Answer","text":"按「開始」就行，不用安裝軟體。結果裡有三組延遲：閒置時、下載時、上傳時，每組都有中位數和抖動（相鄰兩次延遲的平均差值）。 閒置延遲反映到 Cloudflare 節點的距離和線路品質；抖動大，視訊通話和遊戲會忽快忽慢；下載、上傳時延遲比閒置多出多少，就是 Bufferbloat 等級的依據。打視訊電話或玩遊戲前測一次，最能看出網路穩不穩。"}},{"@type":"Question","name":"開著代理或 VPN，測的是誰的速度？","acceptedAnswer":{"@type":"Answer","text":"代理的。開著代理或 VPN 時，瀏覽器經過它去連測速伺服器，測到的是你到代理節點的線路、節點自己的頻寬，以及節點到 Cloudflare 的線路。用來比較節點很方便。 要測自己的線路，加上直連規則（進度條旁邊的按鈕）：只有 speed.cloudflare.com 直連，其他流量不變。支援 Clash/Mihomo、Surge、Shadowrocket、Quantumult X、Loon、sing-box 和 Xray，多數可以用遠端規則集自動保持最新。標題下方顯示的出口（城市、網路、IP）能告訴你測試走的是哪條路，看起來像代理時頁面會提示。"}},{"@type":"Question","name":"測一次用多少流量？","acceptedAnswer":{"@type":"Answer","text":"每個方向速度穩定後 5 秒就結束，最長 10 秒，所以一次測試的流量是上下行各按最高速度跑 5 到 10 秒：100 Mbps 的寬頻合計約 100 到 250 MB，1000 Mbps 約 1 到 2.5 GB。測完會顯示這次用了多少流量。用流量方案或行動網路時，少測幾次。"}},{"@type":"Question","name":"為什麼不自動開始？","acceptedAnswer":{"@type":"Answer","text":"測速很耗流量，所以頁面等你按「開始」。經常測的話，開啟進度條旁邊的「開啟頁面時自動測試」，這個選擇會記在這個瀏覽器裡。"}},{"@type":"Question","name":"會收集我的資料嗎？","acceptedAnswer":{"@type":"Answer","text":"不會。測試在你的瀏覽器和 Cloudflare 的伺服器之間進行，本站收不到結果。和造訪任何網站一樣，Cloudflare 能看到你的 IP 位址。分享連結和圖片在你的瀏覽器裡產生，只包含測試數字。程式碼在 GitHub 上開源。"}}]}]}</script>
+<meta name="twitter:title" content="網路測速：寬頻測速，測下載、上傳、延遲、抖動與 Bufferbloat · 網速測試">
+<meta name="twitter:description" content="下載、上傳、延遲，網路一忙會不會卡，一次測清楚">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"網速測試 · 1ms.dog","url":"https://speed.1ms.dog/zh-tw/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","description":"免費線上網路測速：直接在瀏覽器裡測下載和上傳速度、延遲和抖動，再看網路一忙延遲會增加多少（Bufferbloat，以 A+ 到 F 評級）。連到離你最近的 Cloudflare 節點。不用安裝軟體、沒有廣告，本站不保存你的測試結果。","inLanguage":"zh-TW","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"測速是怎麼測的？","acceptedAnswer":{"@type":"Answer","text":"你的瀏覽器會直接連到 Cloudflare 的測速伺服器（就是 speed.cloudflare.com 用的那一套），連的是離你的網路最近的 Cloudflare 節點，資料不經過本站。 第一步，送出 16 個很小的請求，測延遲和抖動。第二步測下載：同時開幾個請求一起傳，每收到一個位元組就計算，持續 5 到 10 秒。開頭 30% 的時間連線還在加速，不列入計算；速度取之後的平均值，穩定下來就提早結束。第三步用同樣的方法測上傳。下載和上傳的過程中，每 0.15 秒再送一個小請求，測網路被占滿時的延遲。"}},{"@type":"Question","name":"為什麼比簽約速率或其他測速慢？","acceptedAnswer":{"@type":"Answer","text":"最常見的原因是 Wi-Fi。想知道寬頻本身的速度，請用網路線接上路由器，並讓家裡其他裝置暫時別占用網路。 其次是測法不同。瀏覽器和測速伺服器之間只有一條連線（HTTP/2 或 HTTP/3，由幾個請求共用），而 Ookla 的 Speedtest App 會同時開很多條。伺服器離你近時，兩者結果差不多；離得越遠，單條連線越吃虧。Ookla 也常常連到電信業者自己網內的伺服器，結果會比任何出網的線路都好看。 在中國大陸，Cloudflare 的節點在境外，測到的是國際出口頻寬，常常遠低於簽約速率。"}},{"@type":"Question","name":"什麼是 Bufferbloat？等級怎麼算？","acceptedAnswer":{"@type":"Answer","text":"Bufferbloat 指的是：網路一被占滿，延遲就暴增。例如家裡有人在下載大檔案或看高畫質影片，你的遊戲和視訊通話突然開始 LAG，多半就是它造成的。 問題出在路由器和數據機：網路忙時，它們會把封包放進很大的緩衝區排隊。遊戲資料和通話語音只能排在下載資料後面等，延遲就上去了。 測速會先測閒置時的延遲，再在下載和上傳的同時每 0.15 秒測一次，各取中位數。忙碌時比閒置時多出的延遲（下載、上傳取較差的一個）決定等級，標準和 Waveform 的 Bufferbloat 測試相同：少於 5 毫秒 A+，30 毫秒以內 A，60 以內 B，200 以內 C，400 以內 D，再多是 F。 怎麼改善：C 以下的話，在路由器裡開啟 SQM（智慧佇列管理，選 fq_codel 或 CAKE）能解決大部分問題，代價是最高網速會稍微降低。這個功能在不同路由器裡名稱不一樣，常見的有 SQM、Smart Queue、QoS；如果你的路由器沒有，可以改刷 OpenWrt，或換一台有支援的路由器。"}},{"@type":"Question","name":"怎麼測延遲和抖動？","acceptedAnswer":{"@type":"Answer","text":"按「開始」就好，不用安裝軟體。結果裡有三個延遲：閒置時、下載時、上傳時，每個都附上抖動。 延遲是資料跑一趟來回要多久。閒置時的延遲主要看你離 Cloudflare 節點多遠、線路好不好。抖動是相鄰兩次延遲平均差多少，抖動大，通話會斷斷續續，遊戲會忽快忽慢。下載和上傳時比閒置多出來的延遲，就是 Bufferbloat 等級的依據。 打視訊電話或打遊戲之前測一次，最能看出網路穩不穩。"}},{"@type":"Question","name":"能順暢看 4K、打遊戲嗎？是怎麼判斷的？","acceptedAnswer":{"@type":"Answer","text":"測完後，頁面會依結果替五種用途各給一個評價：順暢、勉強或吃力。標準是常見的經驗值，不同平台的要求會有些差異。 4K 影片：下載 25 Mbps 以上算順暢；5 Mbps 以上算勉強，看高畫質沒問題，4K 可能要緩衝。 視訊通話：下載和上傳都在 3 Mbps 以上、延遲 80 毫秒以內、抖動 20 毫秒以內算順暢；放寬到 1.5 和 1 Mbps、200 毫秒、50 毫秒算勉強。 線上遊戲：延遲 40 毫秒以內、抖動 10 毫秒以內、網路占滿時多出的延遲不超過 30 毫秒算順暢；放寬到 100、30、100 毫秒算勉強。 雲端遊戲：下載 35 Mbps 以上、延遲 40 毫秒以內、抖動 10 毫秒以內算順暢；放寬到 15 Mbps、80 毫秒、20 毫秒算勉強。 直播：上傳 20 Mbps 以上算順暢，5 Mbps 以上算勉強。 達不到「勉強」就是吃力。遊戲 LAG 多半是延遲、抖動或 Bufferbloat 的問題，先改用網路線，再看路由器的 SQM；影片和直播卡住，多半是頻寬不夠。"}},{"@type":"Question","name":"開著代理或 VPN，測的是誰的速度？","acceptedAnswer":{"@type":"Answer","text":"是代理的速度。開著代理或 VPN 時，瀏覽器要先經過它才連到測速伺服器。測到的速度取決於三段線路中最慢的那一段：你到代理節點、節點本身的頻寬、節點到 Cloudflare。拿來比較節點很方便。 想測自己的寬頻，加上直連規則就好（進度條旁邊的按鈕）：只有 speed.cloudflare.com 走直連，其他流量照舊。支援 Clash/Mihomo、Surge、Shadowrocket、Quantumult X、Loon、sing-box 和 Xray，多數可以用遠端規則集自動保持最新。 標題下方顯示的出口（城市、網路、IP）能告訴你這次測速走的是哪條路；看起來像代理時，頁面會提醒你。"}},{"@type":"Question","name":"測一次會用掉多少數據？","acceptedAnswer":{"@type":"Answer","text":"每個方向速度穩定的話 5 秒就結束，最長 10 秒。所以一次測試大約是下載、上傳各以你的最高網速跑 5 到 10 秒：100 Mbps 的寬頻合計約 100 到 250 MB，1000 Mbps 約 1 到 2.5 GB。測完頁面會顯示這次用掉多少。用行動數據或有流量上限的方案時，請少測幾次。"}},{"@type":"Question","name":"為什麼不會自動開始？","acceptedAnswer":{"@type":"Answer","text":"測速很耗數據，所以頁面會等你按「開始」。如果你常常測，可以勾選進度條旁邊的「開啟頁面就自動測速」，這個選擇只會記在這個瀏覽器裡。"}},{"@type":"Question","name":"會收集我的資料嗎？","acceptedAnswer":{"@type":"Answer","text":"本站不收集測試結果。測試在你的瀏覽器和 Cloudflare 的伺服器之間直接進行，結果不會傳到本站；只有你主動按「回報問題」時，才會把這次的結果傳給我們。和造訪任何網站一樣，Cloudflare 看得到你的 IP 位址。 測試紀錄只存在你的瀏覽器裡。分享連結和圖片也在你的瀏覽器裡產生，只包含測試數字和時間；要不要附上國家和 Cloudflare 節點由你決定，IP 位址絕不會放進去。程式碼在 GitHub 上開源。"}}]}]}</script>
 <link rel="preload" href="/assets/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/app.69c07e1f8d.css">
 </head>
@@ -104,21 +104,21 @@
       </div>
       <!-- latency idle, downloading and uploading (median, its rise over idle, jitter), and the bufferbloat grade -->
       <ul class="lat">
-        <li data-l="idle"><span data-why="線路閒置時到測速伺服器的往返時間：16 次請求的中位數。" tabindex="0">延遲</span><b>–</b><em>&nbsp;</em></li>
-        <li data-l="ldown"><span data-why="線路跑滿時的延遲。漲得多（緩衝膨脹），就是別人一下載、你的通話就卡的原因。" tabindex="0">下載時延遲</span><b>–</b><em>&nbsp;</em></li>
-        <li data-l="lup"><span data-why="線路跑滿時的延遲。漲得多（緩衝膨脹），就是別人一下載、你的通話就卡的原因。" tabindex="0">上傳時延遲</span><b>–</b><em>&nbsp;</em></li>
-        <li data-l="grade"><span data-why="線路跑滿時延遲漲了多少，按 A+ 到 F 評級：低於 5 毫秒 A+，30 以內 A，60 以內 B，200 以內 C，400 以內 D，更多為 F。" tabindex="0">Bufferbloat 等級</span><b>–</b><em>&nbsp;</em></li>
+        <li data-l="idle"><span data-why="資料從你這裡到測速伺服器跑一趟來回要多久，越低越好。這是網路閒置時 16 次測量的中位數。" tabindex="0">延遲</span><b>–</b><em>&nbsp;</em></li>
+        <li data-l="ldown"><span data-why="網路被下載或上傳占滿時的延遲。比閒置時增加得越多（這就是 Bufferbloat），家裡有人下載時，你的通話和遊戲就越卡。" tabindex="0">下載時延遲</span><b>–</b><em>&nbsp;</em></li>
+        <li data-l="lup"><span data-why="網路被下載或上傳占滿時的延遲。比閒置時增加得越多（這就是 Bufferbloat），家裡有人下載時，你的通話和遊戲就越卡。" tabindex="0">上傳時延遲</span><b>–</b><em>&nbsp;</em></li>
+        <li data-l="grade"><span data-why="網路被占滿時，延遲比閒置時多出多少，以 A+ 到 F 評級：少於 5 毫秒是 A+，30 以內 A，60 以內 B，200 以內 C，400 以內 D，再多就是 F。" tabindex="0">Bufferbloat 等級</span><b>–</b><em>&nbsp;</em></li>
       </ul>
       <div class="sum">
         <ul class="uses" id="uses"><li data-u="video" data-lv=""><span>4K 影片</span><span class="lv"></span></li><li data-u="call" data-lv=""><span>視訊通話</span><span class="lv"></span></li><li data-u="game" data-lv=""><span>線上遊戲</span><span class="lv"></span></li><li data-u="cloud" data-lv=""><span>雲端遊戲</span><span class="lv"></span></li><li data-u="live" data-lv=""><span>直播</span><span class="lv"></span></li></ul>
-        <p class="note-l" id="noteL" data-i="hint_idle">按「開始」，約 20–30 秒。流量消耗隨網速增加，詳見說明。</p>
+        <p class="note-l" id="noteL" data-i="hint_idle">按「開始」，大約 20 到 30 秒。網速越快，用掉的數據越多，詳見說明。</p>
       </div>
       <!-- the other 1ms.dog tools that answer what this one can't, linked when the page announces them (meta, from the shell) -->
       <p class="rel" id="rel" hidden></p>
       <div class="bar">
         <span class="prog-t" id="progTxt">&nbsp;</span>
-        <label class="auto"><input type="checkbox" id="auto"><span class="sw" aria-hidden="true"></span><span data-i="auto_label">開啟頁面時自動測試</span></label>
-        <button class="btn sm" id="histBtn" type="button" aria-haspopup="dialog" aria-controls="hist"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.6V8l2.3 1.5"/></svg><span data-i="hist_btn">歷史</span></button>
+        <label class="auto"><input type="checkbox" id="auto"><span class="sw" aria-hidden="true"></span><span data-i="auto_label">開啟頁面就自動測速</span></label>
+        <button class="btn sm" id="histBtn" type="button" aria-haspopup="dialog" aria-controls="hist"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.6V8l2.3 1.5"/></svg><span data-i="hist_btn">紀錄</span></button>
         <button class="btn sm" id="rulesBtn" type="button" aria-haspopup="dialog" aria-controls="rules"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h9M8 4.5 11.5 8 8 11.5M14 3v10"/></svg><span data-i="rules_btn">直連規則</span></button>
       </div>
     </section>
@@ -128,7 +128,7 @@
 </div>
 <div class="scrim" id="hist" hidden>
   <div class="dialog hist" role="dialog" aria-modal="true" aria-labelledby="histT">
-    <div class="dlg-h"><div><h2 id="histT" data-i="hist_h">最近的測試</h2><p class="note" data-i="hist_note">只保存在這個瀏覽器裡，最多 20 筆。</p></div>
+    <div class="dlg-h"><div><h2 id="histT" data-i="hist_h">最近的測試</h2><p class="note" data-i="hist_note">只存在這個瀏覽器裡，最多 20 筆。</p></div>
       <button class="icon-btn" data-close type="button" aria-label="關閉"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
     <div class="dlg-b">
       <div class="htbl" id="histBody"></div>
@@ -138,12 +138,12 @@
 </div>
 <div class="scrim" id="rules" hidden>
   <div class="dialog rules" role="dialog" aria-modal="true" aria-labelledby="rulesT">
-    <div class="dlg-h"><div><h2 id="rulesT" data-i="rules_h">直連規則：測你自己的線路，而不是代理</h2><p class="note" data-i="rules_sub">開著代理時，測試會經過代理，測到的是代理的線路和節點。這些規則只把測速用到的網域設成直連。</p></div>
+    <div class="dlg-h"><div><h2 id="rulesT" data-i="rules_h">直連規則：測你自己的寬頻，而不是代理</h2><p class="note" data-i="rules_sub">開著代理時，測速流量會經過代理，測到的是代理節點的速度。加上這些規則後，只有測速用到的網域會改成直連，其他流量照舊。</p></div>
       <button class="icon-btn" data-close type="button" aria-label="關閉"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
     <div class="dlg-b">
       <div class="tabs" id="ruleTabs" role="tablist"></div>
       <div id="ruleBody" class="rbody"></div>
-      <p class="note" data-i="rules_after">加好後重新載入代理設定，再測一次。想測代理節點的速度，就不要加這些規則。</p>
+      <p class="note" data-i="rules_after">加好後重新載入代理設定，再測一次。如果你想測的是代理節點的速度，就不要加這些規則。</p>
     </div>
   </div>
 </div>
@@ -152,19 +152,19 @@
     <div class="dlg-h"><h2 id="helpT" data-i="faq_h">說明</h2>
       <button class="icon-btn" data-close type="button" aria-label="關閉"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
     <div class="help-b">
-      <nav class="help-nav" id="helpNav" role="tablist"><button type="button" role="tab" data-hq="0" aria-selected="true">測試是怎麼進行的？</button><button type="button" role="tab" data-hq="1" aria-selected="false">為什麼比簽約速率或別的測速低？</button><button type="button" role="tab" data-hq="2" aria-selected="false">什麼是 Bufferbloat（緩衝膨脹）？等級怎麼算？</button><button type="button" role="tab" data-hq="3" aria-selected="false">怎麼測網路延遲和抖動？</button><button type="button" role="tab" data-hq="4" aria-selected="false">開著代理或 VPN，測的是誰的速度？</button><button type="button" role="tab" data-hq="5" aria-selected="false">測一次用多少流量？</button><button type="button" role="tab" data-hq="6" aria-selected="false">為什麼不自動開始？</button><button type="button" role="tab" data-hq="7" aria-selected="false">會收集我的資料嗎？</button></nav>
+      <nav class="help-nav" id="helpNav" role="tablist"><button type="button" role="tab" data-hq="0" aria-selected="true">測速是怎麼測的？</button><button type="button" role="tab" data-hq="1" aria-selected="false">為什麼比簽約速率或其他測速慢？</button><button type="button" role="tab" data-hq="2" aria-selected="false">什麼是 Bufferbloat？等級怎麼算？</button><button type="button" role="tab" data-hq="3" aria-selected="false">怎麼測延遲和抖動？</button><button type="button" role="tab" data-hq="4" aria-selected="false">能順暢看 4K、打遊戲嗎？是怎麼判斷的？</button><button type="button" role="tab" data-hq="5" aria-selected="false">開著代理或 VPN，測的是誰的速度？</button><button type="button" role="tab" data-hq="6" aria-selected="false">測一次會用掉多少數據？</button><button type="button" role="tab" data-hq="7" aria-selected="false">為什麼不會自動開始？</button><button type="button" role="tab" data-hq="8" aria-selected="false">會收集我的資料嗎？</button></nav>
       <div class="help-pick">
         <button class="icon-btn" type="button" data-hstep="-1" aria-label="上一則"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 4L6 8l4 4"/></svg></button>
         <select id="helpSel" aria-labelledby="helpT"></select>
         <button class="icon-btn" type="button" data-hstep="1" aria-label="下一則"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4 4-4 4"/></svg></button>
       </div>
-      <div class="help-c" id="helpC"><article data-hqb="0"><h3>測試是怎麼進行的？</h3><p>你的瀏覽器直接連 Cloudflare 的測速伺服器（speed.cloudflare.com 背後那套），連的是離你的網路最近的 Cloudflare 節點，不經過本站。</p><p>先發 16 個空請求測延遲和抖動。然後測下載：同時保持幾個請求在傳輸，每個位元組到達時就計數，持續 5 到 10 秒；速度取前 30% 時間之後（連線已經提速完畢）的平均值，速度穩定下來就提前結束。上傳反方向同樣測一遍。兩個階段裡，每 0.15 秒再發一個小請求，測線路跑滿時的延遲。</p></article><article data-hqb="1" hidden><h3>為什麼比簽約速率或別的測速低？</h3><p>最常見的原因是 Wi-Fi：想看線路本身的速度，用網路線連接，靠近路由器，讓其他裝置別占用網路。</p><p>瀏覽器和測速伺服器之間只有一條 HTTP/2 或 HTTP/3 連線（幾個請求共用它），而 Ookla 的 App 會開很多條獨立連線。離節點近的時候兩者結果一致；伺服器越遠，單條連線越吃虧。Ookla 還經常測到電信業者自己網內的伺服器，比任何出網的線路都好看。</p><p>在中國大陸，Cloudflare 的節點在境外，測到的是國際出口頻寬，常常遠低於簽約速率。</p></article><article data-hqb="2" hidden><h3>什麼是 Bufferbloat（緩衝膨脹）？等級怎麼算？</h3><p>線路跑滿時，路由器和數據機會把封包排進很大的緩衝區。排在下載後面的遊戲封包、通話語音都得等著，延遲就漲上去了，這就是 Bufferbloat（緩衝膨脹）。</p><p>測試先測閒置時的延遲，再在下載和上傳的同時每 0.15 秒測一次，各取中位數和抖動。跑滿時比閒置多出的延遲（下載和上傳取較差的一個）決定等級，門檻和 Waveform 的 Bufferbloat 測試一致：低於 5 毫秒 A+，低於 30 毫秒 A，低於 60 毫秒 B，低於 200 毫秒 C，低於 400 毫秒 D，再高就是 F。</p><p>C 以下，只要有人在下載或上傳，打電話、玩遊戲就會卡。在路由器裡開啟智慧佇列管理（SQM：fq_codel 或 CAKE）能解決大部分問題，代價是最高速度略降一點。</p></article><article data-hqb="3" hidden><h3>怎麼測網路延遲和抖動？</h3><p>按「開始」就行，不用安裝軟體。結果裡有三組延遲：閒置時、下載時、上傳時，每組都有中位數和抖動（相鄰兩次延遲的平均差值）。</p><p>閒置延遲反映到 Cloudflare 節點的距離和線路品質；抖動大，視訊通話和遊戲會忽快忽慢；下載、上傳時延遲比閒置多出多少，就是 Bufferbloat 等級的依據。打視訊電話或玩遊戲前測一次，最能看出網路穩不穩。</p></article><article data-hqb="4" hidden><h3>開著代理或 VPN，測的是誰的速度？</h3><p>代理的。開著代理或 VPN 時，瀏覽器經過它去連測速伺服器，測到的是你到代理節點的線路、節點自己的頻寬，以及節點到 Cloudflare 的線路。用來比較節點很方便。</p><p>要測自己的線路，加上直連規則（進度條旁邊的按鈕）：只有 speed.cloudflare.com 直連，其他流量不變。支援 Clash/Mihomo、Surge、Shadowrocket、Quantumult X、Loon、sing-box 和 Xray，多數可以用遠端規則集自動保持最新。標題下方顯示的出口（城市、網路、IP）能告訴你測試走的是哪條路，看起來像代理時頁面會提示。</p></article><article data-hqb="5" hidden><h3>測一次用多少流量？</h3><p>每個方向速度穩定後 5 秒就結束，最長 10 秒，所以一次測試的流量是上下行各按最高速度跑 5 到 10 秒：100 Mbps 的寬頻合計約 100 到 250 MB，1000 Mbps 約 1 到 2.5 GB。測完會顯示這次用了多少流量。用流量方案或行動網路時，少測幾次。</p></article><article data-hqb="6" hidden><h3>為什麼不自動開始？</h3><p>測速很耗流量，所以頁面等你按「開始」。經常測的話，開啟進度條旁邊的「開啟頁面時自動測試」，這個選擇會記在這個瀏覽器裡。</p></article><article data-hqb="7" hidden><h3>會收集我的資料嗎？</h3><p>不會。測試在你的瀏覽器和 Cloudflare 的伺服器之間進行，本站收不到結果。和造訪任何網站一樣，Cloudflare 能看到你的 IP 位址。分享連結和圖片在你的瀏覽器裡產生，只包含測試數字。程式碼在 GitHub 上開源。</p></article></div>
+      <div class="help-c" id="helpC"><article data-hqb="0"><h3>測速是怎麼測的？</h3><p>你的瀏覽器會直接連到 Cloudflare 的測速伺服器（就是 speed.cloudflare.com 用的那一套），連的是離你的網路最近的 Cloudflare 節點，資料不經過本站。</p><p>第一步，送出 16 個很小的請求，測延遲和抖動。第二步測下載：同時開幾個請求一起傳，每收到一個位元組就計算，持續 5 到 10 秒。開頭 30% 的時間連線還在加速，不列入計算；速度取之後的平均值，穩定下來就提早結束。第三步用同樣的方法測上傳。下載和上傳的過程中，每 0.15 秒再送一個小請求，測網路被占滿時的延遲。</p></article><article data-hqb="1" hidden><h3>為什麼比簽約速率或其他測速慢？</h3><p>最常見的原因是 Wi-Fi。想知道寬頻本身的速度，請用網路線接上路由器，並讓家裡其他裝置暫時別占用網路。</p><p>其次是測法不同。瀏覽器和測速伺服器之間只有一條連線（HTTP/2 或 HTTP/3，由幾個請求共用），而 Ookla 的 Speedtest App 會同時開很多條。伺服器離你近時，兩者結果差不多；離得越遠，單條連線越吃虧。Ookla 也常常連到電信業者自己網內的伺服器，結果會比任何出網的線路都好看。</p><p>在中國大陸，Cloudflare 的節點在境外，測到的是國際出口頻寬，常常遠低於簽約速率。</p></article><article data-hqb="2" hidden><h3>什麼是 Bufferbloat？等級怎麼算？</h3><p>Bufferbloat 指的是：網路一被占滿，延遲就暴增。例如家裡有人在下載大檔案或看高畫質影片，你的遊戲和視訊通話突然開始 LAG，多半就是它造成的。</p><p>問題出在路由器和數據機：網路忙時，它們會把封包放進很大的緩衝區排隊。遊戲資料和通話語音只能排在下載資料後面等，延遲就上去了。</p><p>測速會先測閒置時的延遲，再在下載和上傳的同時每 0.15 秒測一次，各取中位數。忙碌時比閒置時多出的延遲（下載、上傳取較差的一個）決定等級，標準和 Waveform 的 Bufferbloat 測試相同：少於 5 毫秒 A+，30 毫秒以內 A，60 以內 B，200 以內 C，400 以內 D，再多是 F。</p><p>怎麼改善：C 以下的話，在路由器裡開啟 SQM（智慧佇列管理，選 fq_codel 或 CAKE）能解決大部分問題，代價是最高網速會稍微降低。這個功能在不同路由器裡名稱不一樣，常見的有 SQM、Smart Queue、QoS；如果你的路由器沒有，可以改刷 OpenWrt，或換一台有支援的路由器。</p></article><article data-hqb="3" hidden><h3>怎麼測延遲和抖動？</h3><p>按「開始」就好，不用安裝軟體。結果裡有三個延遲：閒置時、下載時、上傳時，每個都附上抖動。</p><p>延遲是資料跑一趟來回要多久。閒置時的延遲主要看你離 Cloudflare 節點多遠、線路好不好。抖動是相鄰兩次延遲平均差多少，抖動大，通話會斷斷續續，遊戲會忽快忽慢。下載和上傳時比閒置多出來的延遲，就是 Bufferbloat 等級的依據。</p><p>打視訊電話或打遊戲之前測一次，最能看出網路穩不穩。</p></article><article data-hqb="4" hidden><h3>能順暢看 4K、打遊戲嗎？是怎麼判斷的？</h3><p>測完後，頁面會依結果替五種用途各給一個評價：順暢、勉強或吃力。標準是常見的經驗值，不同平台的要求會有些差異。</p><p>4K 影片：下載 25 Mbps 以上算順暢；5 Mbps 以上算勉強，看高畫質沒問題，4K 可能要緩衝。</p><p>視訊通話：下載和上傳都在 3 Mbps 以上、延遲 80 毫秒以內、抖動 20 毫秒以內算順暢；放寬到 1.5 和 1 Mbps、200 毫秒、50 毫秒算勉強。</p><p>線上遊戲：延遲 40 毫秒以內、抖動 10 毫秒以內、網路占滿時多出的延遲不超過 30 毫秒算順暢；放寬到 100、30、100 毫秒算勉強。</p><p>雲端遊戲：下載 35 Mbps 以上、延遲 40 毫秒以內、抖動 10 毫秒以內算順暢；放寬到 15 Mbps、80 毫秒、20 毫秒算勉強。</p><p>直播：上傳 20 Mbps 以上算順暢，5 Mbps 以上算勉強。</p><p>達不到「勉強」就是吃力。遊戲 LAG 多半是延遲、抖動或 Bufferbloat 的問題，先改用網路線，再看路由器的 SQM；影片和直播卡住，多半是頻寬不夠。</p></article><article data-hqb="5" hidden><h3>開著代理或 VPN，測的是誰的速度？</h3><p>是代理的速度。開著代理或 VPN 時，瀏覽器要先經過它才連到測速伺服器。測到的速度取決於三段線路中最慢的那一段：你到代理節點、節點本身的頻寬、節點到 Cloudflare。拿來比較節點很方便。</p><p>想測自己的寬頻，加上直連規則就好（進度條旁邊的按鈕）：只有 speed.cloudflare.com 走直連，其他流量照舊。支援 Clash/Mihomo、Surge、Shadowrocket、Quantumult X、Loon、sing-box 和 Xray，多數可以用遠端規則集自動保持最新。</p><p>標題下方顯示的出口（城市、網路、IP）能告訴你這次測速走的是哪條路；看起來像代理時，頁面會提醒你。</p></article><article data-hqb="6" hidden><h3>測一次會用掉多少數據？</h3><p>每個方向速度穩定的話 5 秒就結束，最長 10 秒。所以一次測試大約是下載、上傳各以你的最高網速跑 5 到 10 秒：100 Mbps 的寬頻合計約 100 到 250 MB，1000 Mbps 約 1 到 2.5 GB。測完頁面會顯示這次用掉多少。用行動數據或有流量上限的方案時，請少測幾次。</p></article><article data-hqb="7" hidden><h3>為什麼不會自動開始？</h3><p>測速很耗數據，所以頁面會等你按「開始」。如果你常常測，可以勾選進度條旁邊的「開啟頁面就自動測速」，這個選擇只會記在這個瀏覽器裡。</p></article><article data-hqb="8" hidden><h3>會收集我的資料嗎？</h3><p>本站不收集測試結果。測試在你的瀏覽器和 Cloudflare 的伺服器之間直接進行，結果不會傳到本站；只有你主動按「回報問題」時，才會把這次的結果傳給我們。和造訪任何網站一樣，Cloudflare 看得到你的 IP 位址。</p><p>測試紀錄只存在你的瀏覽器裡。分享連結和圖片也在你的瀏覽器裡產生，只包含測試數字和時間；要不要附上國家和 Cloudflare 節點由你決定，IP 位址絕不會放進去。程式碼在 GitHub 上開源。</p></article></div>
     </div>
   </div>
 </div>
 
 <script type="application/json" id="data">{"lang":"zh-TW","paths":{"en":"/","zh-CN":"/zh-cn/","zh-TW":"/zh-tw/","ja":"/ja/","ko":"/ko/","es":"/es/","fr":"/fr/","de":"/de/","pt":"/pt/","ru":"/ru/"}}</script>
-<script src="/assets/l.zh-tw.3e9a8bd62e.js"></script>
+<script src="/assets/l.zh-tw.9180ca1fa9.js"></script>
 <script src="/assets/app.ee87edf6b8.js"></script>
 </body>
 </html>

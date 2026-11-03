@@ -54,8 +54,15 @@ async function card(lang, d) {
   const big = (x, label, val, c) => `<text x="${x}" y="214" font-size="22" font-weight="600" fill="${c}">${esc(label)}</text>` +
     `<text x="${x}" y="296" font-size="76" font-weight="700" font-family="Consolas, monospace" fill="#ededed">${val}</text>` +
     `<text x="${x}" y="330" font-size="20" fill="#a0a0a0">Mbps</text>`;
+  // each label gets its column (the last one runs to the panel's edge), at a smaller size if it needs it, cut only below 14 px
+  const label = (k, w) => {
+    const px = Math.max(14, Math.min(18, Math.floor(w / est(k, 1))));
+    let s = k;
+    while (est(s, px) > w) s = s.slice(0, -2) + "…";
+    return `font-size="${px}">${esc(s)}`;
+  };
   const lat = [[d.k_idle, "12", "#3ecf8e"], [d.k_jit, "1.4", "#3ecf8e"], [d.k_ldown, "31", "#9fd356"]].map(([k, v, c], i) =>
-    `<text x="${640 + i * 168}" y="468" font-size="18" fill="#a0a0a0">${esc(k.length > 14 ? k.slice(0, 13) + "…" : k)}</text>` +
+    `<text x="${640 + i * 168}" y="468" fill="#a0a0a0" ${label(k, i < 2 ? 156 : 180)}</text>` +
     `<text x="${640 + i * 168}" y="500" font-size="28" font-weight="600" font-family="Consolas, monospace" fill="${c}">${v} ms</text>`).join("");
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" font-family="${ff}">
 <rect width="1200" height="630" fill="#1c1c1c"/>
