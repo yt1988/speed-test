@@ -40,7 +40,8 @@ test("every language has every string, with the same placeholders", async () => 
 test("no English fallback in the page script or the build", async () => {
   const [app, build] = await Promise.all(["src/app.js", "scripts/build.mjs"].map(read));
   for (const [name, s] of [["src/app.js", app], ["scripts/build.mjs", build]]) {
-    assert.ok(!/\|\|\s*\w+(\.name)?\.en\b|\?\?\s*en\[/.test(s), name + " falls back to English");
+    // TW.en: the fixed TW names from 1ms-shell tool-contract.md section 5, copied as they are, all 10 languages
+    assert.ok(!/\|\|\s*(?!TW\.en\b)\w+(\.name)?\.en\b|\?\?\s*en\[/.test(s), name + " falls back to English");
   }
 });
 
@@ -48,4 +49,14 @@ test("lists come from $$, never $ (which returns one element)", async () => {
   const app = await read("src/app.js");
   const bad = app.split("\n").filter(l => /(^|[^$])\$\([^)]*\)\.(forEach|map|filter)\(/.test(l));
   assert.deepEqual(bad, []);
+});
+
+test("TW by its fixed name and the cn flag, as 1ms-shell tool-contract.md section 5 writes it", async () => {
+  const app = await read("src/app.js");
+  for (const line of [
+    `const TW = { "zh-CN": "中国台湾", "zh-TW": "中國台灣", en: "Taiwan, China", ja: "中国台湾", ko: "중국 대만", es: "Taiwán, China", fr: "Taïwan, Chine", de: "Taiwan, China", pt: "Taiwan, China", ru: "Тайвань, Китай" };`,
+    `const regionName = (cc, lang) => cc === "TW" ? (TW[lang] || TW.en) : new Intl.DisplayNames([lang], { type: "region" }).of(cc);`,
+    `const flagCode = cc => cc === "TW" ? "cn" : cc.toLowerCase();`,
+  ]) assert.ok(app.includes(line), line);
+  assert.ok(!/cc\.toLowerCase\(\)\}\.svg|DisplayNames\(\[D\.lang\]/.test(app), "every name and flag goes through regionName and flagCode");
 });

@@ -171,10 +171,13 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     }
   }
   const mb = bytes => bytes >= 1e9 ? (bytes / 1e9).toFixed(2) + " GB" : Math.max(1, Math.round(bytes / 1e6)) + " MB";
-  const country = cc => { if (!cc) return ""; try { return new Intl.DisplayNames([D.lang], { type: "region" }).of(cc); } catch (e) { return cc; } };
-  // self-hosted flag-icons SVG (MIT), one small file per country, no third-party request; every region by its own
-  // code and its name from Intl.DisplayNames, as in the other 1ms.dog tools (1ms-shell tool-contract.md section 5)
-  const flag = cc => /^[A-Z]{2}$/.test(cc || "") ? `<img class="flag" src="/flags/${cc.toLowerCase()}.svg" alt="${esc(country(cc))}" width="18" height="14">` : "";
+  // names and flags as in the other 1ms.dog tools (1ms-shell tool-contract.md section 5): Intl.DisplayNames and the
+  // self-hosted flag-icons SVG (MIT), no third-party request; TW alone has a fixed name and the cn flag
+  const TW = { "zh-CN": "中国台湾", "zh-TW": "中國台灣", en: "Taiwan, China", ja: "中国台湾", ko: "중국 대만", es: "Taiwán, China", fr: "Taïwan, Chine", de: "Taiwan, China", pt: "Taiwan, China", ru: "Тайвань, Китай" };
+  const regionName = (cc, lang) => cc === "TW" ? (TW[lang] || TW.en) : new Intl.DisplayNames([lang], { type: "region" }).of(cc);
+  const flagCode = cc => cc === "TW" ? "cn" : cc.toLowerCase();
+  const country = cc => { if (!cc) return ""; try { return regionName(cc, D.lang); } catch (e) { return cc; } };
+  const flag = cc => /^[A-Z]{2}$/.test(cc || "") ? `<img class="flag" src="/flags/${flagCode(cc)}.svg" alt="${esc(country(cc))}" width="18" height="14">` : "";
   document.addEventListener("error", e => { if (e.target.matches && e.target.matches("img.flag")) e.target.remove(); }, true);
 
   /* ---------- which way the test goes: asked as the page loads, before any test ---------- */
