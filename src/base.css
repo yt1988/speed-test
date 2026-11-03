@@ -63,7 +63,7 @@ svg[viewBox="0 0 16 16"] { fill: none; stroke: currentColor; stroke-width: 1.4; 
 /* the open list is drawn by the OS: without its own colors it stays light in the dark theme */
 select option, select optgroup { background-color: var(--panel); color: var(--fg); }
 select option:checked { background-color: var(--soft); }
-.sel select { appearance: none; -webkit-appearance: none; border: 0; background: transparent; height: 100%; padding: 0 12px 0 7px; cursor: pointer; outline: none; }
+.sel select { appearance: none; -webkit-appearance: none; border: 0; background: transparent; height: 100%; padding: 0 12px 0 7px; cursor: pointer; outline: none; font-size: 16px; }   /* 16px: iOS zooms into smaller fields */
 .icon-btn { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); cursor: pointer; padding: 0; }
 .icon-btn svg { width: 16px; height: 16px; }
 /* the GitHub mark is a filled shape, unlike the stroked icons */

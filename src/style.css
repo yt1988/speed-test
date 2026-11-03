@@ -74,7 +74,7 @@ h2 { font-size: 15px; font-weight: 700; }
 .share-go:hover { background: var(--ink-soft); }
 .share-go:disabled { visibility: hidden; }
 .go-t { position: relative; font-size: 21px; font-weight: 700; letter-spacing: -.01em; }
-.go-s { position: relative; font-size: 11.5px; opacity: .85; max-width: 112px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.go-s { position: relative; font-size: 12px; opacity: .85; max-width: 112px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .go[data-st="run"] { background: var(--panel); color: var(--fg); box-shadow: 0 0 0 1px var(--line); }
 .go[data-st="run"] .go-t { font-size: 17px; }
 .go[data-st="done"] .go-t { font-size: 17px; }
@@ -117,6 +117,8 @@ a.xl svg { width: .95em; height: .95em; flex: none; }
 .rel { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 18px; margin: -6px 0 2px; font-size: 13px; text-align: center; }
 .rel a { color: var(--ink); text-decoration: none; }
 .rel a:hover { text-decoration: underline; }
+/* touch: each link a 32px target, looking the same */
+@media (pointer: coarse) { .rel { row-gap: 0; } .rel a.xl { min-height: 32px; } }
 /* a data value linked to its page on another tool: dotted underline, no icon */
 a.dv { color: inherit; text-decoration: underline dotted; text-underline-offset: 3px; text-decoration-thickness: 1px; }
 a.dv:hover { color: var(--ink); }
@@ -159,10 +161,10 @@ a.dv:hover { color: var(--ink); }
 .dialog.hist { width: 720px; }
 .htbl { display: flex; flex-direction: column; font-size: 13px; }
 .htbl .hr { display: grid; grid-template-columns: minmax(0, 1.3fr) repeat(3, minmax(0, .8fr)) minmax(0, 1.6fr); gap: 8px; align-items: center; padding: 7px 0; border-top: 1px solid var(--line); }
-.htbl .hr:first-child { border-top: 0; font-size: 11.5px; font-weight: 600; color: var(--muted); }
+.htbl .hr:first-child { border-top: 0; font-size: 12px; font-weight: 600; color: var(--muted); }
 .htbl .hr > :nth-child(n+2):nth-child(-n+4) { text-align: right; font-family: var(--f-num); font-variant-numeric: tabular-nums; }
 .htbl .hr > :last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
-.htbl .pk { font-style: normal; margin-left: 6px; font: 600 10.5px/16px var(--f-ui); padding: 0 5px; border-radius: 4px; background: var(--warn-soft); color: var(--warn); }
+.htbl .pk { font-style: normal; margin-left: 6px; font: 600 12px/16px var(--f-ui); padding: 0 5px; border-radius: 4px; background: var(--warn-soft); color: var(--warn); }
 .htbl .empty { color: var(--muted); padding: 8px 0; }
 .dlg-b > #histClear { align-self: flex-start; }
 .dlg-b { padding: 14px 18px 18px; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
