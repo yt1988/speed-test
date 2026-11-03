@@ -172,9 +172,9 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   }
   const mb = bytes => bytes >= 1e9 ? (bytes / 1e9).toFixed(2) + " GB" : Math.max(1, Math.round(bytes / 1e6)) + " MB";
   const country = cc => { if (!cc) return ""; try { return new Intl.DisplayNames([D.lang], { type: "region" }).of(cc); } catch (e) { return cc; } };
-  // self-hosted flag-icons SVG (MIT), one small file per country, no third-party request; Taiwan is shown with
-  // China's flag, as in the other 1ms.dog tools
-  const flag = cc => /^[A-Z]{2}$/.test(cc || "") ? `<img class="flag" src="/flags/${cc === "TW" ? "cn" : cc.toLowerCase()}.svg" alt="${esc(country(cc))}" width="18" height="14">` : "";
+  // self-hosted flag-icons SVG (MIT), one small file per country, no third-party request; every region by its own
+  // code and its name from Intl.DisplayNames, as in the other 1ms.dog tools (1ms-shell tool-contract.md section 5)
+  const flag = cc => /^[A-Z]{2}$/.test(cc || "") ? `<img class="flag" src="/flags/${cc.toLowerCase()}.svg" alt="${esc(country(cc))}" width="18" height="14">` : "";
   document.addEventListener("error", e => { if (e.target.matches && e.target.matches("img.flag")) e.target.remove(); }, true);
 
   /* ---------- which way the test goes: asked as the page loads, before any test ---------- */
