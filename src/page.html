@@ -72,6 +72,17 @@
         <li data-l="lup"><span data-why="{{a:tip_loaded}}" tabindex="0">{{k_lup}}</span><b>–</b><em>&nbsp;</em></li>
         <li data-l="grade"><span data-why="{{a:tip_grade}}" tabindex="0">{{k_grade}}</span><b>–</b><em>&nbsp;</em></li>
       </ul>
+      <!-- UDP loss idle, downloading and uploading, and whether QUIC gets through: to rtc.1ms.dog in Tokyo (src/rtc.mjs).
+           Shown only on speed.1ms.dog, where that server is; a self-hosted copy has none -->
+      <div class="udp" id="udp" hidden>
+        <p class="udp-h" data-i="udp_h"></p>
+        <ul class="lat">
+          <li data-u="0"><span data-why="{{a:tip_loss}}" tabindex="0">{{k_loss_idle}}</span><b>–</b><em>&nbsp;</em></li>
+          <li data-u="1"><span data-why="{{a:tip_loss}}" tabindex="0">{{k_loss_down}}</span><b>–</b><em>&nbsp;</em></li>
+          <li data-u="2"><span data-why="{{a:tip_loss}}" tabindex="0">{{k_loss_up}}</span><b>–</b><em>&nbsp;</em></li>
+          <li data-u="q"><span data-why="{{a:tip_quic}}" tabindex="0">{{k_quic}}</span><b>–</b><em>&nbsp;</em></li>
+        </ul>
+      </div>
       <div class="sum">
         <ul class="uses" id="uses">{{uses}}</ul>
         <p class="note-l" id="noteL" data-i="hint_idle"></p>

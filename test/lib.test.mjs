@@ -154,3 +154,25 @@ test("a result link whose code can't be read is a 404, not a redirect", async ()
   const env = { ASSETS: { fetch: () => { throw new Error("not reached"); } } };
   for (const p of ["/r/zz", "/zh-cn/r/zz", "/r/2~x"]) assert.equal((await worker.fetch(new Request("https://speed.1ms.dog" + p), env)).status, 404, p);
 });
+
+test("UDP loss per phase: both ways, and split into there and back by the server's count", async () => {
+  const { lossOf } = await import("../src/rtc.mjs");
+  assert.equal(lossOf(0, 0, []), null);
+  const a = lossOf(100, 98, Array(97).fill(20));
+  assert.equal(Math.round(a.loss * 10) / 10, 3);
+  assert.equal(Math.round(a.up * 10) / 10, 2);
+  assert.equal(Math.round(a.down * 100) / 100, 1.02);
+  assert.equal(a.jit, 0);
+  const b = lossOf(10, null, [10, 30, 20]);
+  assert.equal(b.up, null); assert.equal(b.down, null); assert.equal(b.jit, 15); assert.equal(b.rtt, 20);
+});
+
+test("QUIC verdict: works, slowed, blocked, can't check, server unreachable", async () => {
+  const { quicVerdict } = await import("../src/rtc.mjs");
+  assert.equal(quicVerdict({ api: false }), "na");
+  assert.equal(quicVerdict({ api: true, wt: null, ws: null }), "down");
+  assert.equal(quicVerdict({ api: true, wt: null, ws: { rtt: 50 } }), "blocked");
+  assert.equal(quicVerdict({ api: true, wt: { rtt: 52, lost: 0 }, ws: { rtt: 50 } }), "ok");
+  assert.equal(quicVerdict({ api: true, wt: { rtt: 120, lost: 0 }, ws: { rtt: 50 } }), "slow");
+  assert.equal(quicVerdict({ api: true, wt: { rtt: 50, lost: 0.4 }, ws: { rtt: 50 } }), "slow");
+});

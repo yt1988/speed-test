@@ -7,6 +7,7 @@ import { fmtMbps, fmtMs, msTier, speedTier, bloat, grade, gradeKey, gradeTier, u
 import { FORMATS, FORMAT_NAMES, items as ruleItems, inline as ruleInline, remote as ruleRemote } from "./rules.mjs";
 import { parse as parseHist, add as addHist, change, isPeak } from "./history.mjs";
 import { encode as encodeShare, decode as decodeShare, sharePath } from "./share.mjs";
+import { udp, quic } from "./rtc.mjs";
 
 (function () {
   "use strict";
@@ -166,6 +167,39 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   const showLat = r => {
     latCell("idle", r.idle, r.jit); latCell("ldown", r.ldown, r.jdown, r.idle); latCell("lup", r.lup, r.jup, r.idle); gradeCell(r);
   };
+  // the UDP and QUIC row, to rtc.1ms.dog in Tokyo: only on speed.1ms.dog (and its local copy), where that server is
+  const RTC_ON = /^(speed\.1ms\.dog|localhost|127\.0\.0\.1)$/.test(location.hostname) && typeof RTCPeerConnection === "function";
+  if (RTC_ON) $("#udp").hidden = false;
+  const udpCell = (k, val, em, cls) => {
+    const li = $(`#udp [data-u="${k}"]`), b = li.querySelector("b");
+    b.className = cls || ""; b.innerHTML = val; li.querySelector("em").innerHTML = em || "&nbsp;";
+  };
+  const lossTier = p => p < 1 ? "t1" : p < 3 ? "t3" : "t5";
+  const fmtPct = p => p < 0.05 ? "0" : p < 10 ? p.toFixed(1) : String(Math.round(p));
+  // during a test: the phase being measured says so, the others wait their turn
+  const udpLive = now => { for (const k of [0, 1, 2]) udpCell(k, "···", esc(t(k === now ? "lat_now" : "lat_wait")), "wait"); udpCell("q", "···", esc(t("lat_wait")), "wait"); };
+  const udpClear = () => { for (const k of [0, 1, 2, "q"]) udpCell(k, "–"); };
+  function showRtc(u, q) {
+    for (const k of [0, 1, 2]) {
+      const p = u.phases && u.phases[k];
+      if (u.state !== "open") udpCell(k, "–", esc(t(u.state === "blocked" ? "udp_blocked" : "rtc_down")));
+      else if (!p) udpCell(k, "–");
+      else udpCell(k, `${fmtPct(p.loss)}<small>%</small>`, p.jit != null ? esc(t("jit_v", { ms: fmtMs(p.jit) })) : "", "n " + lossTier(p.loss));
+    }
+    const v = q.verdict, ms = { q: q.wt && fmtMs(q.wt.rtt), t: q.ws && fmtMs(q.ws.rtt) };
+    if (v === "na") udpCell("q", esc(t("quic_na")), esc(t("quic_na_em")), "w");
+    else if (v === "down") udpCell("q", "–", esc(t("rtc_down")));
+    else if (v === "blocked") udpCell("q", esc(t("quic_blocked")), esc(t("quic_blocked_em", ms)), "w t5");
+    else udpCell("q", esc(t(v === "ok" ? "quic_ok" : "quic_slow")), esc(t("quic_em", ms)), "w " + (v === "ok" ? "t1" : "t3"));
+  }
+  // after the test: the last UDP packets come back while QUIC and TCP are compared (a few seconds), then the row.
+  // A new test started meanwhile (RTC_N moved on) owns the row, so this one's result is dropped.
+  let RTC_N = 0;
+  async function finishRtc(U, run) {
+    udpCell("q", "···", esc(t("lat_now")), "wait");
+    const [u, q] = await Promise.all([U.stop(), quic().catch(() => ({ verdict: "down" }))]);
+    if (run === RTC_N) showRtc(u, q);
+  }
   function showUses(r) {
     const u = uses(r);
     for (const k of USES) {
@@ -277,6 +311,10 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     if (RECV) { RECV.remove(); RECV = null; history.replaceState(null, "", D.paths[D.lang]); }
     const ctl = RUN = new AbortController(), sig = ctl.signal, t0 = performance.now();
     reset(); showPrev(HIST[0]); setGo("run", t("ph_ping"));
+    // UDP to Tokyo for the whole test, tagged by phase (src/rtc.mjs)
+    const run = ++RTC_N;
+    let U = null;
+    if (RTC_ON) { try { U = udp(); } catch (e) {} U ? udpLive(0) : udpClear(); }
     // every tile says where it stands while the test runs
     latLive("idle", []);
     latCell("ldown", null, null, null, t("lat_wait")); latCell("lup", null, null, null, t("lat_wait"));
@@ -294,6 +332,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
       latCell("idle", R.idle, R.jit);
 
       setGo("run", t("ph_down"));
+      if (U) { U.phase(1); udpLive(1); }
       latLive("ldown", []);
       const d = await download({ signal: sig, onTick: s => {
         SERIES.down.push([s.ms, s.mbps]); drawSpark("down"); gauge("down", s.mbps, true);
@@ -307,6 +346,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
       R.ldown = median(d.loaded); R.jdown = jitter(d.loaded); latCell("ldown", R.ldown, R.jdown, R.idle);
 
       setGo("run", t("ph_up"));
+      if (U) { U.phase(2); udpLive(2); }
       latLive("lup", []);
       const u = await upload({ signal: sig, onTick: s => {
         SERIES.up.push([s.ms, s.mbps]); drawSpark("up"); gauge("up", s.mbps, true);
@@ -334,12 +374,14 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
       $("#shareBtn").disabled = false;
       saveRun({ ts: LAST.ts, ...R, ip: (NET.cf && NET.cf.ip) || META.ip || "", cc: cc || "", org: (NET.cf && NET.cf.org) || "", peak });
       setGo("done", t("used", { mb: mb(bytes) }));
+      if (U) finishRtc(U, run);
       if (EMBED) {
         post({ type: "progress", done: 100, total: 100, text: $("#progTxt").textContent });
         post(checkup(cc));
       }
     } catch (e) {
       gauge("down", R.down); gauge("up", R.up); showLat(R); ring(0); document.title = TITLE;
+      if (U) { U.stop().catch(() => {}); udpClear(); }
       if (sig.aborted) { $("#progTxt").textContent = t("stopped"); setGo("idle"); }
       else { $("#progTxt").innerHTML = "&nbsp;"; $("#noteL").textContent = t("e_fail"); setGo("idle"); post({ type: "error", text: t("e_fail") }); }
     } finally {

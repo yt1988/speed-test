@@ -1,0 +1,33 @@
+# /etc/systemd/system/1ms-speed.service: rtc.1ms.dog (see main.go). Directory, ports, user and service name are as
+# registered in 1ms-shell docs/processes.md, "VPS": /opt/1ms/speed/, 40100/udp, 40101/udp, 2087/tcp, 1ms-speed.
+# The certificate is issued by Public (certbot, webroot) and read through LoadCredential; renewal restarts this.
+[Unit]
+Description=rtc.1ms.dog: UDP loss and QUIC checks for speed.1ms.dog
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/opt/1ms/speed/rtc -sig :2087 -ice 40100 -wt :40101 -public4 16.76.79.94
+User=1ms-speed
+Group=1ms-speed
+LoadCredential=fullchain.pem:/etc/letsencrypt/live/rtc.1ms.dog/fullchain.pem
+LoadCredential=privkey.pem:/etc/letsencrypt/live/rtc.1ms.dog/privkey.pem
+Restart=always
+RestartSec=2
+# 939 MB for the whole machine: a hard cap, and Go's collector told to stay under it
+MemoryMax=96M
+Environment=GOMEMLIMIT=64MiB
+# ports above 1024, no capabilities at all; its own output is startup and errors only
+CapabilityBoundingSet=
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_NETLINK AF_UNIX
+LimitNOFILE=8192
+
+[Install]
+WantedBy=multi-user.target

@@ -94,6 +94,11 @@ h2 { font-size: 15px; font-weight: 700; }
 .lat [data-l="grade"] b { font: 700 24px/30px var(--f-ui); }
 .lat [data-l="grade"][data-g] { border-color: transparent; background: color-mix(in srgb, currentColor 9%, transparent); }
 .lat [data-l="grade"][data-g] > span, .lat [data-l="grade"][data-g] em { color: var(--muted); }
+/* UDP and QUIC to Tokyo: the same tiles under a small heading that says where they measure to */
+.udp { display: flex; flex-direction: column; gap: 6px; margin-top: -8px; }
+.udp-h { font-size: 12px; color: var(--muted); font-weight: 600; }
+.udp[hidden] { display: none; }
+.udp .lat b.w { font: 600 17px/30px var(--f-ui); overflow: hidden; text-overflow: ellipsis; }
 
 /* the conclusion: what the line is good for, and one or two sentences (before a test: how it works, or a warning
    about the route) */
