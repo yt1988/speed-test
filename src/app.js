@@ -382,9 +382,13 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   // the component, its version in the address: a copy cached before an update must not answer for the new one
   const SHARE_JS = "/assets/share/share.js?v=7";
   const shareLink = show => location.origin + D.paths[D.lang] + "r/" + encodeShare({ ...LAST, cc: show ? LAST.cc : "", colo: show ? LAST.colo : "" });
-  // the card's middle: the two speeds, the latencies and the grade, what the line is good for
+  // what the box adds to the card: the country and the Cloudflare node, on their own line under the speeds (the
+  // footer is too short for them in de or fr, and a card must not clip them: tool-contract.md, "Share card")
+  const cardWhere = (S, show) => show ? [S.cc && country(S.cc), S.colo && "Cloudflare " + S.colo].filter(Boolean).join("  ·  ") : "";
+  // the card's middle: the two speeds, where they were measured, the latencies and the grade, what the line is good for
   async function drawResult(x, kit) {
-    const { W, P, F, M, v, roundRect, clip, top } = kit, S = LAST, y = n => top + n;
+    const { W, P, F, M, v, roundRect, clip, fit, img, top } = kit, S = LAST, where = cardWhere(S, kit.show), d = where ? 44 : 0;
+    const y = n => top + n + (n > 200 ? d : 0);
     x.textBaseline = "alphabetic";
     const big = (label, val, at, color) => {
       x.fillStyle = color; x.font = `600 28px ${F}`; x.fillText(label, at, y(50));
@@ -393,6 +397,11 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
       x.fillStyle = v("muted"); x.font = `500 30px ${F}`; x.fillText("Mbps", at + w + 14, y(160));
     };
     big("↓ " + t("k_down"), S.down, P, v("ink")); big("↑ " + t("k_up"), S.up, P + 560, v("up"));
+    if (where) {
+      let at = P;
+      if (/^[A-Z]{2}$/.test(S.cc || "")) try { x.drawImage(await img(`/flags/${flagCode(S.cc)}.svg`), P, top + 182, 30, 22); at += 42; } catch (e) {}
+      x.fillStyle = v("muted"); fit(x, where, W - P - at, 24, 18, 500); x.fillText(clip(x, where, W - P - at), at, top + 202);
+    }
     const lat = [["k_idle", S.idle, S.jit], ["k_ldown", S.ldown, S.jdown], ["k_lup", S.lup, S.jup]], cw = (W - P * 2) / 4;
     x.fillStyle = v("line"); x.fillRect(P, y(210), W - P * 2, 2);
     lat.forEach(([k, ms, jit], i) => {
@@ -431,8 +440,8 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
       show: ["country", "colo"], never: ["ip"], canShow: !!(S.cc || S.colo),
       link: shareLink, home: location.origin + D.paths[D.lang],
       text: () => t("share_text", { down: fmtMbps(S.down), up: fmtMbps(S.up), ms: fmtMs(S.idle), grade: grade(S) || "–" }),
-      height: 760, draw: drawResult,
-      foot: show => [t("card_sub"), show && S.cc && country(S.cc), show && S.colo && "Cloudflare " + S.colo],
+      height: (x, kit) => 760 + (cardWhere(S, kit.show) ? 44 : 0), draw: drawResult,
+      foot: () => [t("card_sub")],
       ts: S.ts,
     }).open();
   };
