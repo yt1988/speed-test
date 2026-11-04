@@ -1,5 +1,6 @@
 // UDP and QUIC to rtc.1ms.dog in Tokyo (server/main.go). Little traffic: 50 packets of 12 bytes a second while the
-// test runs (about 0.2 MB both ways with the headers), then 10 echoes over QUIC and 10 over TCP.
+// test runs (with WebRTC's own acknowledgements about 130 UDP packets and 10 KB a second each way, 0.4-0.7 MB a
+// test), then 10 echoes over QUIC and 10 over TCP.
 //
 //   udp()          a WebRTC data channel, unreliable and unordered (as calls and games send): .phase(0|1|2) tags
 //                  what follows as idle, download or upload; .stop() gives { state, phases: [{ loss, up, down, jit }] }
@@ -39,7 +40,8 @@ export function udp(sig = SIG) {
   const pc = new RTCPeerConnection();
   const dc = pc.createDataChannel("u", { ordered: false, maxRetransmits: 0 });
   dc.binaryType = "arraybuffer";
-  const sent = new Map(), out = Array.from({ length: PHASES }, () => ({ sent: 0, rtts: [] }));
+  // sent: the packets still out, by sequence number; out: per phase, how many went and when, the round trips back
+  const sent = new Map(), out = Array.from({ length: PHASES }, () => ({ sent: 0, at: [], rtts: [] }));
   // state: connecting → open, or blocked (the server answered, UDP didn't get through) or down (no server)
   let phase = 0, seq = 0, tick = null, counts = null, state = "connecting", reached = false;
   const t0 = performance.now();
@@ -63,7 +65,8 @@ export function udp(sig = SIG) {
       if (dc.readyState !== "open") return;
       const b = new ArrayBuffer(12), v = new DataView(b);
       v.setUint8(0, phase); v.setUint32(1, ++seq); v.setFloat32(5, performance.now() - t0);
-      sent.set(seq, { p: phase, t: performance.now() }); out[phase].sent++;
+      const now = performance.now();
+      sent.set(seq, { p: phase, t: now }); out[phase].sent++; out[phase].at.push(now);
       try { dc.send(b); } catch (e) {}
     }, RATE_MS);
   })().catch(() => { state = reached ? "blocked" : "down"; });
@@ -71,6 +74,17 @@ export function udp(sig = SIG) {
   return {
     phase(p) { phase = p; },
     get state() { return state; },
+    // so far, while the test runs: per phase, the packets old enough to have come back (WAIT_MS), how many of
+    // them didn't, and the jitter of those that did; null for a phase with none yet
+    live() {
+      if (state !== "open") return null;
+      const old = performance.now() - WAIT_MS, lost = [0, 0, 0];
+      for (const s of sent.values()) if (s.t < old) lost[s.p]++;
+      return out.map((o, i) => {
+        let n = o.at.length; while (n && o.at[n - 1] >= old) n--;
+        return n ? { n, loss: 100 * lost[i] / n, jit: jitterOf(o.rtts) } : null;
+      });
+    },
     // stop sending, give the last packets WAIT_MS to come back, ask the server what reached it, close
     async stop() {
       await timeout(ready, 7000).catch(() => {});

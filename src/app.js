@@ -176,30 +176,53 @@ import { udp, quic } from "./rtc.mjs";
   };
   const lossTier = p => p < 1 ? "t1" : p < 3 ? "t3" : "t5";
   const fmtPct = p => p < 0.05 ? "0" : p < 10 ? p.toFixed(1) : String(Math.round(p));
-  // during a test: the phase being measured says so, the others wait their turn
-  const udpLive = now => { for (const k of [0, 1, 2]) udpCell(k, "···", esc(t(k === now ? "lat_now" : "lat_wait")), "wait"); udpCell("q", "···", esc(t("lat_wait")), "wait"); };
   const udpClear = () => { for (const k of [0, 1, 2, "q"]) udpCell(k, "–"); };
-  function showRtc(u, q) {
+  const lossCell = (k, p, n) => udpCell(k, `${fmtPct(p.loss)}<small>%</small>`,
+    [p.jit != null && esc(t("jit_v", { ms: fmtMs(p.jit) })), n && esc(tn("lat_n", n))].filter(Boolean).join(" · "), "n " + lossTier(p.loss));
+  // during a test, every 0.5 s from the packets so far: each phase that has some shows its loss and jitter, the one
+  // being measured says how many; the others wait their turn. UDP that never connected says why at once.
+  function udpLive(U, now) {
+    if (U.state === "blocked" || U.state === "down") { for (const k of [0, 1, 2]) udpCell(k, "–", esc(t(U.state === "blocked" ? "udp_blocked" : "rtc_down"))); return; }
+    const l = U.live();
+    for (const k of [0, 1, 2]) {
+      if (l && l[k]) lossCell(k, l[k], k === now && l[k].n);
+      else udpCell(k, "···", esc(t(k === now ? "lat_now" : "lat_wait")), "wait");
+    }
+  }
+  function showLoss(u) {
     for (const k of [0, 1, 2]) {
       const p = u.phases && u.phases[k];
       if (u.state !== "open") udpCell(k, "–", esc(t(u.state === "blocked" ? "udp_blocked" : "rtc_down")));
       else if (!p) udpCell(k, "–");
-      else udpCell(k, `${fmtPct(p.loss)}<small>%</small>`, p.jit != null ? esc(t("jit_v", { ms: fmtMs(p.jit) })) : "", "n " + lossTier(p.loss));
+      else lossCell(k, p);
     }
+  }
+  function showQuic(q) {
     const v = q.verdict, ms = { q: q.wt && fmtMs(q.wt.rtt), t: q.ws && fmtMs(q.ws.rtt) };
     if (v === "na") udpCell("q", esc(t("quic_na")), esc(t("quic_na_em")), "w");
     else if (v === "down") udpCell("q", "–", esc(t("rtc_down")));
     else if (v === "blocked") udpCell("q", esc(t("quic_blocked")), esc(t("quic_blocked_em", ms)), "w t5");
     else udpCell("q", esc(t(v === "ok" ? "quic_ok" : "quic_slow")), esc(t("quic_em", ms)), "w " + (v === "ok" ? "t1" : "t3"));
   }
-  // after the test: the last UDP packets come back while QUIC and TCP are compared (a few seconds), then the row.
-  // A new test started meanwhile (RTC_N moved on) owns the row, so this one's result is dropped.
+  // The row runs beside Cloudflare's test, not after it: UDP from the start (live, above), QUIC against TCP in the
+  // first seconds, shown as soon as it's known. When the test ends, the last packets get 1.5 s to come back, then
+  // the final loss (with the server's count). A new test started meanwhile (RTC_N moved on) owns the row.
   let RTC_N = 0;
-  async function finishRtc(U, run) {
-    udpCell("q", "···", esc(t("lat_now")), "wait");
-    const [u, q] = await Promise.all([U.stop(), quic().catch(() => ({ verdict: "down" }))]);
-    if (run === RTC_N) showRtc(u, q);
-    return { u, q };
+  function startRtc(run) {
+    let U = null;
+    try { U = udp(); } catch (e) { udpClear(); return null; }
+    let now = 0;
+    const live = setInterval(() => { if (run === RTC_N) udpLive(U, now); }, 500);
+    udpLive(U, 0); udpCell("q", "···", esc(t("lat_now")), "wait");
+    const Q = quic().catch(() => ({ verdict: "down" }));
+    Q.then(q => { if (run === RTC_N) showQuic(q); });
+    return {
+      phase(p) { now = p; U.phase(p); udpLive(U, p); },
+      // the test is done: final loss, and both for the checkup report
+      async done() { clearInterval(live); const [u, q] = await Promise.all([U.stop(), Q]); if (run === RTC_N) showLoss(u); return { u, q }; },
+      // stopped or failed: nothing to show
+      cancel() { clearInterval(live); U.stop().catch(() => {}); udpClear(); },
+    };
   }
   function showUses(r) {
     const u = uses(r);
@@ -314,8 +337,7 @@ import { udp, quic } from "./rtc.mjs";
     reset(); showPrev(HIST[0]); setGo("run", t("ph_ping"));
     // UDP to Tokyo for the whole test, tagged by phase (src/rtc.mjs)
     const run = ++RTC_N;
-    let U = null;
-    if (RTC_ON) { try { U = udp(); } catch (e) {} U ? udpLive(0) : udpClear(); }
+    const U = RTC_ON ? startRtc(run) : null;
     // every tile says where it stands while the test runs
     latLive("idle", []);
     latCell("ldown", null, null, null, t("lat_wait")); latCell("lup", null, null, null, t("lat_wait"));
@@ -333,7 +355,7 @@ import { udp, quic } from "./rtc.mjs";
       latCell("idle", R.idle, R.jit);
 
       setGo("run", t("ph_down"));
-      if (U) { U.phase(1); udpLive(1); }
+      if (U) U.phase(1);
       latLive("ldown", []);
       const d = await download({ signal: sig, onTick: s => {
         SERIES.down.push([s.ms, s.mbps]); drawSpark("down"); gauge("down", s.mbps, true);
@@ -347,7 +369,7 @@ import { udp, quic } from "./rtc.mjs";
       R.ldown = median(d.loaded); R.jdown = jitter(d.loaded); latCell("ldown", R.ldown, R.jdown, R.idle);
 
       setGo("run", t("ph_up"));
-      if (U) { U.phase(2); udpLive(2); }
+      if (U) U.phase(2);
       latLive("lup", []);
       const u = await upload({ signal: sig, onTick: s => {
         SERIES.up.push([s.ms, s.mbps]); drawSpark("up"); gauge("up", s.mbps, true);
@@ -375,14 +397,14 @@ import { udp, quic } from "./rtc.mjs";
       $("#shareBtn").disabled = false;
       saveRun({ ts: LAST.ts, ...R, ip: (NET.cf && NET.cf.ip) || META.ip || "", cc: cc || "", org: (NET.cf && NET.cf.org) || "", peak });
       setGo("done", t("used", { mb: mb(bytes) }));
-      const rtc = U ? finishRtc(U, run) : null;
+      const rtc = U ? U.done() : null;
       if (EMBED) {
         post({ type: "progress", done: 100, total: 100, text: $("#progTxt").textContent });
         post(checkup(cc, rtc && await rtc));   // the checkup report waits the few seconds UDP and QUIC take
       }
     } catch (e) {
       gauge("down", R.down); gauge("up", R.up); showLat(R); ring(0); document.title = TITLE;
-      if (U) { U.stop().catch(() => {}); udpClear(); }
+      if (U) U.cancel();
       if (sig.aborted) { $("#progTxt").textContent = t("stopped"); setGo("idle"); }
       else { $("#progTxt").innerHTML = "&nbsp;"; $("#noteL").textContent = t("e_fail"); setGo("idle"); post({ type: "error", text: t("e_fail") }); }
     } finally {
