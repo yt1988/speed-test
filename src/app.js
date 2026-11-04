@@ -199,6 +199,7 @@ import { udp, quic } from "./rtc.mjs";
     udpCell("q", "···", esc(t("lat_now")), "wait");
     const [u, q] = await Promise.all([U.stop(), quic().catch(() => ({ verdict: "down" }))]);
     if (run === RTC_N) showRtc(u, q);
+    return { u, q };
   }
   function showUses(r) {
     const u = uses(r);
@@ -374,10 +375,10 @@ import { udp, quic } from "./rtc.mjs";
       $("#shareBtn").disabled = false;
       saveRun({ ts: LAST.ts, ...R, ip: (NET.cf && NET.cf.ip) || META.ip || "", cc: cc || "", org: (NET.cf && NET.cf.org) || "", peak });
       setGo("done", t("used", { mb: mb(bytes) }));
-      if (U) finishRtc(U, run);
+      const rtc = U ? finishRtc(U, run) : null;
       if (EMBED) {
         post({ type: "progress", done: 100, total: 100, text: $("#progTxt").textContent });
-        post(checkup(cc));
+        post(checkup(cc, rtc && await rtc));   // the checkup report waits the few seconds UDP and QUIC take
       }
     } catch (e) {
       gauge("down", R.down); gauge("up", R.up); showLat(R); ring(0); document.title = TITLE;
@@ -509,7 +510,18 @@ import { udp, quic } from "./rtc.mjs";
   // the grade line as the headline; the speeds, latency and grade; what needs attention (a test that isn't measuring the
   // visitor's own line, what the line struggles with), worst first; the facts its cross-tool rules read; the share
   // link without the country and data center, as the share box starts
-  function checkup(cc) {
+  // UDP loss over the whole test (all three phases, by packets sent), and whether the QUIC handshake got through:
+  // 1ms-shell docs/checkup.md, "line and tunnel keys". Not measured: no key.
+  const rtcFacts = rtc => {
+    const f = {};
+    const ps = rtc && rtc.u.state === "open" && (rtc.u.phases || []).filter(Boolean);
+    const sent = ps ? ps.reduce((s, p) => s + p.sent, 0) : 0;
+    if (sent) f.udpLoss = Math.round(ps.reduce((s, p) => s + p.sent * p.loss, 0) / sent * 10) / 10;
+    const v = rtc && rtc.q.verdict;
+    if (v === "ok" || v === "slow") f.quic = true; else if (v === "blocked") f.quic = false;
+    return f;
+  };
+  function checkup(cc, rtc) {
     const plain = h => { const d = document.createElement("div"); d.innerHTML = h; return d.textContent; };
     const g = grade(R), u = uses(R), n1 = v => v == null ? undefined : Math.round(v * 10) / 10;
     const good = USES.filter(k => u[k] === "good").map(k => t("u_" + k));
@@ -520,7 +532,7 @@ import { udp, quic } from "./rtc.mjs";
       ...USES.filter(k => u[k] === "poor" || u[k] === "ok").map(k => ({ level: u[k] === "poor" ? "bad" : "warn", text: t("u_" + k) + " · " + t("lv_" + u[k]) })),
       ...(good.length ? [{ level: "ok", text: new Intl.ListFormat(D.lang).format(good) + " · " + t("lv_good") }] : []),
     ].sort((a, b) => lv[a.level] - lv[b.level]).slice(0, 4);
-    const facts = { down: n1(R.down), up: n1(R.up), idle: n1(R.idle), jitter: n1(R.jit), ldown: n1(R.ldown), lup: n1(R.lup), bloat: g || undefined };
+    const facts = { down: n1(R.down), up: n1(R.up), idle: n1(R.idle), jitter: n1(R.jit), ldown: n1(R.ldown), lup: n1(R.lup), bloat: g || undefined, ...rtcFacts(rtc) };
     for (const k in facts) if (facts[k] === undefined) delete facts[k];
     return {
       type: "result", lang: D.lang,
