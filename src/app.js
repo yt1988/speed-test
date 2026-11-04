@@ -380,7 +380,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   // system share sheet; this page gives the link, the card's middle and the footer. The box adds the country and the
   // Cloudflare data center to both; the address is never in either.
   // the component, its version in the address: a copy cached before an update must not answer for the new one
-  const SHARE_JS = "/assets/share/share.js?v=5";
+  const SHARE_JS = "/assets/share/share.js?v=6";
   const shareLink = show => location.origin + D.paths[D.lang] + "r/" + encodeShare({ ...LAST, cc: show ? LAST.cc : "", colo: show ? LAST.colo : "" });
   // the card's middle: the two speeds, the latencies and the grade, what the line is good for
   async function drawResult(x, kit) {
