@@ -47,7 +47,7 @@ export default {
   c_exit: "Saída",
   peak: "horário de pico",
   k_grade: "Bufferbloat", jit_v: "jitter {ms} ms", grade_sub: "carga +{ms} ms",
-  lat_wait: "Aguardando", lat_now: "Medindo", lat_n: "{n} medições", grade_wait: "Nota após o upload",
+  lat_wait: "Aguardando", lat_now: "Medindo", lat_n: "{n} medições", lat_n_one: "{n} medição", grade_wait: "Nota após o upload",
   tip_grade: "Quanto a latência sobe quando sua conexão está cheia, com nota de A+ a F: menos de 5 ms A+, menos de 30 A, menos de 60 B, menos de 200 C, menos de 400 D, acima disso F.",
   grade_ap: "Bufferbloat A+: com a conexão cheia, sua latência sobe só {ms} ms. Chamadas e jogos nem percebem que alguém está baixando algo.",
   grade_a: "Bufferbloat A: com a conexão cheia, sua latência sobe {ms} ms. Chamadas e a maioria dos jogos vão bem mesmo com ela ocupada.",

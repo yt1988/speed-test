@@ -64,7 +64,9 @@ export async function build({ check = false } = {}) {
   const path = slug => "/" + (slug ? slug + "/" : "");
   for (const [lang, slug, locale] of langs) {
     const d = I[lang], T = k => { if (!(k in d)) throw new Error(`i18n/${lang}.mjs has no "${k}"`); return d[k]; };
-    const strings = Object.fromEntries(Object.keys(en).filter(k => !BUILD_ONLY.has(k)).map(k => [k, T(k)]));
+    // English's keys, plus the plural forms only this language has (ru key_few, key_many)
+    const keys = [...Object.keys(en), ...Object.keys(d).filter(k => !(k in en))];
+    const strings = Object.fromEntries(keys.filter(k => !BUILD_ONLY.has(k)).map(k => [k, T(k)]));
     const sjs = `window.L1MS=${JSON.stringify(strings).replace(/</g, "\\u003c")};\n`;
     const sName = `l.${lang.toLowerCase()}.${hash(sjs)}.js`;
     files["assets/" + sName] = sjs;

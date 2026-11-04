@@ -47,7 +47,7 @@ export default {
   c_exit: "Ausgang",
   peak: "Abendspitze",
   k_grade: "Bufferbloat", jit_v: "Jitter {ms} ms", grade_sub: "Last +{ms} ms",
-  lat_wait: "Wartet", lat_now: "Misst", lat_n: "{n} Messungen", grade_wait: "Note nach dem Upload",
+  lat_wait: "Wartet", lat_now: "Misst", lat_n: "{n} Messungen", lat_n_one: "{n} Messung", grade_wait: "Note nach dem Upload",
   tip_grade: "Wie stark die Latenz steigt, wenn deine Leitung voll ist, benotet von A+ bis F: unter 5 ms A+, unter 30 A, unter 60 B, unter 200 C, unter 400 D, darüber F.",
   grade_ap: "Bufferbloat A+: Bei voller Leitung steigt deine Latenz nur um {ms} ms. Anrufe und Spiele merken nicht, wenn jemand etwas herunterlädt.",
   grade_a: "Bufferbloat A: Bei voller Leitung steigt deine Latenz um {ms} ms. Anrufe und die meisten Spiele laufen auch dann problemlos.",

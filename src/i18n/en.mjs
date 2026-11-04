@@ -47,7 +47,7 @@ export default {
   c_exit: "Exit",
   peak: "evening peak",
   k_grade: "Bufferbloat", jit_v: "jitter {ms} ms", grade_sub: "load +{ms} ms",
-  lat_wait: "Waiting", lat_now: "Measuring", lat_n: "{n} samples", grade_wait: "Graded after the upload",
+  lat_wait: "Waiting", lat_now: "Measuring", lat_n: "{n} samples", lat_n_one: "{n} sample", grade_wait: "Graded after the upload",
   tip_grade: "How much the latency rises when your line is full, graded A+ to F: under 5 ms A+, under 30 A, under 60 B, under 200 C, under 400 D, more F.",
   grade_ap: "Bufferbloat A+: your latency rises by only {ms} ms when the line is full. Calls and games won't notice someone downloading.",
   grade_a: "Bufferbloat A: your latency rises by {ms} ms when the line is full. Calls and most games are fine while it's busy.",

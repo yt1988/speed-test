@@ -31,7 +31,8 @@ test("every language has every string, with the same placeholders", async () => 
   for (const [lang] of LANGS) {
     const d = (await import(`../src/i18n/${lang}.mjs`)).default;
     for (const k of Object.keys(en)) assert.ok(k in d, `${lang}: ${k}`);
-    for (const k of Object.keys(d)) assert.ok(k in en, `${lang}: ${k} is not in en`);
+    // plural forms English doesn't have (ru key_few, key_many) stand beside a key it does
+    for (const k of Object.keys(d)) assert.ok(k in en || /_(few|many)$/.test(k) && k.replace(/_(few|many)$/, "") in en, `${lang}: ${k} is not in en`);
     assert.equal(d.docs.length, en.docs.length, lang + ": help entries");
     for (const k of Object.keys(en)) if (typeof en[k] === "string") assert.equal(vars(d[k]), vars(en[k]), `${lang}: ${k} placeholders`);
   }

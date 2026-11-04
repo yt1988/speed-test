@@ -47,7 +47,7 @@ export default {
   c_exit: "출구",
   peak: "저녁 피크",
   k_grade: "Bufferbloat", jit_v: "지터 {ms} ms", grade_sub: "부하 시 +{ms} ms",
-  lat_wait: "대기 중", lat_now: "측정 중", lat_n: "{n}회", grade_wait: "업로드 후 등급 산정",
+  lat_wait: "대기 중", lat_now: "측정 중", lat_n: "{n}회", lat_n_one: "{n}회", grade_wait: "업로드 후 등급 산정",
   tip_grade: "회선이 꽉 찼을 때 핑이 한가할 때보다 얼마나 오르는지 A+~F로 매겨요: 5 ms 미만 A+, 30 미만 A, 60 미만 B, 200 미만 C, 400 미만 D, 그 이상 F.",
   grade_ap: "Bufferbloat A+: 회선이 꽉 차도 핑이 {ms} ms밖에 안 올라요. 누가 다운로드해도 통화나 게임에 영향이 없어요.",
   grade_a: "Bufferbloat A: 회선이 꽉 차면 핑이 {ms} ms 올라요. 바쁠 때도 통화와 대부분의 게임은 문제없어요.",

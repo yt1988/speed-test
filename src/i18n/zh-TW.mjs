@@ -47,7 +47,7 @@ export default {
   c_exit: "出口",
   peak: "晚間尖峰",
   k_grade: "Bufferbloat 等級", jit_v: "抖動 {ms} ms", grade_sub: "滿載 +{ms} ms",
-  lat_wait: "等待中", lat_now: "測量中", lat_n: "{n} 次", grade_wait: "測完上傳後評級",
+  lat_wait: "等待中", lat_now: "測量中", lat_n: "{n} 次", lat_n_one: "{n} 次", grade_wait: "測完上傳後評級",
   tip_grade: "網路被占滿時，延遲比閒置時多出多少，以 A+ 到 F 評級：少於 5 毫秒是 A+，30 以內 A，60 以內 B，200 以內 C，400 以內 D，再多就是 F。",
   grade_ap: "Bufferbloat A+：網路占滿時延遲只多 {ms} 毫秒。家裡有人在下載，你講電話、打遊戲也不受影響。",
   grade_a: "Bufferbloat A：網路占滿時延遲多 {ms} 毫秒。網路忙的時候，通話和大多數遊戲都沒問題。",

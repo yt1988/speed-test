@@ -47,7 +47,7 @@ export default {
   c_exit: "出口",
   peak: "夜の混雑時",
   k_grade: "Bufferbloat", jit_v: "ジッター {ms} ms", grade_sub: "負荷時 +{ms} ms",
-  lat_wait: "待機中", lat_now: "測定中", lat_n: "{n} 回", grade_wait: "上りの測定後に評価",
+  lat_wait: "待機中", lat_now: "測定中", lat_n: "{n} 回", lat_n_one: "{n} 回", grade_wait: "上りの測定後に評価",
   tip_grade: "回線がいっぱいのとき、空いているときより遅延がどれだけ増えるかを A+〜F で評価します：5 ms 未満 A+、30 未満 A、60 未満 B、200 未満 C、400 未満 D、それ以上 F。",
   grade_ap: "Bufferbloat A+：回線がいっぱいでも、遅延の増加はわずか {ms} ms。誰かがダウンロードしていても、通話やゲームに影響はありません。",
   grade_a: "Bufferbloat A：回線がいっぱいのとき、遅延が {ms} ms 増えます。混雑中も通話やほとんどのゲームは問題ありません。",

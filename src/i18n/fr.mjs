@@ -47,7 +47,7 @@ export default {
   c_exit: "Sortie",
   peak: "heure de pointe",
   k_grade: "Bufferbloat", jit_v: "gigue {ms} ms", grade_sub: "charge +{ms} ms",
-  lat_wait: "En attente", lat_now: "Mesure", lat_n: "{n} mesures", grade_wait: "Note après l'upload",
+  lat_wait: "En attente", lat_now: "Mesure", lat_n: "{n} mesures", lat_n_one: "{n} mesure", grade_wait: "Note après l'upload",
   tip_grade: "De combien la latence grimpe quand votre connexion est saturée, noté de A+ à F : moins de 5 ms A+, moins de 30 A, moins de 60 B, moins de 200 C, moins de 400 D, au-delà F.",
   grade_ap: "Bufferbloat A+ : connexion saturée, votre latence ne grimpe que de {ms} ms. Appels et jeux ne remarquent même pas qu'on télécharge.",
   grade_a: "Bufferbloat A : connexion saturée, votre latence grimpe de {ms} ms. Les appels et la plupart des jeux tournent bien, même quand elle est chargée.",

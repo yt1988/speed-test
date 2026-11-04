@@ -14,6 +14,10 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   const D = JSON.parse($("#data").textContent);
   const L = window.L1MS || {};
   const t = (k, v) => { let s = L[k] ?? k; if (v) for (const x in v) s = s.split("{" + x + "}").join(v[x]); return s; };
+  // a sentence with a count: key_one, key_few… by the language's plural rule, else the key itself
+  // (1ms-shell translation.md section 2, "Plurals")
+  const PR = new Intl.PluralRules(D.lang);
+  const tn = (k, n, v) => { const p = k + "_" + PR.select(n); return t(p in L ? p : k, { n, ...v }); };
   const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
   const K = { theme: "speedtest:theme", lang: "speedtest:lang", rules: "speedtest:rules", auto: "speedtest:auto", hist: "speedtest:hist" };
@@ -149,7 +153,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
     em.innerHTML = [jit != null && esc(t("jit_v", { ms: fmtMs(jit) })), note && esc(note)].filter(Boolean).join(" · ") || "&nbsp;";
   };
   // live, from the samples so far
-  const latLive = (k, a, base) => a.length ? latCell(k, median(a), jitter(a), base, t("lat_n", { n: a.length })) : latCell(k, null, null, null, t("lat_now"));
+  const latLive = (k, a, base) => a.length ? latCell(k, median(a), jitter(a), base, tn("lat_n", a.length)) : latCell(k, null, null, null, t("lat_now"));
   // the grade tile: the letter, tinted by how good it is, and the latency load adds (during a test: when it comes)
   const gradeCell = (r, note) => {
     const li = $('.lat [data-l="grade"]'), g = r ? grade(r) : "";
