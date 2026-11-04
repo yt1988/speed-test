@@ -115,7 +115,7 @@ async function probe(signal) {
 // `signal`, or `ms` passing: an empty request that takes that long means the server can't be reached from here
 function within(signal, ms) {
   const c = new AbortController(), t = setTimeout(() => c.abort(new DOMException("", "TimeoutError")), ms);
-  signal && signal.addEventListener("abort", () => c.abort(), { once: true });
+  signal && signal.addEventListener("abort", () => c.abort(signal.reason), { once: true });
   return { signal: c.signal, done: () => clearTimeout(t) };
 }
 const probeWithin = async (signal, ms) => { const w = within(signal, ms); try { return await probe(w.signal); } finally { w.done(); } };
@@ -155,7 +155,9 @@ function underLoad(signal, out) {
 // ms pass. send(size, add, signal) moves `size` bytes, calling add(n) as bytes go; resolves when the request ends.
 async function transfer({ send, streams, hi, min, max, signal, onTick }) {
   const stop = new AbortController(), t0 = performance.now(), samples = [[0, 0]], loaded = [];
-  const end = () => stop.abort();
+  // every abort carries a reason that says which one it was: a bare abort() is reported as "signal is aborted
+  // without reason", which names nothing (1ms-shell#69)
+  const end = () => { if (!stop.signal.aborted) stop.abort(signal && signal.aborted ? signal.reason : new DOMException("transfer over", "AbortError")); };
   signal && signal.addEventListener("abort", end, { once: true });
   let got = 0, fails = 0;
   const add = n => { got += n; };
@@ -188,6 +190,8 @@ export function download({ streams = 4, min = 5000, max = 10000, signal, onTick 
     const r = await fetch(`${CF}/__down?bytes=${size}&measId=${uid()}`, { cache: "no-store", signal: sig });
     if (!r.ok || !r.body) throw new Error("HTTP " + r.status);
     const rd = r.body.getReader();
+    // the stream errors when the transfer ends mid-request; newer Chrome reports its closed promise as unhandled
+    rd.closed.catch(() => {});
     for (;;) { const { done, value } = await rd.read(); if (done) break; add(value.byteLength); }
   };
   return transfer({ send, streams, hi: 50e6, min, max, signal, onTick });

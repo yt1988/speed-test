@@ -268,7 +268,7 @@ import { encode as encodeShare, decode as decodeShare, sharePath } from "./share
   }
 
   async function start() {
-    if (RUN) { RUN.abort(); return; }
+    if (RUN) { RUN.abort(new DOMException("stopped", "AbortError")); return; }
     // someone else's result gives way to the visitor's own (no compare mode here: the banner goes with it)
     if (RECV) { RECV.remove(); RECV = null; history.replaceState(null, "", D.paths[D.lang]); }
     const ctl = RUN = new AbortController(), sig = ctl.signal, t0 = performance.now();
