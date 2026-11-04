@@ -50,7 +50,7 @@ export default {
   lat_wait: "대기 중", lat_now: "측정 중", lat_n: "{n}회", lat_n_one: "{n}회", grade_wait: "업로드 후 등급 산정",
   tip_grade: "회선이 꽉 찼을 때 핑이 한가할 때보다 얼마나 오르는지 A+~F로 매겨요: 5 ms 미만 A+, 30 미만 A, 60 미만 B, 200 미만 C, 400 미만 D, 그 이상 F.",
   // the UDP and QUIC row (src/rtc.mjs, rtc.1ms.dog in Tokyo)
-  udp_h: "UDP와 QUIC (도쿄 서버까지)", k_loss_idle: "패킷 손실", k_loss_down: "다운로드 중 손실", k_loss_up: "업로드 중 손실", k_quic: "QUIC", tip_loss: "통화나 게임처럼 UDP로 작은 패킷을 초당 50개씩 도쿄에 보내고, 돌아오지 않은 비율을 잽니다. 1% 미만이면 괜찮습니다.", tip_quic: "QUIC(HTTP/3, UDP 사용)이 네트워크를 거쳐 도쿄까지 가는지, 같은 서버로 가는 TCP만큼 빠른지 봅니다. 회사·학교·해외 회선에서는 UDP를 막거나 느리게 하기도 합니다.", udp_blocked: "UDP 차단됨", rtc_down: "서버 연결 안 됨", quic_ok: "정상", quic_slow: "속도 제한", quic_blocked: "차단됨", quic_na: "확인 불가", quic_em: "QUIC {q} · TCP {t} ms", quic_na_em: "브라우저 미지원", quic_blocked_em: "TCP만 {t} ms",
+  udp_h: "UDP와 QUIC (도쿄 서버까지)", k_loss_idle: "패킷 손실", k_loss_down: "다운로드 중 손실", k_loss_up: "업로드 중 손실", k_quic: "QUIC", tip_loss: "통화나 게임처럼 UDP로 작은 패킷을 초당 50개씩 도쿄에 보내고, 돌아오지 않은 비율을 잽니다. 1% 미만이면 괜찮습니다.", tip_quic: "QUIC(HTTP/3, UDP 사용)이 네트워크를 거쳐 도쿄까지 가는지, 같은 서버로 가는 TCP만큼 빠른지 봅니다. 회사·학교·해외 회선에서는 UDP를 막거나 느리게 하기도 합니다.", udp_blocked: "UDP 차단됨", rtc_down: "서버 연결 안 됨", quic_ok: "정상", quic_slow: "속도 제한", quic_blocked: "차단됨", quic_na: "확인 불가", quic_em: "{q} · TCP {t} ms", quic_na_em: "브라우저 미지원", quic_blocked_em: "TCP만 {t} ms",
   grade_ap: "Bufferbloat A+: 회선이 꽉 차도 핑이 {ms} ms밖에 안 올라요. 누가 다운로드해도 통화나 게임에 영향이 없어요.",
   grade_a: "Bufferbloat A: 회선이 꽉 차면 핑이 {ms} ms 올라요. 바쁠 때도 통화와 대부분의 게임은 문제없어요.",
   grade_b: "Bufferbloat B: 회선이 꽉 차면 핑이 {ms} ms 올라요. 누가 다운로드하면 FPS나 격투 게임처럼 핑에 민감한 게임에서는 느껴질 수 있어요.",

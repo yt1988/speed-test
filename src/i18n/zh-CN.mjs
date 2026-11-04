@@ -50,7 +50,7 @@ export default {
   lat_wait: "等待中", lat_now: "测量中", lat_n: "{n} 次", lat_n_one: "{n} 次", grade_wait: "测完上传后评级",
   tip_grade: "网络被占满时，延迟比空闲时多出多少，按 A+ 到 F 评级：少于 5 毫秒是 A+，30 以内 A，60 以内 B，200 以内 C，400 以内 D，再多就是 F。",
   // the UDP and QUIC row (src/rtc.mjs, rtc.1ms.dog in Tokyo)
-  udp_h: "UDP 和 QUIC，到我们在东京的服务器", k_loss_idle: "丢包", k_loss_down: "下载时丢包", k_loss_up: "上传时丢包", k_quic: "QUIC", tip_loss: "每秒 50 个小包，走 UDP（和视频通话、游戏一样）发到东京再回来，没回来的比例就是丢包。低于 1% 没问题。", tip_quic: "QUIC（HTTP/3，走 UDP）能不能穿过你的网络到达东京，速度是否和到同一台服务器的 TCP 一样快。有些公司、学校和跨境网络会拦截或限速 UDP。", udp_blocked: "UDP 不通", rtc_down: "连不上服务器", quic_ok: "正常", quic_slow: "被限速", quic_blocked: "被拦截", quic_na: "无法检测", quic_em: "QUIC {q} · TCP {t} ms", quic_na_em: "浏览器不支持", quic_blocked_em: "只能走 TCP，{t} ms",
+  udp_h: "UDP 和 QUIC，到我们在东京的服务器", k_loss_idle: "丢包", k_loss_down: "下载时丢包", k_loss_up: "上传时丢包", k_quic: "QUIC", tip_loss: "每秒 50 个小包，走 UDP（和视频通话、游戏一样）发到东京再回来，没回来的比例就是丢包。低于 1% 没问题。", tip_quic: "QUIC（HTTP/3，走 UDP）能不能穿过你的网络到达东京，速度是否和到同一台服务器的 TCP 一样快。有些公司、学校和跨境网络会拦截或限速 UDP。", udp_blocked: "UDP 不通", rtc_down: "连不上服务器", quic_ok: "正常", quic_slow: "被限速", quic_blocked: "被拦截", quic_na: "无法检测", quic_em: "{q} · TCP {t} ms", quic_na_em: "浏览器不支持", quic_blocked_em: "只能走 TCP，{t} ms",
   grade_ap: "Bufferbloat A+：网络占满时延迟只多 {ms} 毫秒。家里有人下载，你打电话、打游戏也不受影响。",
   grade_a: "Bufferbloat A：网络占满时延迟多 {ms} 毫秒。网络忙的时候，通话和大多数游戏都没问题。",
   grade_b: "Bufferbloat B：网络占满时延迟多 {ms} 毫秒。有人下载时，射击、格斗这类对延迟敏感的游戏会有感觉。",

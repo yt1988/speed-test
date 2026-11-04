@@ -50,7 +50,7 @@ export default {
   lat_wait: "待機中", lat_now: "測定中", lat_n: "{n} 回", lat_n_one: "{n} 回", grade_wait: "上りの測定後に評価",
   tip_grade: "回線がいっぱいのとき、空いているときより遅延がどれだけ増えるかを A+〜F で評価します：5 ms 未満 A+、30 未満 A、60 未満 B、200 未満 C、400 未満 D、それ以上 F。",
   // the UDP and QUIC row (src/rtc.mjs, rtc.1ms.dog in Tokyo)
-  udp_h: "UDP と QUIC（東京のサーバーまで）", k_loss_idle: "パケットロス", k_loss_down: "下り中のロス", k_loss_up: "上り中のロス", k_quic: "QUIC", tip_loss: "通話やゲームと同じ UDP で、小さなパケットを毎秒 50 個東京へ送り、戻ってこなかった割合です。1% 未満なら問題ありません。", tip_quic: "QUIC（HTTP/3、UDP を使用）があなたのネットワークを通って東京まで届くか、同じサーバーへの TCP と同じくらい速いかを調べます。会社や学校、国際回線では UDP が遮断・制限されることがあります。", udp_blocked: "UDP 不通", rtc_down: "サーバーに届かない", quic_ok: "正常", quic_slow: "制限あり", quic_blocked: "遮断", quic_na: "判定不可", quic_em: "QUIC {q} · TCP {t} ms", quic_na_em: "ブラウザ非対応", quic_blocked_em: "TCP のみ {t} ms",
+  udp_h: "UDP と QUIC（東京のサーバーまで）", k_loss_idle: "パケットロス", k_loss_down: "下り中のロス", k_loss_up: "上り中のロス", k_quic: "QUIC", tip_loss: "通話やゲームと同じ UDP で、小さなパケットを毎秒 50 個東京へ送り、戻ってこなかった割合です。1% 未満なら問題ありません。", tip_quic: "QUIC（HTTP/3、UDP を使用）があなたのネットワークを通って東京まで届くか、同じサーバーへの TCP と同じくらい速いかを調べます。会社や学校、国際回線では UDP が遮断・制限されることがあります。", udp_blocked: "UDP 不通", rtc_down: "サーバーに届かない", quic_ok: "正常", quic_slow: "制限あり", quic_blocked: "遮断", quic_na: "判定不可", quic_em: "{q} · TCP {t} ms", quic_na_em: "ブラウザ非対応", quic_blocked_em: "TCP のみ {t} ms",
   grade_ap: "Bufferbloat A+：回線がいっぱいでも、遅延の増加はわずか {ms} ms。誰かがダウンロードしていても、通話やゲームに影響はありません。",
   grade_a: "Bufferbloat A：回線がいっぱいのとき、遅延が {ms} ms 増えます。混雑中も通話やほとんどのゲームは問題ありません。",
   grade_b: "Bufferbloat B：回線がいっぱいのとき、遅延が {ms} ms 増えます。誰かがダウンロードしていると、FPS や格闘ゲームなど遅延に敏感なゲームでは気になるかもしれません。",

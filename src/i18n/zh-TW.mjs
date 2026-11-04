@@ -50,7 +50,7 @@ export default {
   lat_wait: "等待中", lat_now: "測量中", lat_n: "{n} 次", lat_n_one: "{n} 次", grade_wait: "測完上傳後評級",
   tip_grade: "網路被占滿時，延遲比閒置時多出多少，以 A+ 到 F 評級：少於 5 毫秒是 A+，30 以內 A，60 以內 B，200 以內 C，400 以內 D，再多就是 F。",
   // the UDP and QUIC row (src/rtc.mjs, rtc.1ms.dog in Tokyo)
-  udp_h: "UDP 和 QUIC，到我們在東京的伺服器", k_loss_idle: "封包遺失", k_loss_down: "下載時封包遺失", k_loss_up: "上傳時封包遺失", k_quic: "QUIC", tip_loss: "每秒 50 個小封包，走 UDP（和視訊通話、遊戲一樣）送到東京再回來，沒回來的比例就是封包遺失。低於 1% 沒問題。", tip_quic: "QUIC（HTTP/3，走 UDP）能不能穿過你的網路到東京，速度是否和到同一台伺服器的 TCP 一樣快。有些公司、學校和跨境網路會封鎖或限速 UDP。", udp_blocked: "UDP 不通", rtc_down: "連不上伺服器", quic_ok: "正常", quic_slow: "被限速", quic_blocked: "被封鎖", quic_na: "無法檢測", quic_em: "QUIC {q} · TCP {t} ms", quic_na_em: "瀏覽器不支援", quic_blocked_em: "只能走 TCP，{t} ms",
+  udp_h: "UDP 和 QUIC，到我們在東京的伺服器", k_loss_idle: "封包遺失", k_loss_down: "下載時封包遺失", k_loss_up: "上傳時封包遺失", k_quic: "QUIC", tip_loss: "每秒 50 個小封包，走 UDP（和視訊通話、遊戲一樣）送到東京再回來，沒回來的比例就是封包遺失。低於 1% 沒問題。", tip_quic: "QUIC（HTTP/3，走 UDP）能不能穿過你的網路到東京，速度是否和到同一台伺服器的 TCP 一樣快。有些公司、學校和跨境網路會封鎖或限速 UDP。", udp_blocked: "UDP 不通", rtc_down: "連不上伺服器", quic_ok: "正常", quic_slow: "被限速", quic_blocked: "被封鎖", quic_na: "無法檢測", quic_em: "{q} · TCP {t} ms", quic_na_em: "瀏覽器不支援", quic_blocked_em: "只能走 TCP，{t} ms",
   grade_ap: "Bufferbloat A+：網路占滿時延遲只多 {ms} 毫秒。家裡有人在下載，你講電話、打遊戲也不受影響。",
   grade_a: "Bufferbloat A：網路占滿時延遲多 {ms} 毫秒。網路忙的時候，通話和大多數遊戲都沒問題。",
   grade_b: "Bufferbloat B：網路占滿時延遲多 {ms} 毫秒。有人在下載時，射擊、格鬥這類對延遲敏感的遊戲會感覺得到。",
