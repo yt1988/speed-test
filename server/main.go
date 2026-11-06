@@ -1,5 +1,6 @@
-// rtc.1ms.dog: the server end of speed.1ms.dog's UDP and QUIC checks, in Tokyo. Ports, directory and service name are
-// as registered in 1ms-shell docs/processes.md, "VPS": 40100/udp (ICE), 40101/udp (WebTransport), 2087/tcp, 1ms-speed.
+// rtc.1ms.dog: the server end of the UDP and QUIC checks of speed.1ms.dog and lag.1ms.dog (Network Diagnosis, which
+// copies src/rtc.mjs), in Tokyo. Ports, directory and service name are as registered in 1ms-shell docs/processes.md,
+// "VPS": 40100/udp (ICE), 40101/udp (WebTransport), 2087/tcp, 1ms-speed.
 //
 //   POST https://rtc.1ms.dog:2087/offer   a WebRTC offer in, the answer out (ice-lite, one UDP port): the page then
 //                                          sends small packets on an unreliable data channel and this echoes each one
@@ -42,7 +43,7 @@ const (
 )
 
 var (
-	origins = regexp.MustCompile(`^(https://speed\.1ms\.dog|http://localhost(:\d+)?|http://127\.0\.0\.1(:\d+)?)$`)
+	origins = regexp.MustCompile(`^(https://(speed|lag)\.1ms\.dog|http://localhost(:\d+)?|http://127\.0\.0\.1(:\d+)?)$`)
 	peers   atomic.Int32
 	wsOpen  atomic.Int32
 	api     *webrtc.API
