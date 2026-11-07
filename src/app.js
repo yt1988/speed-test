@@ -190,6 +190,8 @@ import { udp, quic } from "./rtc.mjs";
     }
   }
   function showLoss(u) {
+    const lossMax = Math.max(0, ...((u.state === "open" && u.phases) || []).filter(Boolean).map(p => p.loss));
+    if (laggy(R, lossMax)) addLag();
     for (const k of [0, 1, 2]) {
       const p = u.phases && u.phases[k];
       if (u.state !== "open") udpCell(k, "–", esc(t(u.state === "blocked" ? "udp_blocked" : "rtc_down")));
@@ -261,7 +263,12 @@ import { udp, quic } from "./rtc.mjs";
   // embed mode), Me2Cloud (latency to the other clouds), the DNS test, ASN Lookup (the exit's network, /AS<n>), the
   // IPv6 test (when the test went over IPv4)
   const tool = name => { const m = document.querySelector(`meta[name="${name}"]`); return m ? m.content.replace(/\/+$/, "") + D.paths[D.lang] : ""; };
-  const CHECK = tool("check"), M2C = tool("m2c"), DNS = tool("dns"), ASN = tool("asn"), IPV6 = tool("ipv6");
+  const CHECK = tool("check"), M2C = tool("m2c"), DNS = tool("dns"), ASN = tool("asn"), IPV6 = tool("ipv6"), LAG = tool("lag");
+  // Network Diagnosis (lag.1ms.dog), right after the conclusion once a result shows the line stutters: UDP loss of 1%
+  // or more, jitter of 30 ms or more, a bufferbloat grade of C or worse, or calls or games that struggle
+  const laggy = (r, lossMax) => lossMax >= 1 || (r.jit != null && r.jit >= 30) || /^[CDF]/.test(grade(r) || "") || ["call", "game"].some(k => uses(r)[k] === "poor");
+  const lagLink = () => LAG && !EMBED ? `<a class="xl lag" href="${esc(LAG)}" target="_blank" rel="noopener">${esc(t("rel_lag"))}${XL}</a>` : "";
+  const addLag = () => { if (!$("#noteL .lag") && lagLink()) $("#noteL").insertAdjacentHTML("beforeend", " " + lagLink()); };
   function renderRel() {
     const e = NET.cf;
     const v4 = e && e.ip && !e.ip.includes(":");
@@ -389,6 +396,7 @@ import { udp, quic } from "./rtc.mjs";
       if (cc === "CN" && !NET.reasons.length) lines.push(esc(t("cn_note")));
       if (NET.reasons.length) lines.push(warnHTML());
       $("#noteL").innerHTML = lines.join(" ") || "&nbsp;";
+      if (laggy(R, 0)) addLag();   // UDP loss, when there is some, adds it a moment later (showLoss)
       ring(1);
       const peak = isPeak(new Date());
       $("#progTxt").textContent = t("done", { s: ((performance.now() - t0) / 1000).toFixed(0), mb: mb(bytes) }) + (peak ? " · " + t("peak") : "");

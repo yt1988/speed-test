@@ -32,7 +32,7 @@ export default {
   r_dc: "出口網路 {org} 是機房網路，通常代表你在用代理、VPN 或雲端伺服器。",
   r_fix: "想測自己的寬頻，請加上{rules}。",
   egress_link: "看看各網站看到的是哪個 IP",
-  rel_check: "做一次完整體檢", rel_m2c: "測你到 AWS、Google Cloud 等雲端服務的延遲", rel_dns: "網頁開得慢？看看哪個 DNS 對你最快",
+  rel_lag: "找出卡在哪一段", rel_check: "做一次完整體檢", rel_m2c: "測你到 AWS、Google Cloud 等雲端服務的延遲", rel_dns: "網頁開得慢？看看哪個 DNS 對你最快",
   rel_v6: "這次測速走的是 IPv4。你的網路支援 IPv6 嗎？", asn_tip: "AS{n}：查查這個網路是誰的",
   hint_idle: "按「開始」，大約 20 到 30 秒。網速越快，用掉的數據越多，詳見說明。",
   src_cf: "測速伺服器：Cloudflare",

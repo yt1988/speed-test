@@ -32,7 +32,7 @@ export default {
   r_dc: "出口网络 {org} 是机房网络，通常说明在用代理、VPN 或云服务器。",
   r_fix: "想测自己的宽带，请加上{rules}。",
   egress_link: "看看各个网站看到的是哪个 IP",
-  rel_check: "做一次完整体检", rel_m2c: "测你到 AWS、阿里云等云厂商的延迟", rel_dns: "网页打开慢？看看哪个 DNS 对你最快",
+  rel_lag: "找出卡在哪一段", rel_check: "做一次完整体检", rel_m2c: "测你到 AWS、阿里云等云厂商的延迟", rel_dns: "网页打开慢？看看哪个 DNS 对你最快",
   rel_v6: "这次测速走的是 IPv4。你的网络支持 IPv6 吗？", asn_tip: "AS{n}：查查这个网络是谁的",
   hint_idle: "点「开始」，大约 20 到 30 秒。网速越快，用的流量越多，详见帮助。",
   src_cf: "测速服务器：Cloudflare",
