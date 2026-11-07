@@ -1,8 +1,8 @@
 export default {
   name: "繁體中文",
   app_name: "網速測試",
-  seo_title: "網路測速：寬頻測速，測下載、上傳、延遲、抖動與 Bufferbloat · 網速測試",
-  seo_desc: "免費線上網路測速：直接在瀏覽器裡測下載和上傳速度、延遲和抖動，再看網路一忙延遲會增加多少（Bufferbloat，以 A+ 到 F 評級）。連到離你最近的 Cloudflare 節點。不用安裝軟體、沒有廣告，本站不保存你的測試結果。",
+  seo_title: "網路測速・寬頻測速：免裝 App，同時測 UDP 封包遺失 · 網速測試",
+  seo_desc: "跟 speedtest.net、fast.com 不同：不用裝 App，還會同時測 UDP 封包遺失。直接在瀏覽器裡測網路速度：下載、上傳、延遲、抖動，以及網路一忙延遲會增加多少（Bufferbloat，以 A+ 到 F 評級）。連到離你最近的 Cloudflare 節點，沒有廣告，本站不保存你的測試結果。",
   seo_kw: "網速測試, 網路測速, 寬頻測速, 測網速, 網路延遲測試, 網路抖動測試, ping 測試, bufferbloat 測試, 滿載延遲, WiFi 測速",
   og_sub: "下載、上傳、延遲，網路一忙會不會卡，一次測清楚",
   h1: "你的網速有多快？",
