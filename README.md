@@ -49,12 +49,17 @@ src/history.mjs     past results, kept only in the browser
 src/verdict.mjs     tiers, bufferbloat and its A+ to F grade, what the line is good for
 src/rules.mjs       direct rules for proxy tools
 src/share.mjs       results in links
+src/rtc.mjs         UDP loss and QUIC, to rtc.1ms.dog (speed.1ms.dog only)
 src/app.js          the page script
 src/worker.js       /r/<code> previews; a bare 404 for anything else
 src/i18n/*.mjs      10 languages
 scripts/build.mjs   builds public/ (pages, assets, rule sets, CSP)
 scripts/assets.mjs  link preview images (public/og/)
 scripts/verify.mjs  checks the endpoints with tiny requests (weekly in GitHub Actions)
+scripts/capped.mjs  the site locally, every speed request capped at 16 KB
+server/             rtc.1ms.dog: one Go process (WebRTC, WebTransport, WebSocket echo) and its systemd unit
+AGENTS.md           how to run, test and deploy, the server from scratch
+docs/design.md      why it works the way it does, and what was measured
 ```
 
 ## Run and deploy

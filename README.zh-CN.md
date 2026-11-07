@@ -49,12 +49,17 @@ src/history.mjs     历史结果，只保存在浏览器里
 src/verdict.mjs     档位、缓冲膨胀、线路适合干什么
 src/rules.mjs       代理工具的直连规则
 src/share.mjs       把结果编进链接
+src/rtc.mjs         UDP 丢包和 QUIC，到 rtc.1ms.dog（只在 speed.1ms.dog 上）
 src/app.js          页面脚本
 src/worker.js       /r/<code> 的预览；其他路径返回不带 HTML 的 404
 src/i18n/*.mjs      10 种语言
 scripts/build.mjs   生成 public/（页面、资源、规则集、CSP）
 scripts/assets.mjs  链接预览图（public/og/）
 scripts/verify.mjs  用很小的请求检查端点（GitHub Actions 每周跑一次）
+scripts/capped.mjs  在本地打开网站，每个测速请求限制在 16 KB
+server/             rtc.1ms.dog：一个 Go 进程（WebRTC、WebTransport、WebSocket 回声）和它的 systemd unit
+AGENTS.md           怎么运行、测试、部署，以及从零装好服务器
+docs/design.md      为什么这样设计，测过的结论
 ```
 
 ## 运行和部署
