@@ -1,0 +1,37 @@
+# The UDP and QUIC server (server/): on every push to main that touches it, a static linux/amd64 build published as a
+# GitHub Release, so a new machine downloads it instead of installing Go. Tag server-<short commit>, marked latest:
+#   https://github.com/yt1988/speed-test/releases/latest/download/rtc          (and .../SHA256SUMS)
+# Nothing here deploys or holds a key; the binary goes on the server by hand (see AGENTS.md).
+name: server
+on:
+  push:
+    branches: [main]
+    paths: ["server/**", ".github/workflows/server.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: server/go.mod
+          cache-dependency-path: server/go.sum
+      - name: Vet and build
+        working-directory: server
+        run: |
+          go vet ./...
+          mkdir -p out
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o out/rtc .
+          cd out && sha256sum rtc > SHA256SUMS && cat SHA256SUMS && ls -l
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="server-${GITHUB_SHA::7}"
+          if gh release view "$tag" >/dev/null 2>&1; then echo "$tag exists"; exit 0; fi
+          gh release create "$tag" server/out/rtc server/out/SHA256SUMS --target "$GITHUB_SHA" --latest \
+            --title "rtc server $tag" \
+            --notes "Static linux/amd64 build of server/ at ${GITHUB_SHA::7} (CGO_ENABLED=0, -trimpath -ldflags=\"-s -w\"). Install and verify: AGENTS.md, \"Run the UDP and QUIC server\"."

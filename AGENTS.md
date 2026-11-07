@@ -56,7 +56,17 @@ by flags: an HTTPS port for the WebRTC offer and a WebSocket echo (`-sig`, defau
 WebRTC peer shares (`-ice`, default `40100`, ice-lite) and a UDP port for WebTransport (`-wt`, default `:40101`). It
 writes no access log and keeps nothing (see the top of `server/main.go`); about 12 MB of memory.
 
-1. **Build** (Go 1.27 or newer; the server needs no Go):
+1. **Get the binary.** Every push to `main` that touches `server/` publishes a static linux/amd64 build as a GitHub
+   Release (tag `server-<short commit>`, always marked latest; `.github/workflows/server.yml`). On the server, no Go
+   needed:
+   ```bash
+   curl -fLO https://github.com/yt1988/speed-test/releases/latest/download/rtc
+   curl -fLO https://github.com/yt1988/speed-test/releases/latest/download/SHA256SUMS
+   sha256sum -c SHA256SUMS          # must print "rtc: OK"
+   chmod 755 rtc
+   ```
+   That build answers only the page origins listed in `server/main.go`. For your own domains (step 2), build it
+   yourself with Go 1.27 or newer, on any machine:
    ```bash
    cd server
    GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o rtc .
