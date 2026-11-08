@@ -56,7 +56,7 @@ export async function build({ check = false } = {}) {
   const tpl = await readFile(new URL("page.html", src), "utf8");
 
   const root = fileURLToPath(new URL("..", import.meta.url));
-  const js = (await bundle({ entryPoints: [fileURLToPath(new URL("app.js", src))], bundle: true, minify: true, format: "iife", target: "es2020",
+  const js = (await bundle({ entryPoints: [fileURLToPath(new URL("app.js", src))], bundle: true, minify: true, format: "iife", target: ["es2019", "chrome70", "safari12", "firefox68", "edge79"],
     legalComments: "none", write: false, absWorkingDir: root,
     // the share dialog is loaded from /assets/share/ when someone shares, never bundled
     external: ["/assets/*"] })).outputFiles[0].text;
