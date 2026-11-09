@@ -32,7 +32,7 @@ export default {
   r_dc: "Sua saída, {org}, é uma rede de data center. Isso geralmente indica proxy, VPN ou servidor na nuvem.",
   r_fix: "Para testar sua própria conexão, adicione as {rules}.",
   egress_link: "Ver qual IP cada site enxerga",
-  rel_lag: "Descubra onde trava", rel_check: "Fazer um check-up completo", rel_m2c: "Sua latência até AWS, Google Cloud e outras nuvens", rel_dns: "Páginas demorando para abrir? Descubra seu DNS mais rápido",
+  rel_lag: "Descubra onde trava", rel_ping: "Latência até este serviço em 18 locais", rel_check: "Fazer um check-up completo", rel_m2c: "Sua latência até AWS, Google Cloud e outras nuvens", rel_dns: "Páginas demorando para abrir? Descubra seu DNS mais rápido",
   rel_v6: "Este teste foi feito por IPv4. Sua rede tem IPv6?", asn_tip: "AS{n}: quem opera esta rede",
   hint_idle: "Toque em Iniciar. Leva uns 20–30 segundos e usa mais dados quanto mais rápida for sua conexão (veja a Ajuda).",
   src_cf: "Servidores de teste: Cloudflare",

@@ -32,7 +32,7 @@ export default {
   r_dc: "Dein Ausgang, {org}, ist ein Rechenzentrumsnetz. Das deutet meist auf einen Proxy, ein VPN oder einen Cloud-Server hin.",
   r_fix: "Um deine eigene Leitung zu testen, füge die {rules} hinzu.",
   egress_link: "Welche IP jede Website sieht",
-  rel_lag: "Finden, wo es hakt", rel_check: "Vollständigen Check starten", rel_m2c: "Deine Latenz zu AWS, Google Cloud und anderen Clouds", rel_dns: "Seiten laden langsam? Finde dein schnellstes DNS",
+  rel_lag: "Finden, wo es hakt", rel_ping: "Latenz zu diesem Dienst aus 18 Regionen", rel_check: "Vollständigen Check starten", rel_m2c: "Deine Latenz zu AWS, Google Cloud und anderen Clouds", rel_dns: "Seiten laden langsam? Finde dein schnellstes DNS",
   rel_v6: "Dieser Test lief über IPv4. Hat dein Netz IPv6?", asn_tip: "AS{n}: wer dieses Netz betreibt",
   hint_idle: "Drück auf Start. Das dauert etwa 20–30 Sekunden und verbraucht umso mehr Daten, je schneller deine Leitung ist (siehe Hilfe).",
   src_cf: "Testserver: Cloudflare",

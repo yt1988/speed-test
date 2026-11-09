@@ -32,7 +32,7 @@ export default {
   r_dc: "출구가 데이터센터 네트워크({org})예요. 보통 프록시, VPN 또는 클라우드 서버를 쓰고 있다는 뜻이에요.",
   r_fix: "내 회선을 측정하려면 {rules}을 추가하세요.",
   egress_link: "사이트마다 보이는 IP 확인",
-  rel_lag: "어디서 끊기는지 찾기", rel_check: "전체 점검 실행", rel_m2c: "AWS, Google Cloud 등 클라우드까지의 지연 시간 측정", rel_dns: "페이지가 느리게 열리나요? 가장 빠른 DNS 찾기",
+  rel_lag: "어디서 끊기는지 찾기", rel_ping: "각 지역에서 이 서비스까지의 지연", rel_check: "전체 점검 실행", rel_m2c: "AWS, Google Cloud 등 클라우드까지의 지연 시간 측정", rel_dns: "페이지가 느리게 열리나요? 가장 빠른 DNS 찾기",
   rel_v6: "이번 측정은 IPv4로 했어요. 내 네트워크는 IPv6를 지원할까요?", asn_tip: "AS{n}: 이 네트워크를 운영하는 곳",
   hint_idle: "시작을 누르면 20~30초 정도 걸려요. 속도가 빠를수록 데이터를 더 많이 써요(도움말 참고).",
   src_cf: "측정 서버: Cloudflare",

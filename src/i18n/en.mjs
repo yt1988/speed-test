@@ -32,7 +32,7 @@ export default {
   r_dc: "Your exit, {org}, is a data center network. That usually means a proxy, VPN or cloud server.",
   r_fix: "To test your own connection, add the {rules}.",
   egress_link: "See which IP each site sees",
-  rel_lag: "Find where it lags", rel_check: "Run a full checkup", rel_m2c: "Your latency to AWS, Google Cloud and other clouds", rel_dns: "Pages slow to load? Find your fastest DNS",
+  rel_lag: "Find where it lags", rel_ping: "Latency to this service from 18 places", rel_check: "Run a full checkup", rel_m2c: "Your latency to AWS, Google Cloud and other clouds", rel_dns: "Pages slow to load? Find your fastest DNS",
   rel_v6: "This test ran over IPv4. Does your network support IPv6?", asn_tip: "AS{n}: who runs this network",
   hint_idle: "Press Start. It takes about 20–30 seconds, and uses more data the faster your line is (see Help).",
   src_cf: "Test servers: Cloudflare",

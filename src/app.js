@@ -1,7 +1,7 @@
 // Speed Test page. Waits for Start unless the visitor turned on testing when the page opens (remembered here).
 // Order: idle latency, download, upload (src/measure.mjs), each shown live in the hero's fixed slots; at the end what
 // the line is good for and the bufferbloat grade (how much latency load adds). Strings: window.L1MS.
-import { ping, download, upload, median, jitter, exit } from "./measure.mjs";
+import { CF, ping, download, upload, median, jitter, exit } from "./measure.mjs";
 import { reasons, fromMe } from "./net.mjs";
 import { fmtMbps, fmtMs, msTier, speedTier, bloat, grade, gradeKey, gradeTier, uses, USES } from "./verdict.mjs";
 import { FORMATS, FORMAT_NAMES, items as ruleItems, inline as ruleInline, remote as ruleRemote } from "./rules.mjs";
@@ -191,7 +191,7 @@ import { udp, quic } from "./rtc.mjs";
   }
   function showLoss(u) {
     const lossMax = Math.max(0, ...((u.state === "open" && u.phases) || []).filter(Boolean).map(p => p.loss));
-    if (laggy(R, lossMax)) addLag();
+    if (laggy(R, lossMax)) { addLag(); addPing(); }
     for (const k of [0, 1, 2]) {
       const p = u.phases && u.phases[k];
       if (u.state !== "open") udpCell(k, "–", esc(t(u.state === "blocked" ? "udp_blocked" : "rtc_down")));
@@ -261,7 +261,7 @@ import { udp, quic } from "./rtc.mjs";
   const ipLink = ip => IPQS ? dlink(IPQS.content.replace(/\/+$/, "") + D.paths[D.lang] + "?ip=" + encodeURIComponent(ip), esc(ip), t("ipqs_tip"), "ip") : `<span class="m">${esc(ip)}</span>`;
   // the other 1ms.dog tools, each linked only when the page announces it: the full checkup (check.1ms.dog; not in
   // embed mode), Me2Cloud (latency to the other clouds), the DNS test, ASN Lookup (the exit's network, /AS<n>), the
-  // IPv6 test (when the test went over IPv4)
+  // IPv6 test (when the test went over IPv4), and Global Ping (beside the conclusion, with the line below)
   const tool = name => { const m = document.querySelector(`meta[name="${name}"]`); return m ? m.content.replace(/\/+$/, "") + D.paths[D.lang] : ""; };
   const CHECK = tool("check"), M2C = tool("m2c"), DNS = tool("dns"), ASN = tool("asn"), IPV6 = tool("ipv6"), LAG = tool("lag");
   // Network Diagnosis (lag.1ms.dog), right after the conclusion once a result shows the line stutters: UDP loss of 1%
@@ -269,6 +269,12 @@ import { udp, quic } from "./rtc.mjs";
   const laggy = (r, lossMax) => lossMax >= 1 || (r.jit != null && r.jit >= 30) || /^[CDF]/.test(grade(r) || "") || ["call", "game"].some(k => uses(r)[k] === "poor");
   const lagLink = () => LAG && !EMBED ? `<a class="xl lag" href="${esc(LAG)}" target="_blank" rel="noopener">${esc(t("rel_lag"))}${XL}</a>` : "";
   const addLag = () => { if (!$("#noteL .lag") && lagLink()) $("#noteL").insertAdjacentHTML("beforeend", " " + lagLink()); };
+  // Global Ping (ping.1ms.dog) beside that link, at the same moment: how far the service this test runs against
+  // (Cloudflare's speed test endpoints) is from 18 places around the world, so a slow result can be told apart from a
+  // slow endpoint. The target rides along as ?t=, which there only fills in the field; it starts no test.
+  const PING = tool("ping");
+  const pingLink = () => PING && !EMBED ? `<a class="xl ping" href="${esc(PING)}?t=${encodeURIComponent(new URL(CF).host)}" target="_blank" rel="noopener">${esc(t("rel_ping"))}${XL}</a>` : "";
+  const addPing = () => { if (!$("#noteL .ping") && pingLink()) $("#noteL").insertAdjacentHTML("beforeend", " " + pingLink()); };
   function renderRel() {
     const e = NET.cf;
     const v4 = e && e.ip && !e.ip.includes(":");
@@ -396,7 +402,7 @@ import { udp, quic } from "./rtc.mjs";
       if (cc === "CN" && !NET.reasons.length) lines.push(esc(t("cn_note")));
       if (NET.reasons.length) lines.push(warnHTML());
       $("#noteL").innerHTML = lines.join(" ") || "&nbsp;";
-      if (laggy(R, 0)) addLag();   // UDP loss, when there is some, adds it a moment later (showLoss)
+      if (laggy(R, 0)) { addLag(); addPing(); }   // UDP loss, when there is some, adds them a moment later (showLoss)
       ring(1);
       const peak = isPeak(new Date());
       $("#progTxt").textContent = t("done", { s: ((performance.now() - t0) / 1000).toFixed(0), mb: mb(bytes) }) + (peak ? " · " + t("peak") : "");

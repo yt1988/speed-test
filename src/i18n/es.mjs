@@ -32,7 +32,7 @@ export default {
   r_dc: "Tu salida, {org}, es una red de centro de datos. Eso suele indicar un proxy, una VPN o un servidor en la nube.",
   r_fix: "Para medir tu propia conexión, añade las {rules}.",
   egress_link: "Ver qué IP ve cada sitio",
-  rel_lag: "Encuentra dónde se atasca", rel_check: "Haz un chequeo completo", rel_m2c: "Tu latencia a AWS, Google Cloud y otras nubes", rel_dns: "¿Las páginas tardan en abrir? Encuentra tu DNS más rápido",
+  rel_lag: "Encuentra dónde se atasca", rel_ping: "Latencia hasta este servicio desde 18 sitios", rel_check: "Haz un chequeo completo", rel_m2c: "Tu latencia a AWS, Google Cloud y otras nubes", rel_dns: "¿Las páginas tardan en abrir? Encuentra tu DNS más rápido",
   rel_v6: "Este test se hizo por IPv4. ¿Tu red tiene IPv6?", asn_tip: "AS{n}: quién opera esta red",
   hint_idle: "Pulsa Empezar. Tarda unos 20–30 segundos y usa más datos cuanto más rápida es tu conexión (ver Ayuda).",
   src_cf: "Servidores de prueba: Cloudflare",
