@@ -223,3 +223,9 @@ html[data-embed] .go { pointer-events: none; width: 104px; height: 104px; margin
 html[data-embed] .bar { margin: 0 -14px; padding: 8px 14px 10px; }
 /* Network Diagnosis after the conclusion, when the line stutters: the next step, so it stands out a little */
 .note-l a.lag { font-weight: 600; white-space: nowrap; }
+/* "the numbers look wrong?" under the conclusion: a quiet way into the site's report dialog (the shell's report.js),
+   with this run's readings offered to pick from. Hidden until there is a result, and in embed mode */
+.rp-btn { border: 0; background: none; padding: 0; font: inherit; font-size: 12px; color: var(--muted); cursor: pointer; }
+.rp-btn:hover { color: var(--ink); text-decoration: underline; }
+.rp-btn[hidden] { display: none; }
+@media (pointer: coarse) { .rp-btn { min-height: 32px; } }

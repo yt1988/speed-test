@@ -339,7 +339,7 @@ import { udp, quic } from "./rtc.mjs";
     showLat({});
     showUses({}); $("#noteL").innerHTML = warnHTML() || "&nbsp;";
     ring(0); document.title = TITLE;
-    LAST = null; $("#shareBtn").disabled = true;
+    LAST = null; $("#shareBtn").disabled = true; rpShow(false);
   }
 
   async function start() {
@@ -408,7 +408,7 @@ import { udp, quic } from "./rtc.mjs";
       $("#progTxt").textContent = t("done", { s: ((performance.now() - t0) / 1000).toFixed(0), mb: mb(bytes) }) + (peak ? " · " + t("peak") : "");
       document.title = `↓ ${fmtMbps(R.down)} ↑ ${fmtMbps(R.up)} Mbps · ${TITLE}`;
       LAST = { ts: Date.now(), cc: cc || "", colo: META.colo || (NET.cf && NET.cf.colo) || "", ...R };
-      $("#shareBtn").disabled = false;
+      $("#shareBtn").disabled = false; rpShow(true);
       saveRun({ ts: LAST.ts, ...R, ip: (NET.cf && NET.cf.ip) || META.ip || "", cc: cc || "", org: (NET.cf && NET.cf.org) || "", peak });
       setGo("done", t("used", { mb: mb(bytes) }));
       const rtc = U ? U.done() : null;
@@ -536,7 +536,7 @@ import { udp, quic } from "./rtc.mjs";
     showLat(S);
     showUses(S);
     $("#noteL").innerHTML = gradeLine(S) || "&nbsp;";
-    LAST = S; $("#shareBtn").disabled = false;
+    LAST = S; $("#shareBtn").disabled = false; rpShow(true);
     setGo("idle");
     const { received } = await import(SHARE_JS);
     if (!RUN && LAST === S) RECV = received({ lang: D.lang, ts: S.ts, at: $(".hero"), test: () => { if (!RUN) start(); } });
@@ -583,6 +583,47 @@ import { udp, quic } from "./rtc.mjs";
     };
   }
 
+  /* ---------- the site's "report a problem" dialog (1ms-shell docs/tool-contract.md, "报告问题") ---------- */
+  // What this page read, for the dialog's "the tool's own result" row: a line in the visitor's language, the JSON that
+  // reproduces the run (the address masked; a shared result says so instead of posing as a test this visitor ran), and
+  // the readings as one-tap answers behind the "numbers look wrong?" entry under the conclusion. Nothing before a
+  // result, and only where the host provides the dialog: a copy someone deploys themselves has none, and then the
+  // entry stays hidden and msReport is never asked.
+  const RP = typeof window.msOpenReport === "function" && !EMBED;
+  const rpShow = has => { const b = $("#rpRes"); if (b) b.hidden = !(RP && has); };
+  const maskIp = ip => !ip ? "" : ip.includes(":") ? ip.split(":").slice(0, 2).join(":") + ":…" : ip.split(".").slice(0, 2).join(".") + ".•.•";
+  const num = v => v == null || !isFinite(v) ? null : Math.round(v * 10) / 10;
+  window.msReport = () => {
+    if (!LAST) return null;
+    const g = grade(LAST), u = uses(LAST), e = NET.cf || META || {}, shared = !!RECV;
+    const Mbps = v => v == null ? "–" : fmtMbps(v) + " Mbps", Ms = v => v == null ? "–" : fmtMs(v) + " ms";
+    const node = [e.coloCity, e.colo].filter(Boolean).join(" ") || "Cloudflare";
+    const summary = t(shared ? "rp_sum_shared" : "rp_sum",
+      { down: Mbps(LAST.down), up: Mbps(LAST.up), ms: Ms(LAST.idle), jit: Ms(LAST.jit), grade: g || "–", node });
+    // what the page reads for real: the speeds, the latencies, the grade, then any use the line struggles with
+    const sep = /^(zh|ja)/.test(D.lang) ? "：" : ": ";
+    const pick = (k, v) => v == null || v === "–" ? null : (t(k) + sep + v).slice(0, 60);
+    const picks = [
+      pick("k_down", Mbps(LAST.down)), pick("k_up", Mbps(LAST.up)), pick("k_idle", Ms(LAST.idle)), pick("k_jit", Ms(LAST.jit)),
+      pick("k_grade", g || "–"), pick("k_ldown", Ms(LAST.ldown)), pick("k_lup", Ms(LAST.lup)),
+      ...USES.filter(k => u[k] === "poor").map(k => pick("u_" + k, t("lv_poor"))),
+    ].filter(Boolean).slice(0, 8);
+    // the run as it can be replayed, in a shared link's terms: the numbers, and a link that shows them; the address
+    // masked; the country and network as the page shows them (the report is private, and both say whether the line or
+    // the path is at fault); no city, no history, and a shared result carries only its own numbers
+    const data = {
+      v: 1, at: new Date(LAST.ts).toISOString(), lang: D.lang, mode: EMBED ? "embed" : "page", shared,
+      result: { down: num(LAST.down), up: num(LAST.up), idle: num(LAST.idle), jit: num(LAST.jit),
+        ldown: num(LAST.ldown), lup: num(LAST.lup), jdown: num(LAST.jdown), jup: num(LAST.jup), grade: g || null },
+      link: D.paths[D.lang] + "r/" + encodeShare({ ...LAST, cc: "", colo: "" }),
+      node: { host: new URL(CF).host, colo: LAST.colo || null },
+      exit: shared ? null : { ip: maskIp(e.ip), org: e.org || null, cc: e.cc || null },
+      tz: shared ? null : TZ || null,
+      proxy: shared ? null : NET.reasons.map(r => r.k),
+    };
+    return { summary: summary.slice(0, 300), data, picks };
+  };
+  rpShow(!!LAST);
   setGo("idle");
   const SP = sharePath(location.pathname), SHARED = SP && decodeShare(SP.code);
   if (EMBED) start();

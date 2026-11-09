@@ -86,6 +86,9 @@
       <div class="sum">
         <ul class="uses" id="uses">{{uses}}</ul>
         <p class="note-l" id="noteL" data-i="hint_idle"></p>
+        <!-- "the numbers look wrong?": starts the site's report dialog with those words, and the dialog then offers this
+             run's readings to pick from (1ms-shell docs/tool-contract.md, "报告问题"); shown once there is a result -->
+        <button class="rp-btn" id="rpRes" type="button" hidden data-i="rp_bad" data-ms-report="{{a:rp_pre}}"></button>
       </div>
       <!-- the other 1ms.dog tools that answer what this one can't, linked when the page announces them (meta, from the shell) -->
       <p class="rel" id="rel" hidden></p>
