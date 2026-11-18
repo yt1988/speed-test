@@ -25,9 +25,52 @@ const pub = new URL("../public/", import.meta.url), src = new URL("../src/", imp
 export const LANGS = [["en", "", "en_US"], ["zh-CN", "zh-cn", "zh_CN"], ["zh-TW", "zh-tw", "zh_TW"], ["ja", "ja", "ja_JP"], ["ko", "ko", "ko_KR"],
   ["es", "es", "es_ES"], ["fr", "fr", "fr_FR"], ["de", "de", "de_DE"], ["pt", "pt", "pt_BR"], ["ru", "ru", "ru_RU"]];
 
-// Runs before first paint: apply the saved theme. On the English root, send visitors to their language's page
-// (a saved choice first, then the browser languages); crawlers and English readers stay.
-const PREPAINT = `(function(){var d=document.documentElement,th=null,s=null;try{th=localStorage.getItem("speedtest:theme");s=localStorage.getItem("speedtest:lang")}catch(e){}if(th==="light"||th==="dark")d.setAttribute("data-theme",th);if(!d.hasAttribute("data-root"))return;var P=JSON.parse(d.getAttribute("data-paths")||"{}"),l=null;try{var q=new URLSearchParams(location.search).get("lang");if(P[q])l=q}catch(e){}if(!l&&P[s])l=s;for(var ls=navigator.languages||[navigator.language||"en"],i=0;!l&&!s&&i<ls.length;i++){var x=String(ls[i]).toLowerCase(),b=x.split("-")[0];l=b==="zh"?(/tw|hk|mo|hant/.test(x)?"zh-TW":"zh-CN"):P[b]?b:null}if(l&&l!=="en")location.replace(P[l]+location.search+location.hash)})();`;
+// Runs before first paint. Applies the saved theme; on the English root, sends visitors to their language's page (a
+// saved choice first, then the browser languages; crawlers and English readers stay). Then asks /_ms/me for the exit
+// and draws the network row with it: the page script can only do that after the stylesheet, the strings and the page
+// script itself have loaded, which on a phone is most of a second after the page could have painted. The page script
+// replaces the row with the full one (links, the data center, the proxy warnings). Names and flags as in app.js and
+// the tool contract (TW by its fixed name and the cn flag); the table is repeated here because this runs without the
+// page script.
+const PREPAINT = `(function(){
+var d=document.documentElement,th=null,s=null;
+try{th=localStorage.getItem("speedtest:theme");s=localStorage.getItem("speedtest:lang")}catch(e){}
+if(th==="light"||th==="dark")d.setAttribute("data-theme",th);
+if(d.hasAttribute("data-root")){
+  var P=JSON.parse(d.getAttribute("data-paths")||"{}"),l=null;
+  try{var q=new URLSearchParams(location.search).get("lang");if(P[q])l=q}catch(e){}
+  if(!l&&P[s])l=s;
+  for(var ls=navigator.languages||[navigator.language||"en"],i=0;!l&&!s&&i<ls.length;i++){
+    var x=String(ls[i]).toLowerCase(),b=x.split("-")[0];
+    l=b==="zh"?(/tw|hk|mo|hant/.test(x)?"zh-TW":"zh-CN"):P[b]?b:null
+  }
+  if(l&&l!=="en")return location.replace(P[l]+location.search+location.hash)
+}
+try{
+  var c=new AbortController(),tm=setTimeout(function(){c.abort()},6000);
+  window.__msMe=fetch("/_ms/me",{cache:"no-store",signal:c.signal}).then(function(r){return r&&r.ok?r.json():null}).catch(function(){return null}).finally(function(){clearTimeout(tm)});
+  window.__msMe.then(function(j){
+    if(!j||!j.ip)return;
+    var lang=d.lang||"en",TW={"zh-CN":"中国台湾","zh-TW":"中國台灣",en:"Taiwan, China",ja:"中国台湾",ko:"중국 대만",es:"Taiwán, China",fr:"Taïwan, Chine",de:"Taiwan, China",pt:"Taiwan, China",ru:"Тайвань, Китай"};
+    var nm=function(cc){if(!cc)return"";if(cc==="TW")return TW[lang];try{return new Intl.DisplayNames([lang],{type:"region"}).of(cc)}catch(e){return cc}};
+    var tries=0,put=function(){
+      var el=document.getElementById("netCf");
+      if(!el){if(++tries<250)setTimeout(put,20);return}
+      var cc=String(j.country||"").toUpperCase(),place=[j.city,nm(cc)].filter(Boolean).join(", ");
+      if(!place)return;
+      el.innerHTML="";
+      if(/^[A-Z]{2}$/.test(cc)){
+        var im=document.createElement("img");
+        im.className="flag";im.src="/flags/"+(cc==="TW"?"cn":cc.toLowerCase())+".svg";im.alt=nm(cc);im.width=18;im.height=14;
+        el.appendChild(im)
+      }
+      el.appendChild(document.createTextNode(place+(j.org?" · "+j.org:"")+" · "));
+      var ip=document.createElement("span");ip.className="m";ip.textContent=j.ip;el.appendChild(ip)
+    };
+    put()
+  })
+}catch(e){}
+})();`;
 
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const hash = s => createHash("sha256").update(s).digest("hex").slice(0, 10);

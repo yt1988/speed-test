@@ -307,7 +307,10 @@ import { udp, quic } from "./rtc.mjs";
   }
   document.addEventListener("click", e => { if (e.target.closest && e.target.closest("[data-rules]")) $("#rulesBtn").click(); });
   renderRel();
-  const ME = fetch("/_ms/me", { cache: "no-store", signal: AbortSignal.timeout(6000) }).then(r => r.ok ? r.json() : null).then(fromMe).catch(() => null);
+  // asked by the pre-paint snippet (build.mjs) as the HTML parses, which already draws the row without its links; the
+  // fallback covers a page whose snippet could not run
+  const ME = (window.__msMe || fetch("/_ms/me", { cache: "no-store", signal: AbortSignal.timeout(6000) }).then(r => r && r.ok ? r.json() : null).catch(() => null))
+    .then(fromMe).catch(() => null);
   ME.then(e => { if (e && !NET.cfDone) { NET.cf = e; NET.cfDone = true; renderNet(); } });
   exit().then(async c => {
     const m = await ME;

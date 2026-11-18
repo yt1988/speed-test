@@ -26,6 +26,32 @@ see [AGENTS.md](../AGENTS.md).
 - **For the embed mode's report**: `udpLoss` (over the whole test) and `quic` (handshake through or blocked) in
   `facts`, left out when not measured; the report waits the few seconds the row takes.
 
+## The network row, and first paint
+
+- **The field showed the row as the LCP.** On 2026-11-18, 78% of the page's mobile loads had `#netCf` (the exit
+  network) as the LCP element, p75 3,308 ms, while the h1 painted at 2,608 ms; desktop 32%, 2,544 ms. 54% of the
+  visitors are on phones.
+- **It was waiting for the page script, not for a probe.** The row comes from `/_ms/me` (what Cloudflare already
+  knows of this connection), but only `app.js` drew it, and that runs after the render-blocking stylesheet and the
+  strings script; the fetch then added a round trip of its own. In a throttled lab (375×667, 4× CPU, 1.6 Mbps,
+  150 ms) the row filled at 1,530 ms and became the LCP at 1,550 ms, 390 ms after the h1 painted.
+- **The pre-paint snippet now draws it.** The inline script in `<head>` asks `/_ms/me` as the HTML parses and fills
+  `#netCf` with the same data (flag, city and country, network, IP) as soon as the JSON arrives — about 340 ms in
+  the lab, before first paint. `app.js` replaces it with the full row (links to the ASN and IP quality tools, the
+  data center, the proxy warnings) when it runs. It is the real answer, not a placeholder: painting made-up text
+  first would freeze the LCP at that paint instead of making the answer arrive sooner (2026-11-05, dns).
+- **Measured after the change:** LCP = first paint, 950–1,050 ms in the lab (from 1,550 ms). On the live page
+  before the deploy the same lab read 1,170–1,370 ms, `#netCf` 200 ms after the h1. The row no longer bounds LCP;
+  the stylesheet and first paint do.
+- **The Geist preload is gone.** It competed with the render-blocking stylesheet while `font-display: swap` means
+  first paint does not need the font (the fix home made on 2026-11-17, measured the same way). First paint
+  1,160 → 950 ms in the lab; CLS moved by 0.0005 (the swap), and it is 0 on the live page.
+- **Taiwan's name and flag** are repeated in the snippet (it runs without `app.js`), because the tool contract
+  fixes them; `test/strings.test.mjs` fails if the two tables ever differ.
+- **One round trip is left.** If the shell ever puts these `request.cf` fields into the HTML it already returns,
+  every tool could paint its own row with the first paint and this fetch could go. Until then, this is the earliest
+  the page can know.
+
 ## Errors and aborts
 
 - **Abort rejections from outside the page.** Chrome and Edge 156–157 report unhandled rejections carrying the

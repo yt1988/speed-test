@@ -51,6 +51,14 @@ test("lists come from $$, never $ (which returns one element)", async () => {
   assert.deepEqual(bad, []);
 });
 
+test("the pre-paint row names and flags Taiwan exactly as the page script does", async () => {
+  const [app, build] = await Promise.all(["src/app.js", "scripts/build.mjs"].map(read));
+  const table = s => { const m = s.match(/TW\s*=\s*\{([^}]*)\}/); return m ? [...m[1].matchAll(/:\s*"([^"]*)"/g)].map(x => x[1]) : []; };
+  assert.equal(table(app).length, 10, "app.js TW table");
+  assert.deepEqual(table(build), table(app), "build.mjs's pre-paint copy of the TW table");
+  assert.ok(build.includes(`(cc==="TW"?"cn":cc.toLowerCase())`), "the pre-paint row flags TW as cn");
+});
+
 test("TW by its fixed name and the cn flag, as 1ms-shell tool-contract.md section 5 writes it", async () => {
   const app = await read("src/app.js");
   for (const line of [
