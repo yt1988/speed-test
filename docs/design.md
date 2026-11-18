@@ -40,12 +40,13 @@ see [AGENTS.md](../AGENTS.md).
   the lab, before first paint. `app.js` replaces it with the full row (links to the ASN and IP quality tools, the
   data center, the proxy warnings) when it runs. It is the real answer, not a placeholder: painting made-up text
   first would freeze the LCP at that paint instead of making the answer arrive sooner (2026-11-05, dns).
-- **Measured after the change:** LCP = first paint, 950–1,050 ms in the lab (from 1,550 ms). On the live page
-  before the deploy the same lab read 1,170–1,370 ms, `#netCf` 200 ms after the h1. The row no longer bounds LCP;
-  the stylesheet and first paint do.
-- **The Geist preload is gone.** It competed with the render-blocking stylesheet while `font-display: swap` means
-  first paint does not need the font (the fix home made on 2026-11-17, measured the same way). First paint
-  1,160 → 950 ms in the lab; CLS moved by 0.0005 (the swap), and it is 0 on the live page.
+- **Measured after the change:** LCP = first paint — 950–1,050 ms in the lab with the preload removed, 1,150–1,170
+  with it kept (from 1,550 ms). On the live page before the deploy the same lab read 1,170–1,370 ms, `#netCf` 200 ms
+  after the h1. The row no longer bounds LCP; the stylesheet and first paint do.
+- **The Geist preload stays.** Dropping it (the fix home made on 2026-11-17) gained first paint ~200 ms in the lab,
+  but on the live page it brought a 0.11 CLS: the latency tiles' line boxes change when the font swaps in after
+  first paint. With the preload, the font is there before paint and CLS stays 0. Speed's first paint is text, so it
+  needs the font the way home did not.
 - **Taiwan's name and flag** are repeated in the snippet (it runs without `app.js`), because the tool contract
   fixes them; `test/strings.test.mjs` fails if the two tables ever differ.
 - **One round trip is left.** If the shell ever puts these `request.cf` fields into the HTML it already returns,
