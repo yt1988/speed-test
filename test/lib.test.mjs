@@ -88,9 +88,9 @@ test("the exit, and signs it isn't the visitor's own line", () => {
 
 test("the vendored egress core says which commit it came from", async () => {
   const s = await readFile(new URL("../src/egress.js", import.meta.url), "utf8");
-  assert.match(s, /^\/\/ vendored from 1ms\.dog\/src\/egress\.js VERSION 3 \(73f1272\)/);
+  assert.match(s, /^\/\/ vendored from 1ms\.dog\/src\/egress\.js VERSION 4 \(3d6aad3\)/);
   const { VERSION, classify } = await import("../src/egress.js");
-  assert.equal(VERSION, "3");
+  assert.equal(VERSION, "4");
   assert.equal(classify({ mode: "single" }).verdict, "unknown", "no answers: nothing is assumed");
 });
 
