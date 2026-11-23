@@ -78,6 +78,9 @@ test("the exit, and signs it isn't the visitor's own line", () => {
   const cf = egress({ ...e, cc: "JP", org: "", asn: 13335 }, { tz: "Asia/Tokyo" });
   assert.equal(cf.verdict, "proxy", "Cloudflare's ASN is a proxy exit with no WARP answer");
   assert.deepEqual(cf.reasons.map(r => r.k), ["r_dc"]);
+  const riyadh = egress({ ...e, cc: "SA", org: "STC", asn: 25019 }, { tz: "Asia/Riyadh" });
+  assert.equal(riyadh.verdict, "direct", "the core's fuller time-zone table knows Riyadh");
+  assert.deepEqual(riyadh.reasons, []);
   assert.equal(egress(fromTrace("ip=1.2.3.4\nloc=JP\n"), {}).verdict, "unknown", "an address alone is not 'direct'");
   assert.equal(egress(null).verdict, "unknown");
   assert.deepEqual(egress(null).reasons, []);
@@ -85,9 +88,9 @@ test("the exit, and signs it isn't the visitor's own line", () => {
 
 test("the vendored egress core says which commit it came from", async () => {
   const s = await readFile(new URL("../src/egress.js", import.meta.url), "utf8");
-  assert.match(s, /^\/\/ vendored from 1ms\.dog\/src\/egress\.js VERSION 2 \(662db31\)/);
+  assert.match(s, /^\/\/ vendored from 1ms\.dog\/src\/egress\.js VERSION 3 \(73f1272\)/);
   const { VERSION, classify } = await import("../src/egress.js");
-  assert.equal(VERSION, "2");
+  assert.equal(VERSION, "3");
   assert.equal(classify({ mode: "single" }).verdict, "unknown", "no answers: nothing is assumed");
 });
 
