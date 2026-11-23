@@ -34,7 +34,6 @@ import (
 )
 
 const (
-	maxPeers  = 200              // WebRTC and WebTransport sessions at once (each a few hundred KB)
 	maxWS     = 200              // WebSocket echoes at once
 	peerLife  = 90 * time.Second // a test takes about 30 s
 	shortLife = 20 * time.Second // the QUIC/TCP comparison takes a few seconds
@@ -43,10 +42,11 @@ const (
 )
 
 var (
-	origins = regexp.MustCompile(`^(https://(speed|lag)\.1ms\.dog|http://localhost(:\d+)?|http://127\.0\.0\.1(:\d+)?)$`)
-	peers   atomic.Int32
-	wsOpen  atomic.Int32
-	api     *webrtc.API
+	origins  = regexp.MustCompile(`^(https://(speed|lag)\.1ms\.dog|http://localhost(:\d+)?|http://127\.0\.0\.1(:\d+)?)$`)
+	maxPeers int32 = 200 // WebRTC and WebTransport sessions at once (each a few hundred KB); -maxpeers
+	peers    atomic.Int32
+	wsOpen   atomic.Int32
+	api      *webrtc.API
 )
 
 func allowed(r *http.Request) bool { return origins.MatchString(r.Header.Get("Origin")) }
@@ -56,8 +56,14 @@ func main() {
 	icePort := flag.Int("ice", 40100, "UDP port for every WebRTC peer (ice-lite)")
 	wt := flag.String("wt", ":40101", "UDP address for WebTransport")
 	public4 := flag.String("public4", "", "public IPv4 to announce instead of the private one behind NAT")
+	public6 := flag.String("public6", "", "public IPv6 to announce instead of the interface's, when the host is behind an IPv6 NAT")
+	maxP := flag.Int("maxpeers", int(maxPeers), "WebRTC and WebTransport sessions at once: lower it on a metered host")
 	certs := flag.String("certs", os.Getenv("CREDENTIALS_DIRECTORY"), "directory with fullchain.pem and privkey.pem")
 	flag.Parse()
+	if *maxP < 1 {
+		log.Fatalf("-maxpeers: %d", *maxP)
+	}
+	maxPeers = int32(*maxP)
 
 	cert, err := tls.LoadX509KeyPair(filepath.Join(*certs, "fullchain.pem"), filepath.Join(*certs, "privkey.pem"))
 	if err != nil {
@@ -78,9 +84,17 @@ func main() {
 	se.SetICEUDPMux(mux)
 	se.SetNetworkTypes([]webrtc.NetworkType{webrtc.NetworkTypeUDP4, webrtc.NetworkTypeUDP6})
 	se.SetICETimeouts(5*time.Second, 10*time.Second, 2*time.Second)
+	var rules []webrtc.ICEAddressRewriteRule
 	if *public4 != "" {
-		if err := se.SetICEAddressRewriteRules(webrtc.ICEAddressRewriteRule{External: []string{*public4}, AsCandidateType: webrtc.ICECandidateTypeHost,
-			Mode: webrtc.ICEAddressRewriteReplace, Networks: []webrtc.NetworkType{webrtc.NetworkTypeUDP4}}); err != nil {
+		rules = append(rules, webrtc.ICEAddressRewriteRule{External: []string{*public4}, AsCandidateType: webrtc.ICECandidateTypeHost,
+			Mode: webrtc.ICEAddressRewriteReplace, Networks: []webrtc.NetworkType{webrtc.NetworkTypeUDP4}})
+	}
+	if *public6 != "" {
+		rules = append(rules, webrtc.ICEAddressRewriteRule{External: []string{*public6}, AsCandidateType: webrtc.ICECandidateTypeHost,
+			Mode: webrtc.ICEAddressRewriteReplace, Networks: []webrtc.NetworkType{webrtc.NetworkTypeUDP6}})
+	}
+	if len(rules) > 0 {
+		if err := se.SetICEAddressRewriteRules(rules...); err != nil {
 			log.Fatalf("rewrite: %v", err)
 		}
 	}
@@ -89,7 +103,7 @@ func main() {
 	h := http.NewServeMux()
 	h.HandleFunc("/offer", offer)
 	h.HandleFunc("/ws", echoWS)
-	h.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { http.Error(w, "rtc.1ms.dog: see speed.1ms.dog", http.StatusNotFound) })
+	h.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { http.Error(w, "rtc: see speed.1ms.dog", http.StatusNotFound) })
 	srv := &http.Server{Addr: *sig, Handler: h, TLSConfig: tlsConf, ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 30 * time.Second,
 		ErrorLog: log.New(io.Discard, "", 0)} // TLS handshake noise from scanners carries their addresses
 	go func() { log.Fatal(srv.ListenAndServeTLS("", "")) }()
@@ -98,7 +112,7 @@ func main() {
 	ws := &webtransport.Server{H3: &http3.Server{Addr: *wt, Handler: wm, TLSConfig: http3.ConfigureTLSConfig(tlsConf)}, CheckOrigin: allowed}
 	webtransport.ConfigureHTTP3Server(ws.H3)
 	wm.HandleFunc("/wt", func(w http.ResponseWriter, r *http.Request) { echoWT(ws, w, r) })
-	log.Printf("rtc.1ms.dog: https %s, ice udp %d, webtransport udp %s", *sig, *icePort, *wt)
+	log.Printf("rtc: https %s, ice udp %d, webtransport udp %s, at most %d peers", *sig, *icePort, *wt, maxPeers)
 	log.Fatal(ws.ListenAndServe())
 }
 

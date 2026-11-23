@@ -88,7 +88,10 @@ writes no access log and keeps nothing (see the top of `server/main.go`); about 
 7. **The unit**: `server/1ms-speed.service` is the one speed.1ms.dog runs; copy it, change the paths, the user,
    the certificate's directory and `-public4`, then `systemctl daemon-reload && systemctl enable --now <unit>`.
    `-public4` is the server's public IPv4: behind a cloud provider's NAT the machine only sees its private address,
-   and WebRTC must announce the public one. The sockets still listen on all addresses.
+   and WebRTC must announce the public one. The sockets still listen on all addresses. If the provider puts the host
+   behind an IPv6 NAT as well (check `ip -6 addr`: unusual), `-public6` announces the public IPv6 the same way.
+   On a metered host, `-maxpeers` (default 200) caps how many WebRTC and WebTransport sessions run at once; each
+   session is capped at 6000 small packets and 90 seconds.
 
 ### Verify
 
