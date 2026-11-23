@@ -231,7 +231,7 @@ func echoWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer wsOpen.Add(-1)
-	c, err := websocket.Accept(w, r, &websocket.AcceptOptions{OriginPatterns: []string{"speed.1ms.dog", "localhost:*", "127.0.0.1:*"}})
+	c, err := websocket.Accept(w, r, &websocket.AcceptOptions{OriginPatterns: []string{"speed.1ms.dog", "lag.1ms.dog", "localhost:*", "127.0.0.1:*"}})
 	if err != nil {
 		return
 	}
