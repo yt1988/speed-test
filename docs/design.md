@@ -65,6 +65,16 @@ see [AGENTS.md](../AGENTS.md).
   every tool could paint its own row with the first paint and this fetch could go. Until then, this is the earliest
   the page can know.
 
+## Which way the test goes
+
+The exit Cloudflare sees is shown with the site's shared verdict: `src/egress.js`, vendored from 1ms.dog's
+`src/egress.js` (VERSION 1, commit 3b38822), classifies the one exit this page knows as direct, proxy or unknown,
+with the reasons (data centre, VPN brand, device time zone in another country). The page only feeds it — what the
+test host's `/meta`, the shell's `/_ms/me` and the trace saw, plus the device's time zone — so every tool answers the
+same way and the tables live in one file. An address with no network information is Unknown, not Direct (the
+contract's "data missing"). Vendored copies keep the header naming the canonical commit: change the shared file and
+copy it again rather than editing this one.
+
 ## Errors and aborts
 
 - **Abort rejections from outside the page.** Chrome and Edge 156–157 report unhandled rejections carrying the

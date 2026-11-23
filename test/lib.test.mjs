@@ -1,8 +1,9 @@
 // Statistics, header parsing, the request-size schedule, what the line is good for, shared links and the direct rules.
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { quantile, median, jitter, mbps, serverTime, l4, meta, nextSize, rateNow, steady, settled } from "../src/measure.mjs";
-import { fromMeta, fromMe, fromTrace, reasons } from "../src/net.mjs";
+import { fromMeta, fromMe, fromTrace, egress } from "../src/net.mjs";
 import worker from "../src/worker.js";
 import { uses, bloat, grade, gradeKey, gradeTier, fmtMbps, fmtMs, speedTier } from "../src/verdict.mjs";
 import { encode, decode, sharePath } from "../src/share.mjs";
@@ -63,10 +64,28 @@ test("the exit, and signs it isn't the visitor's own line", () => {
     { ip: "1.2.3.4", cc: "JP", city: "Tokyo", asn: 2516, org: "KDDI", colo: "NRT", coloCity: "", coloCc: "", http: "HTTP/2" });
   assert.equal(fromMe(null), null);
   assert.deepEqual(fromTrace("fl=1\nip=1.2.3.4\nloc=XX\ncolo=NRT\n"), { ip: "1.2.3.4", cc: "", city: "", asn: null, org: "", colo: "NRT", coloCity: "", coloCc: "", http: "" });
-  assert.deepEqual(reasons(e, { tz: "Asia/Shanghai" }), [], "home line in China");
-  assert.deepEqual(reasons({ ...e, cc: "HK" }, { tz: "Asia/Shanghai" }), [], "Hong Kong counts as China's");
-  assert.deepEqual(reasons({ ...e, cc: "JP", org: "Vultr Holdings LLC", asn: 20473 }, { tz: "Asia/Shanghai" }).map(r => r.k), ["r_tz", "r_dc"]);
-  assert.deepEqual(reasons(null), []);
+  assert.equal(egress(e, { tz: "Asia/Shanghai" }).verdict, "direct", "home line in China");
+  assert.deepEqual(egress(e, { tz: "Asia/Shanghai" }).reasons, []);
+  assert.equal(egress({ ...e, cc: "HK" }, { tz: "Asia/Shanghai" }).verdict, "direct", "Hong Kong counts as China's");
+  const dc = egress({ ...e, cc: "JP", org: "Vultr Holdings LLC", asn: 20473 }, { tz: "Asia/Shanghai" });
+  assert.equal(dc.verdict, "proxy");
+  assert.deepEqual(dc.reasons.map(r => r.k), ["r_dc", "r_tz"]);
+  assert.deepEqual(dc.reasons.find(r => r.k === "r_tz"), { k: "r_tz", home: "CN", cc: "JP" });
+  assert.deepEqual(dc.reasons.find(r => r.k === "r_dc"), { k: "r_dc", org: "Vultr Holdings LLC", asn: 20473 });
+  const vpn = egress({ ...e, cc: "JP", org: "Mullvad VPN AB", asn: 20473 }, { tz: "Asia/Tokyo" });
+  assert.equal(vpn.verdict, "proxy");
+  assert.deepEqual(vpn.reasons.map(r => r.k), ["r_vpn"], "a VPN brand, not a data centre");
+  assert.equal(egress(fromTrace("ip=1.2.3.4\nloc=JP\n"), {}).verdict, "unknown", "an address alone is not 'direct'");
+  assert.equal(egress(null).verdict, "unknown");
+  assert.deepEqual(egress(null).reasons, []);
+});
+
+test("the vendored egress core says which commit it came from", async () => {
+  const s = await readFile(new URL("../src/egress.js", import.meta.url), "utf8");
+  assert.match(s, /^\/\/ vendored from 1ms\.dog\/src\/egress\.js VERSION 1 \(3b38822\)/);
+  const { VERSION, classify } = await import("../src/egress.js");
+  assert.equal(VERSION, "1");
+  assert.equal(classify({ mode: "single" }).verdict, "unknown", "no answers: nothing is assumed");
 });
 
 test("what the line is good for", () => {

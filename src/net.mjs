@@ -1,20 +1,7 @@
-// Which way the test goes: the exit Cloudflare sees, and signs that it isn't the visitor's own line (as the
-// me2cloud tool reads them): the device's time zone in one country and the exit in another, and an exit on a
-// data-center network. Pure, unit-tested.
+// Which way the test goes: the exit Cloudflare sees, and the site's one egress verdict (src/egress.js, vendored from
+// 1ms.dog; the rules are in its docs/egress-contract.md): is this the visitor's own line, or a proxy? Pure, unit-tested.
 
-export const DC_RE = /amazon|google|microsoft|azure|digitalocean|vultr|choopa|constant company|linode|akamai|ovh|hetzner|oracle|alibaba|aliyun|tencent|huawei|m247|datacamp|cloudflare|leaseweb|contabo|hostinger|it7|racknerd|colocrossing|psychz|zenlayer|g-core|gcore|hostwinds|scaleway|ionos|kamatera|upcloud|bandwagon|dmit|cogent|quadranet|servers\.com|packet|equinix|fastly|cdn77|datapacket|tzulo|hostdare|greencloud|nexeon|frantech|buyvm/i;
-
-export const TZ_CC = Object.fromEntries(("Asia/Shanghai:CN Asia/Chongqing:CN Asia/Harbin:CN Asia/Urumqi:CN Asia/Hong_Kong:HK Asia/Macau:MO Asia/Taipei:TW Asia/Tokyo:JP " +
-  "Asia/Seoul:KR Asia/Singapore:SG Asia/Kuala_Lumpur:MY Asia/Bangkok:TH Asia/Jakarta:ID Asia/Manila:PH Asia/Ho_Chi_Minh:VN Asia/Saigon:VN " +
-  "Asia/Kolkata:IN Asia/Calcutta:IN Asia/Dubai:AE Asia/Riyadh:SA Asia/Qatar:QA Asia/Jerusalem:IL Asia/Tel_Aviv:IL Asia/Karachi:PK " +
-  "Europe/London:GB Europe/Dublin:IE Europe/Paris:FR Europe/Berlin:DE Europe/Amsterdam:NL Europe/Brussels:BE Europe/Zurich:CH Europe/Rome:IT " +
-  "Europe/Madrid:ES Europe/Lisbon:PT Europe/Stockholm:SE Europe/Oslo:NO Europe/Helsinki:FI Europe/Copenhagen:DK Europe/Warsaw:PL Europe/Vienna:AT " +
-  "Europe/Prague:CZ Europe/Moscow:RU Europe/Istanbul:TR Europe/Kiev:UA Europe/Kyiv:UA Europe/Athens:GR Europe/Bucharest:RO Europe/Budapest:HU " +
-  "Australia/Sydney:AU Australia/Melbourne:AU Australia/Brisbane:AU Australia/Perth:AU Australia/Adelaide:AU Pacific/Auckland:NZ " +
-  "America/New_York:US America/Chicago:US America/Denver:US America/Los_Angeles:US America/Phoenix:US America/Anchorage:US Pacific/Honolulu:US " +
-  "America/Toronto:CA America/Vancouver:CA America/Montreal:CA America/Edmonton:CA America/Mexico_City:MX America/Sao_Paulo:BR America/Santiago:CL " +
-  "America/Bogota:CO America/Lima:PE America/Argentina/Buenos_Aires:AR Africa/Johannesburg:ZA Africa/Cairo:EG Africa/Lagos:NG Africa/Nairobi:KE")
-  .split(" ").map(p => p.split(":")));
+import { classify } from "./egress.js";
 
 // Cloudflare's /meta answer (or its /cdn-cgi/trace as key=value lines) → the exit
 export function fromMeta(j) {
@@ -33,15 +20,20 @@ export function fromTrace(text) {
   return d.ip ? { ip: d.ip, cc: d.loc && d.loc !== "XX" ? d.loc : "", city: "", asn: null, org: "", colo: d.colo || "", coloCity: "", coloCc: "", http: d.http || "" } : null;
 }
 
-// Signs that the test doesn't measure the visitor's own line, each { k: string key, ...values }:
-//   r_tz     the device's time zone is in one country, the exit in another (Hong Kong and Macau count as China's)
-//   r_dc     the exit is on a data-center network
-export function reasons(exit, { tz = "" } = {}) {
-  const out = [];
-  if (!exit) return out;
-  const tzc = TZ_CC[tz];
-  if (tzc && exit.cc && tzc !== exit.cc && !(tzc === "CN" && ["HK", "MO"].includes(exit.cc))) out.push({ k: "r_tz", a: tzc, b: exit.cc });
-  if (exit.org && DC_RE.test(exit.org)) out.push({ k: "r_dc", org: exit.org + (exit.asn ? " (AS" + exit.asn + ")" : "") });
-  return out;
+// The page's one exit as an answer for the core: from the test host's /meta or trace, or the shell's /_ms/me when the
+// test host couldn't say. The group is what the single-exit mode looks for first; there is no second exit here.
+const answerOf = e => ({ id: "test", group: "web", ip: e.ip, org: e.org || "", asn: e.asn || null, family: e.ip.includes(":") ? 6 : 4 });
+
+// The core's single-exit verdict — direct, proxy or unknown — and the reasons behind it, each { k, ...values }:
+//   r_tz   the device's time zone is in one country, the exit in another (Hong Kong and Macau count as China's)
+//   r_dc   the exit is on a data-center network
+//   r_vpn  the exit is on a VPN provider's network
+// (r_warp, r_rtc and r_fam need inputs this page doesn't have.)
+export function egress(exit, { tz = "", warp = "" } = {}) {
+  const answers = exit && exit.ip ? [answerOf(exit)] : [];
+  const { verdict, reasons } = classify({ mode: "single", tz, cc: (exit && exit.cc) || "", warp, answers });
+  return { verdict, reasons };
 }
+// for callers that only need the signs
+export const reasons = (exit, opts) => egress(exit, opts).reasons;
 

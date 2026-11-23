@@ -30,6 +30,7 @@ export default {
   net_node: "測速節點 {node}",
   r_tz: "裝置時區在{a}，出口 IP 卻在{b}。",
   r_dc: "出口網路 {org} 是機房網路，通常代表你在用代理、VPN 或雲端伺服器。",
+  r_vpn: "出口網路 {org} 是 VPN 服務商，通常代表你在用代理或 VPN。",
   r_fix: "想測自己的寬頻，請加上{rules}。",
   egress_link: "看看各網站看到的是哪個 IP",
   rel_lag: "找出卡在哪一段", rel_ping: "看這個服務在各地的延遲", rel_check: "做一次完整體檢", rel_m2c: "測你到 AWS、Google Cloud 等雲端服務的延遲", rel_dns: "網頁開得慢？看看哪個 DNS 對你最快",

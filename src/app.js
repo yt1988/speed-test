@@ -2,7 +2,7 @@
 // Order: idle latency, download, upload (src/measure.mjs), each shown live in the hero's fixed slots; at the end what
 // the line is good for and the bufferbloat grade (how much latency load adds). Strings: window.L1MS.
 import { CF, ping, download, upload, median, jitter, exit } from "./measure.mjs";
-import { reasons, fromMe } from "./net.mjs";
+import { egress, fromMe } from "./net.mjs";
 import { fmtMbps, fmtMs, msTier, speedTier, bloat, grade, gradeKey, gradeTier, uses, USES } from "./verdict.mjs";
 import { FORMATS, FORMAT_NAMES, items as ruleItems, inline as ruleInline, remote as ruleRemote } from "./rules.mjs";
 import { parse as parseHist, add as addHist, change, isPeak } from "./history.mjs";
@@ -341,15 +341,18 @@ import { udp, quic, compareSides, SIG, WT, SIG_CN, WT_CN } from "./rtc.mjs";
         : flag(e.cc) + esc([e.city, country(e.cc)].filter(Boolean).join(", ") || "–") + orgHTML(e) + ` <span class="m">·</span> ` + ipLink(e.ip);
       $("#netCfX").innerHTML = e && e.colo ? t("net_node", { node: flag(e.coloCc) + esc([e.coloCity, e.colo].filter(Boolean).join(" ")) }) : "";
     }
-    NET.reasons = reasons(e, { tz: TZ });
+    const eg = egress(e, { tz: TZ });
+    NET.reasons = eg.reasons;
     renderRel();
-    const st = !NET.cfDone ? "chk" : !e ? "unk" : NET.reasons.length ? "warn" : "good";
+    const st = !NET.cfDone ? "chk" : !e ? "unk" : eg.verdict === "proxy" ? "warn" : eg.verdict === "direct" ? "good" : "unk";
     $("#net").dataset.st = st; $("#netSt").textContent = t("st_" + st);
     $("#rulesBtn").classList.toggle("warn", st === "warn");
     if (!RUN && !LAST) $("#noteL").innerHTML = warnHTML() || esc(t("hint_idle"));
   }
-  const reasonText = r => r.k === "r_tz" ? t("r_tz", { a: esc(country(r.a)), b: esc(country(r.b)) })
-    : t("r_dc", { org: esc(r.org) });
+  const orgOf = r => esc(r.org || "") + (r.asn ? " (AS" + r.asn + ")" : "");
+  const reasonText = r => r.k === "r_tz" ? t("r_tz", { a: esc(country(r.home)), b: esc(country(r.cc)) })
+    : r.k === "r_vpn" ? t("r_vpn", { org: orgOf(r) })
+      : r.k === "r_dc" ? t("r_dc", { org: orgOf(r) }) : "";
   // the warnings, the way out (the rules), and where to see which IP each site gets (EgressLens, on 1ms.dog)
   function warnHTML() {
     if (!NET.reasons.length) return "";

@@ -30,6 +30,7 @@ export default {
   net_node: "servidor de teste {node}",
   r_tz: "O fuso horário do seu dispositivo é de {a}, mas seu IP de saída está em {b}.",
   r_dc: "Sua saída, {org}, é uma rede de data center. Isso geralmente indica proxy, VPN ou servidor na nuvem.",
+  r_vpn: "Sua saída, {org}, é a rede de um provedor de VPN. Isso costuma indicar um proxy ou uma VPN.",
   r_fix: "Para testar sua própria conexão, adicione as {rules}.",
   egress_link: "Ver qual IP cada site enxerga",
   rel_lag: "Descubra onde trava", rel_ping: "Latência até este serviço em 18 locais", rel_check: "Fazer um check-up completo", rel_m2c: "Sua latência até AWS, Google Cloud e outras nuvens", rel_dns: "Páginas demorando para abrir? Descubra seu DNS mais rápido",

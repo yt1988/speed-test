@@ -30,6 +30,7 @@ export default {
   net_node: "Testserver {node}",
   r_tz: "Die Zeitzone deines Geräts liegt in {a}, deine Ausgangs-IP aber in {b}.",
   r_dc: "Dein Ausgang, {org}, ist ein Rechenzentrumsnetz. Das deutet meist auf einen Proxy, ein VPN oder einen Cloud-Server hin.",
+  r_vpn: "Dein Ausgang, {org}, ist das Netz eines VPN-Anbieters. Das deutet meist auf einen Proxy oder ein VPN hin.",
   r_fix: "Um deine eigene Leitung zu testen, füge die {rules} hinzu.",
   egress_link: "Welche IP jede Website sieht",
   rel_lag: "Finden, wo es hakt", rel_ping: "Latenz zu diesem Dienst aus 18 Regionen", rel_check: "Vollständigen Check starten", rel_m2c: "Deine Latenz zu AWS, Google Cloud und anderen Clouds", rel_dns: "Seiten laden langsam? Finde dein schnellstes DNS",

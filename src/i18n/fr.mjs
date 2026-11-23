@@ -30,6 +30,7 @@ export default {
   net_node: "serveur de test {node}",
   r_tz: "Le fuseau horaire de votre appareil est en {a}, mais votre IP de sortie est en {b}.",
   r_dc: "Votre sortie, {org}, est un réseau de datacenter. C'est en général le signe d'un proxy, d'un VPN ou d'un serveur cloud.",
+  r_vpn: "Votre sortie, {org}, est le réseau d'un fournisseur VPN. Cela indique en général un proxy ou un VPN.",
   r_fix: "Pour tester votre propre connexion, ajoutez les {rules}.",
   egress_link: "Voir l'IP que voit chaque site",
   rel_lag: "Trouver où ça coince", rel_ping: "Latence vers ce service depuis 18 régions", rel_check: "Lancer un bilan complet", rel_m2c: "Votre latence vers AWS, Google Cloud et d'autres clouds", rel_dns: "Pages lentes à s'ouvrir ? Trouvez le DNS le plus rapide pour vous",
