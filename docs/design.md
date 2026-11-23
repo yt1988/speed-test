@@ -13,15 +13,25 @@ see [AGENTS.md](../AGENTS.md).
   which needs a peer that answers; a Cloudflare Worker can't be one. WebTransport (QUIC) against a WebSocket (TCP)
   to the same server is the only way a page can compare the two: whether the browser uses HTTP/3 to Cloudflare is
   the browser's choice and invisible to the page.
-- **One location, and the page says where.** A single server measures the whole route to it. Far from it, part of
-  the loss and jitter belongs to the long way there, so the row's heading names the place, the help explains it,
-  and the bufferbloat grade and "what it's good for" come from Cloudflare's measurement alone.
+- **Two locations, side by side.** The same measurement runs against a server in mainland China and one in Tokyo:
+  loss on the mainland side only means the visitor's own network or provider, loss only across the border means the
+  international route, and loss on both means neither alone explains it. The row names both places, and the sentence
+  under the tiles compares each side's worst loaded phase (download or upload; the idle phase is short and carries
+  the connection's warm-up), with under 1% counted as fine (the help's threshold). The bufferbloat grade and "what
+  it's good for" still come from Cloudflare's measurement alone.
+- **Each path stands alone.** The browser keeps every candidate both servers answer with (IPv4 and IPv6); nothing in
+  the page strips one family to force a path. If one side's signaling or UDP fails, its tiles say so ("UDP blocked",
+  "server unreachable") and the other side still reports; the comparison says when only one side was measured. The
+  row also names the address family the browser picked for each path, because a cross-border IPv6 path can lose
+  packets where IPv4 does not. The checkup report keeps `udpLoss` and `quic` from the cross-border path, the facts
+  it has always carried.
 - **Beside the speed test, not after it.** QUIC against TCP runs as the test starts and shows in its first
   seconds; each phase's loss updates every 0.5 s (a packet counts once it is 1.5 s old); the final figures, split
   into the way there and back by the server's own count of what arrived, come at the end.
 - **How much traffic.** Measured with `getStats`: 50 data packets of 12 bytes a second become about 130 UDP packets
-  and 10 KB a second each way with WebRTC's own acknowledgements, 0.4–0.7 MB a test. Halving the rate saves only
-  about 27%, because much of that is WebRTC's fixed overhead, and halves the resolution.
+  and 10 KB a second each way with WebRTC's own acknowledgements, 0.4–0.7 MB a test per server, so 0.8–1.4 MB with
+  both. Halving the rate saves only about 27%, because much of that is WebRTC's fixed overhead, and halves the
+  resolution; the two servers use the same rate and phases, so their numbers compare.
 - **Safari** has no WebTransport: the QUIC tile says it can't check rather than guessing.
 - **For the embed mode's report**: `udpLoss` (over the whole test) and `quic` (handshake through or blocked) in
   `facts`, left out when not measured; the report waits the few seconds the row takes.

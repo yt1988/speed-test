@@ -176,3 +176,17 @@ test("QUIC verdict: works, slowed, blocked, can't check, server unreachable", as
   assert.equal(quicVerdict({ api: true, wt: { rtt: 120, lost: 0 }, ws: { rtt: 50 } }), "slow");
   assert.equal(quicVerdict({ api: true, wt: { rtt: 50, lost: 0.4 }, ws: { rtt: 50 } }), "slow");
 });
+
+test("the two measurement points: which side loses packets, or one side not measured", async () => {
+  const { compareSides } = await import("../src/rtc.mjs");
+  assert.equal(compareSides(null, null).side, "none");
+  assert.equal(compareSides(null, 0.5).side, "partial");
+  assert.equal(compareSides(0.5, null).side, "partial");
+  assert.equal(compareSides(0.5, 0.2).side, "same");
+  assert.equal(compareSides(0.2, 4).side, "border");
+  assert.equal(compareSides(4, 0.2).side, "domestic");
+  assert.equal(compareSides(4, 7).side, "both");
+  assert.equal(compareSides(1, 0.9).side, "domestic");   // 1% is already bad: the threshold the help uses
+  const p = compareSides(null, 4);
+  assert.equal(p.os, 4); assert.equal(p.cn, null);
+});

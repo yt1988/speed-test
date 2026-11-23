@@ -16,7 +16,7 @@ import { fileURLToPath } from "node:url";
 import { build as bundle, transform } from "esbuild";
 import { ruleSets } from "../src/rules.mjs";
 import { CF } from "../src/measure.mjs";
-import { SIG, WT } from "../src/rtc.mjs";
+import { SIG, WT, SIG_CN, WT_CN } from "../src/rtc.mjs";
 import { USES } from "../src/verdict.mjs";
 
 const SITE = (process.env.SITE_URL || "https://speed.1ms.dog").replace(/\/+$/, "");
@@ -88,9 +88,10 @@ const BUILD_ONLY = new Set(["name", "seo_title", "seo_desc", "seo_kw", "og_sub",
 
 // every origin the page asks
 export const ORIGINS = [new URL(CF).origin];
-// rtc.1ms.dog (src/rtc.mjs): the offer and the WebSocket on 2087, WebTransport on 40101; WebRTC itself is not
-// under connect-src
-export const RTC_ORIGINS = [new URL(SIG).origin, new URL(SIG).origin.replace(/^https/, "wss"), new URL(WT).origin];
+// rtc.1ms.dog and rtc.dog.1msapp.com (src/rtc.mjs): the offer and the WebSocket on 2087, WebTransport on 40101;
+// WebRTC itself is not under connect-src
+export const RTC_ORIGINS = [SIG, SIG_CN].flatMap(s => [new URL(s).origin, new URL(s).origin.replace(/^https/, "wss")])
+  .concat([WT, WT_CN].map(w => new URL(w).origin));
 
 export async function build({ check = false } = {}) {
   const I = await loadI18n(), en = I.en;

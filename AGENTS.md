@@ -10,9 +10,10 @@ A speed test that runs in the browser:
 
 - **Download, upload, latency and bufferbloat** against Cloudflare's speed test servers (the ones behind
   speed.cloudflare.com), at the data center nearest the visitor. Nothing passes through the site serving the page.
-- **UDP loss and whether QUIC gets through**, to a small server of its own (`server/`, one Go process). Optional:
+- **UDP loss and whether QUIC gets through**, to two small servers of its own (`server/`, one Go process each:
+  mainland China and Tokyo), so the result says whether UDP is held back at home or only across the border. Optional:
   the page only shows that row on the host it is configured for (`src/rtc.mjs` and `RTC_ON` in `src/app.js`), so a
-  copy without the server simply doesn't have it.
+  copy without the servers simply doesn't have it.
 - 10 languages, shared results in links (`/<lang>/r/<code>`), direct rules for proxy tools, an embed mode.
 
 The page is static files on a Cloudflare Worker (`src/worker.js` only answers `/r/<code>` and 404s). What each file
@@ -51,10 +52,11 @@ in the dashboard and build with `SITE_URL=https://<your-domain> npm run build`.
 
 ## Run the UDP and QUIC server
 
-One Go binary under systemd on any Linux VPS with a public IPv4 (and IPv6, if you want it tested). Three ports, set
-by flags: an HTTPS port for the WebRTC offer and a WebSocket echo (`-sig`, default `:2087`), a UDP port every
-WebRTC peer shares (`-ice`, default `40100`, ice-lite) and a UDP port for WebTransport (`-wt`, default `:40101`). It
-writes no access log and keeps nothing (see the top of `server/main.go`); about 12 MB of memory.
+One Go binary under systemd on any Linux VPS with a public IPv4 (and IPv6, if you want it tested); each location is
+its own process, and the page measures against both of the ones it is configured for. Three ports, set by flags: an
+HTTPS port for the WebRTC offer and a WebSocket echo (`-sig`, default `:2087`), a UDP port every WebRTC peer shares
+(`-ice`, default `40100`, ice-lite) and a UDP port for WebTransport (`-wt`, default `:40101`). It writes no access
+log and keeps nothing (see the top of `server/main.go`); about 12 MB of memory.
 
 1. **Get the binary.** Every push to `main` that touches `server/` publishes a static linux/amd64 build as a GitHub
    Release (tag `server-<short commit>`, always marked latest; `.github/workflows/server.yml`). On the server, no Go
@@ -106,8 +108,9 @@ writes no access log and keeps nothing (see the top of `server/main.go`); about 
   browser console and keep only one family's `a=candidate` lines in the answer before `setRemoteDescription`.
 - Memory stays around 10–15 MB; the unit caps it at 96 MB.
 
-Traffic: about 0.4–0.7 MB per test (measured with the browser's `getStats`: 50 data packets a second become about
-130 UDP packets and 10 KB a second each way, with WebRTC's own acknowledgements).
+Traffic: about 0.4–0.7 MB per test per server (measured with the browser's `getStats`: 50 data packets a second
+become about 130 UDP packets and 10 KB a second each way, with WebRTC's own acknowledgements), so 0.8–1.4 MB with
+both.
 
 ## Conventions
 

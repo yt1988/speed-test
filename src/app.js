@@ -7,7 +7,7 @@ import { fmtMbps, fmtMs, msTier, speedTier, bloat, grade, gradeKey, gradeTier, u
 import { FORMATS, FORMAT_NAMES, items as ruleItems, inline as ruleInline, remote as ruleRemote } from "./rules.mjs";
 import { parse as parseHist, add as addHist, change, isPeak } from "./history.mjs";
 import { encode as encodeShare, decode as decodeShare, sharePath } from "./share.mjs";
-import { udp, quic } from "./rtc.mjs";
+import { udp, quic, compareSides, SIG, WT, SIG_CN, WT_CN } from "./rtc.mjs";
 
 (function () {
   "use strict";
@@ -167,63 +167,114 @@ import { udp, quic } from "./rtc.mjs";
   const showLat = r => {
     latCell("idle", r.idle, r.jit); latCell("ldown", r.ldown, r.jdown, r.idle); latCell("lup", r.lup, r.jup, r.idle); gradeCell(r);
   };
-  // the UDP and QUIC row, to rtc.1ms.dog in Tokyo: only on speed.1ms.dog (and its local copy), where that server is
+  // UDP and QUIC, measured to two of our servers: rtc.dog.1msapp.com in mainland China (the domestic path, "c") and
+  // rtc.1ms.dog in Tokyo (the cross-border path, "o"). Only on speed.1ms.dog (and its local copy), where both are.
   const RTC_ON = /^(speed\.1ms\.dog|localhost|127\.0\.0\.1)$/.test(location.hostname) && typeof RTCPeerConnection === "function";
   if (RTC_ON) $("#udp").hidden = false;
-  const udpCell = (k, val, em, cls) => {
-    const li = $(`#udp [data-u="${k}"]`), b = li.querySelector("b");
+  const RTC_PATHS = [{ k: "c", sig: SIG_CN, wt: WT_CN, label: "udp_cn" }, { k: "o", sig: SIG, wt: WT, label: "udp_os" }];
+  const udpCell = (p, k, val, em, cls) => {
+    const li = $(`#udp [data-u="${p}${k}"]`), b = li.querySelector("b");
     b.className = cls || ""; b.innerHTML = val; li.querySelector("em").innerHTML = em || "&nbsp;";
   };
   const lossTier = p => p < 1 ? "t1" : p < 3 ? "t3" : "t5";
   const fmtPct = p => p < 0.05 ? "0" : p < 10 ? p.toFixed(1) : String(Math.round(p));
-  const udpClear = () => { for (const k of [0, 1, 2, "q"]) udpCell(k, "–"); };
-  const lossCell = (k, p, n) => udpCell(k, `${fmtPct(p.loss)}<small>%</small>`,
-    [p.jit != null && esc(t("jit_v", { ms: fmtMs(p.jit) })), n && esc(tn("lat_n", n))].filter(Boolean).join(" · "), "n " + lossTier(p.loss));
+  // the path's name, plus the address family the browser chose once known: the cross-border IPv6 path can lose
+  // packets where IPv4 does not, so the row says which one was measured
+  const setPathLabel = (p, family) => {
+    const el = $(`#udp [data-p="${p}"] .udp-loc`);
+    if (el) el.textContent = t(RTC_PATHS.find(x => x.k === p).label) + (family ? " · IPv" + family : "");
+  };
+  const udpClear = p => { for (const k of [0, 1, 2, "q"]) udpCell(p, k, "–"); };
+  const udpClearAll = () => { for (const { k } of RTC_PATHS) { udpClear(k); setPathLabel(k, null); } $("#udpV").textContent = " "; };
+  const lossCell = (p, k, ph, n) => udpCell(p, k, `${fmtPct(ph.loss)}<small>%</small>`,
+    [ph.jit != null && esc(t("jit_v", { ms: fmtMs(ph.jit) })), n && esc(tn("lat_n", n))].filter(Boolean).join(" · "), "n " + lossTier(ph.loss));
   // during a test, every 0.5 s from the packets so far: each phase that has some shows its loss and jitter, the one
   // being measured says how many; the others wait their turn. UDP that never connected says why at once.
-  function udpLive(U, now) {
-    if (U.state === "blocked" || U.state === "down") { for (const k of [0, 1, 2]) udpCell(k, "–", esc(t(U.state === "blocked" ? "udp_blocked" : "rtc_down"))); return; }
+  function udpLive(U, p, now) {
+    if (U.state === "blocked" || U.state === "down") { for (const k of [0, 1, 2]) udpCell(p, k, "–", esc(t(U.state === "blocked" ? "udp_blocked" : "rtc_down"))); return; }
     const l = U.live();
     for (const k of [0, 1, 2]) {
-      if (l && l[k]) lossCell(k, l[k], k === now && l[k].n);
-      else udpCell(k, "···", esc(t(k === now ? "lat_now" : "lat_wait")), "wait");
+      if (l && l[k]) lossCell(p, k, l[k], k === now && l[k].n);
+      else udpCell(p, k, "···", esc(t(k === now ? "lat_now" : "lat_wait")), "wait");
     }
   }
-  function showLoss(u) {
-    const lossMax = Math.max(0, ...((u.state === "open" && u.phases) || []).filter(Boolean).map(p => p.loss));
-    if (laggy(R, lossMax)) { addLag(); addPing(); }
+  function showLoss(u, p) {
+    if (!u) { udpClear(p); return; }
     for (const k of [0, 1, 2]) {
-      const p = u.phases && u.phases[k];
-      if (u.state !== "open") udpCell(k, "–", esc(t(u.state === "blocked" ? "udp_blocked" : "rtc_down")));
-      else if (!p) udpCell(k, "–");
-      else lossCell(k, p);
+      const ph = u.phases && u.phases[k];
+      if (u.state !== "open") udpCell(p, k, "–", esc(t(u.state === "blocked" ? "udp_blocked" : "rtc_down")));
+      else if (!ph) udpCell(p, k, "–");
+      else lossCell(p, k, ph);
     }
   }
-  function showQuic(q) {
+  function showQuic(q, p) {
     const v = q.verdict, ms = { q: q.wt && fmtMs(q.wt.rtt), t: q.ws && fmtMs(q.ws.rtt) };
-    if (v === "na") udpCell("q", esc(t("quic_na")), esc(t("quic_na_em")), "w");
-    else if (v === "down") udpCell("q", "–", esc(t("rtc_down")));
-    else if (v === "blocked") udpCell("q", esc(t("quic_blocked")), esc(t("quic_blocked_em", ms)), "w t5");
-    else udpCell("q", esc(t(v === "ok" ? "quic_ok" : "quic_slow")), esc(t("quic_em", ms)), "w " + (v === "ok" ? "t1" : "t3"));
+    if (v === "na") udpCell(p, "q", esc(t("quic_na")), esc(t("quic_na_em")), "w");
+    else if (v === "down") udpCell(p, "q", "–", esc(t("rtc_down")));
+    else if (v === "blocked") udpCell(p, "q", esc(t("quic_blocked")), esc(t("quic_blocked_em", ms)), "w t5");
+    else udpCell(p, "q", esc(t(v === "ok" ? "quic_ok" : "quic_slow")), esc(t("quic_em", ms)), "w " + (v === "ok" ? "t1" : "t3"));
+  }
+  // for the comparison: the worst of the two loaded phases (that is where a provider or a route slows UDP); the idle
+  // phase is short and carries the connection's warm-up, so it only stands in when neither loaded phase was measured
+  const sideLoss = u => {
+    if (!u || u.state !== "open" || !u.phases) return null;
+    const load = [u.phases[1], u.phases[2]].filter(Boolean);
+    const ps = load.length ? load : [u.phases[0]].filter(Boolean);
+    return ps.length ? Math.max(...ps.map(x => x.loss)) : null;
+  };
+  // the pessimistic loss over both paths, for the "line stutters" links beside the conclusion
+  const worstLoss = r => Math.max(0, ...RTC_PATHS.map(pt => sideLoss(r[pt.k] && r[pt.k].u) ?? 0));
+  // the sentence that answers "limited at home, or only across the border?"
+  function showVerdict(r) {
+    const c = compareSides(sideLoss(r.c && r.c.u), sideLoss(r.o && r.o.u));
+    $("#udpV").textContent = c.side === "same" ? t("udp_v_same")
+      : c.side === "border" ? t("udp_v_border", { p: fmtPct(c.os) })
+        : c.side === "domestic" ? t("udp_v_domestic", { p: fmtPct(c.cn) })
+          : c.side === "both" ? t("udp_v_both", { a: fmtPct(c.cn), b: fmtPct(c.os) })
+            : c.side === "partial" ? t(c.cn == null ? "udp_v_partial_os" : "udp_v_partial_cn") : "";
   }
   // The row runs beside Cloudflare's test, not after it: UDP from the start (live, above), QUIC against TCP in the
-  // first seconds, shown as soon as it's known. When the test ends, the last packets get 1.5 s to come back, then
-  // the final loss (with the server's count). A new test started meanwhile (RTC_N moved on) owns the row.
+  // first seconds, shown as soon as it's known on each path. When the test ends, the last packets get 1.5 s to come
+  // back, then the final loss (with the server's count) and the comparison. One path failing leaves the other's
+  // result. A new test started meanwhile (RTC_N moved on) owns the row.
   let RTC_N = 0;
   function startRtc(run) {
-    let U = null;
-    try { U = udp(); } catch (e) { udpClear(); return null; }
+    const P = {};
+    $("#udpV").textContent = " ";
+    for (const pt of RTC_PATHS) {
+      let U = null;
+      try { U = udp(pt.sig); } catch (e) {}
+      const Q = quic(pt.sig, pt.wt).catch(() => ({ verdict: "down" }));
+      P[pt.k] = { U, Q };
+      setPathLabel(pt.k, null);
+      if (U) udpLive(U, pt.k, 0); else udpClear(pt.k);
+      udpCell(pt.k, "q", "···", esc(t("lat_now")), "wait");
+      Q.then(q => { if (run === RTC_N) showQuic(q, pt.k); });
+    }
     let now = 0;
-    const live = setInterval(() => { if (run === RTC_N) udpLive(U, now); }, 500);
-    udpLive(U, 0); udpCell("q", "···", esc(t("lat_now")), "wait");
-    const Q = quic().catch(() => ({ verdict: "down" }));
-    Q.then(q => { if (run === RTC_N) showQuic(q); });
+    const live = setInterval(() => { if (run === RTC_N) for (const pt of RTC_PATHS) if (P[pt.k].U) udpLive(P[pt.k].U, pt.k, now); }, 500);
     return {
-      phase(p) { now = p; U.phase(p); udpLive(U, p); },
-      // the test is done: final loss, and both for the checkup report
-      async done() { clearInterval(live); const [u, q] = await Promise.all([U.stop(), Q]); if (run === RTC_N) showLoss(u); return { u, q }; },
+      phase(p) {
+        now = p;
+        for (const pt of RTC_PATHS) if (P[pt.k].U) { P[pt.k].U.phase(p); udpLive(P[pt.k].U, pt.k, p); }
+      },
+      // the test is done: final loss on both paths, the comparison, and both for the checkup report
+      async done() {
+        clearInterval(live);
+        const out = {};
+        await Promise.all(RTC_PATHS.map(async pt => {
+          const u = P[pt.k].U ? await P[pt.k].U.stop().catch(() => ({ state: "down", family: null, phases: null })) : null;
+          out[pt.k] = { u, q: await P[pt.k].Q };
+        }));
+        if (run === RTC_N) {
+          for (const pt of RTC_PATHS) { showLoss(out[pt.k].u, pt.k); setPathLabel(pt.k, out[pt.k].u && out[pt.k].u.family); }
+          showVerdict(out);
+          if (laggy(R, worstLoss(out))) { addLag(); addPing(); }
+        }
+        return out;
+      },
       // stopped or failed: nothing to show
-      cancel() { clearInterval(live); U.stop().catch(() => {}); udpClear(); },
+      cancel() { clearInterval(live); for (const pt of RTC_PATHS) if (P[pt.k].U) P[pt.k].U.stop().catch(() => {}); udpClearAll(); },
     };
   }
   function showUses(r) {
@@ -351,7 +402,7 @@ import { udp, quic } from "./rtc.mjs";
     if (RECV) { RECV.remove(); RECV = null; history.replaceState(null, "", D.paths[D.lang]); }
     const ctl = RUN = new AbortController(), sig = ctl.signal, t0 = performance.now();
     reset(); showPrev(HIST[0]); setGo("run", t("ph_ping"));
-    // UDP to Tokyo for the whole test, tagged by phase (src/rtc.mjs)
+    // UDP to both servers for the whole test, tagged by phase (src/rtc.mjs)
     const run = ++RTC_N;
     const U = RTC_ON ? startRtc(run) : null;
     // every tile says where it stands while the test runs
@@ -414,7 +465,7 @@ import { udp, quic } from "./rtc.mjs";
       $("#shareBtn").disabled = false; rpShow(true);
       saveRun({ ts: LAST.ts, ...R, ip: (NET.cf && NET.cf.ip) || META.ip || "", cc: cc || "", org: (NET.cf && NET.cf.org) || "", peak });
       setGo("done", t("used", { mb: mb(bytes) }));
-      const rtc = U ? U.done() : null;
+      const rtc = U ? U.done().catch(() => null) : null;
       if (EMBED) {
         post({ type: "progress", done: 100, total: 100, text: $("#progTxt").textContent });
         post(checkup(cc, rtc && await rtc));   // the checkup report waits the few seconds UDP and QUIC take
@@ -550,13 +601,14 @@ import { udp, quic } from "./rtc.mjs";
   // visitor's own line, what the line struggles with), worst first; the facts its cross-tool rules read; the share
   // link without the country and data center, as the share box starts
   // UDP loss over the whole test (all three phases, by packets sent), and whether the QUIC handshake got through:
-  // 1ms-shell docs/checkup.md, "line and tunnel keys". Not measured: no key.
+  // 1ms-shell docs/checkup.md, "line and tunnel keys". Not measured: no key. The cross-border path is the one
+  // these facts have always described (the checkup reads them as one line, not two).
   const rtcFacts = rtc => {
-    const f = {};
-    const ps = rtc && rtc.u.state === "open" && (rtc.u.phases || []).filter(Boolean);
+    const f = {}, o = rtc && rtc.o;
+    const ps = o && o.u && o.u.state === "open" && (o.u.phases || []).filter(Boolean);
     const sent = ps ? ps.reduce((s, p) => s + p.sent, 0) : 0;
     if (sent) f.udpLoss = Math.round(ps.reduce((s, p) => s + p.sent * p.loss, 0) / sent * 10) / 10;
-    const v = rtc && rtc.q.verdict;
+    const v = o && o.q && o.q.verdict;
     if (v === "ok" || v === "slow") f.quic = true; else if (v === "blocked") f.quic = false;
     return f;
   };
