@@ -1,8 +1,8 @@
 export default {
   name: "English",
   app_name: "Speed Test",
-  seo_title: "Internet Speed Test: download, upload, latency, jitter and bufferbloat · Speed Test",
-  seo_desc: "Free internet speed test in your browser. Check your download and upload speed, latency (ping) and jitter, and how much the latency jumps when your line is busy, graded A+ to F for bufferbloat. Measured to the nearest Cloudflare data center. No app, no ads, and this site keeps no results.",
+  seo_title: "Internet Speed Test: download, upload, latency, jitter, UDP loss and bufferbloat · Speed Test",
+  seo_desc: "Free internet speed test in your browser: download, upload, latency (ping), jitter, bufferbloat (A+ to F), and UDP packet loss — what games and video calls suffer from. Measured to the nearest Cloudflare data center. No app, no ads, no results kept.",
   seo_kw: "speed test, internet speed test, wifi speed test, bufferbloat test, latency test, ping test, jitter test, upload speed test, latency under load",
   og_sub: "Download, upload, latency, and lag when your line is busy",
   h1: "How fast is your internet?",
