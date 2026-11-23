@@ -17,8 +17,10 @@ see [AGENTS.md](../AGENTS.md).
   loss on the mainland side only means the visitor's own network or provider, loss only across the border means the
   international route, and loss on both means neither alone explains it. The row names both places, and the sentence
   under the tiles compares each side's worst loaded phase (download or upload; the idle phase is short and carries
-  the connection's warm-up), with under 1% counted as fine (the help's threshold). The bufferbloat grade and "what
-  it's good for" still come from Cloudflare's measurement alone.
+  the connection's warm-up), with under 1% counted as fine (the help's threshold). The help says the mainland server
+  is there to compare the domestic path and that the cross-border leg is whatever this run measures from the
+  visitor's network: no expected loss is published, and measurements taken between the two servers never go into the
+  copy. The bufferbloat grade and "what it's good for" still come from Cloudflare's measurement alone.
 - **Each path stands alone.** The browser keeps every candidate both servers answer with (IPv4 and IPv6); nothing in
   the page strips one family to force a path. If one side's signaling or UDP fails, its tiles say so ("UDP blocked",
   "server unreachable") and the other side still reports; the comparison says when only one side was measured. The
