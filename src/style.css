@@ -33,7 +33,7 @@ h2 { font-size: 15px; font-weight: 700; }
 .net[data-st="chk"] .dot { animation: blink 1s infinite; }
 .net-st { font-weight: 650; white-space: nowrap; }
 .net[data-st="good"] .net-st { color: var(--t1); } .net[data-st="warn"] .net-st { color: var(--warn); }
-.net-s { font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; flex: none; }
+.net-s { font-size: 12px; font-weight: 600; color: var(--muted); flex: 0 1 auto; min-width: 0; }
 .net-v { flex: 1 1 260px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 22px; }
 .net-v .m { color: var(--muted); }
 .net a.ip { font-family: var(--f-num); font-size: 12.5px; }

@@ -72,8 +72,10 @@ The exit Cloudflare sees is shown with the site's shared verdict: `src/egress.js
 with the reasons (data centre, VPN brand, device time zone in another country). The page only feeds it — what the
 test host's `/meta`, the shell's `/_ms/me` and the trace saw, plus the device's time zone — so every tool answers the
 same way and the tables live in one file. An address with no network information is Unknown, not Direct (the
-contract's "data missing"). Vendored copies keep the header naming the canonical commit: change the shared file and
-copy it again rather than editing this one.
+contract's "data missing"). The row also says which vantage point it is: "seen by this site (Cloudflare)", because the
+same address looked at from another destination is a different fact. This page shows one exit, so it has no
+"you have N more exits" line; the EgressLens link appears with a proxy warning. Vendored copies keep the header
+naming the canonical commit: change the shared file and copy it again rather than editing this one.
 
 ## Errors and aborts
 

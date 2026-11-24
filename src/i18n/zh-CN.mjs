@@ -40,7 +40,7 @@ export default {
   rel_v6: "这次测速走的是 IPv4。你的网络支持 IPv6 吗？", asn_tip: "AS{n}：查查这个网络是谁的",
   hint_idle: "点「开始」，大约 20 到 30 秒。网速越快，用的流量越多，详见帮助。",
   src_cf: "测速服务器：Cloudflare",
-  net_you: "你的出口",
+  net_seen: "本站（Cloudflare）看到的",
   prev: "上次 {v}",
   hist_btn: "历史",
   hist_h: "最近的测试",

@@ -40,7 +40,7 @@ export default {
   rel_v6: "이번 측정은 IPv4로 했어요. 내 네트워크는 IPv6를 지원할까요?", asn_tip: "AS{n}: 이 네트워크를 운영하는 곳",
   hint_idle: "시작을 누르면 20~30초 정도 걸려요. 속도가 빠를수록 데이터를 더 많이 써요(도움말 참고).",
   src_cf: "측정 서버: Cloudflare",
-  net_you: "내 출구",
+  net_seen: "이 사이트(Cloudflare)에서 본",
   prev: "지난번 {v}",
   hist_btn: "기록",
   hist_h: "최근 측정",

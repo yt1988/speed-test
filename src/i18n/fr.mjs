@@ -40,7 +40,7 @@ export default {
   rel_v6: "Ce test est passé par IPv4. Votre réseau a-t-il l'IPv6 ?", asn_tip: "AS{n} : qui gère ce réseau",
   hint_idle: "Appuyez sur Lancer : environ 20 à 30 secondes. Plus votre connexion est rapide, plus le test consomme de données (voir l'Aide).",
   src_cf: "Serveurs de test : Cloudflare",
-  net_you: "Votre sortie",
+  net_seen: "Vu par ce site (Cloudflare)",
   prev: "avant {v}",
   hist_btn: "Historique",
   hist_h: "Vos derniers tests",

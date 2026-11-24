@@ -40,7 +40,7 @@ export default {
   rel_v6: "This test ran over IPv4. Does your network support IPv6?", asn_tip: "AS{n}: who runs this network",
   hint_idle: "Press Start. It takes about 20–30 seconds, and uses more data the faster your line is (see Help).",
   src_cf: "Test servers: Cloudflare",
-  net_you: "Your exit",
+  net_seen: "Seen by this site (Cloudflare)",
   prev: "last {v}",
   hist_btn: "History",
   hist_h: "Your recent tests",

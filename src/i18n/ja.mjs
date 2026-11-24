@@ -40,7 +40,7 @@ export default {
   rel_v6: "今回は IPv4 で測りました。お使いの回線は IPv6 に対応していますか？", asn_tip: "AS{n}：このネットワークの運営元を調べる",
   hint_idle: "「開始」を押すと 20〜30 秒ほどで終わります。速い回線ほど通信量が増えます（ヘルプ参照）。",
   src_cf: "テストサーバー：Cloudflare",
-  net_you: "あなたの出口",
+  net_seen: "当サイト（Cloudflare）から見た",
   prev: "前回 {v}",
   hist_btn: "履歴",
   hist_h: "最近のテスト",
