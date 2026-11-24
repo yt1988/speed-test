@@ -9,6 +9,18 @@ import { USES } from "../src/verdict.mjs";
 const read = f => readFile(new URL("../" + f, import.meta.url), "utf8");
 const all = (s, re) => [...s.matchAll(re)].map(m => m[1]);
 
+test("no internal measurement host where a visitor can read it", async () => {
+  const files = ["README.md", "README.zh-CN.md", "public/llms.txt", "src/page.html"];
+  for (const [l] of LANGS) files.push(`src/i18n/${l}.mjs`);
+  for (const [, slug] of LANGS) files.push(`public/${slug ? slug + "/" : ""}index.html`);
+  const bad = /\brtc\.1ms\.dog\b|\b[a-z0-9-]+\.1msapp\.com\b/i;
+  for (const f of files) {
+    const s = await read(f).catch(() => "");
+    const m = s.match(bad);
+    assert.equal(m, null, `${f} names an internal host: ${m && m[0]}`);
+  }
+});
+
 test("every key the page uses exists in every language", async () => {
   const [app, page, build, worker] = await Promise.all(["src/app.js", "src/page.html", "scripts/build.mjs", "src/worker.js"].map(read));
   const keys = new Set([
