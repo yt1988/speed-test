@@ -11,7 +11,7 @@ A speed test that runs in the browser:
 - **Download, upload, latency and bufferbloat** against Cloudflare's speed test servers (the ones behind
   speed.cloudflare.com), at the data center nearest the visitor. Nothing passes through the site serving the page.
 - **UDP loss and whether QUIC gets through**, to two small servers of its own (`server/`, one Go process each:
-  mainland China and Tokyo), so the result says whether UDP is held back at home or only across the border. The
+  Shanghai and Tokyo), so the result says whether UDP is held back at home or only on the way to Tokyo. The
   addresses are deployment data, injected into the page as `<meta name="ms-rtc">` (see "Measurement endpoints"); a
   copy without them simply doesn't show that row.
 - 10 languages, shared results in links (`/<lang>/r/<code>`), direct rules for proxy tools, an embed mode.
@@ -57,7 +57,7 @@ The shell's Worker proxies every tool page and writes the metas into its head fr
 page's `connect-src` too); this repository only reads them:
 
 - `ms-rtc` — `sig=<URL>,<URL>;ice=<host:ports>,<host:ports>;wt=<URL>,<URL>`. Each key is a comma list, and when both
-  measurement points are present the order is fixed: the mainland one first, the cross-border one second. The browser
+  measurement points are present the order is fixed: Shanghai first, Tokyo second. The browser
   uses `sig` and `wt` (`ice` is the server's own configuration). One value means one point, shown without a region
   label.
 - `ms-anchors` — `cn=<base URL>;intl=<base URL>` for the two exit anchors (this page does not use them yet).

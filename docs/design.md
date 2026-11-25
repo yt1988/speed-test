@@ -15,22 +15,23 @@ see [AGENTS.md](../AGENTS.md).
   the browser's choice and invisible to the page.
 - **Deployment-injected endpoints.** The addresses are not in this repository: the shell's Worker proxies every tool
   page and writes `ms-rtc` into its head (and extends `connect-src`) from its own variables. Each key is a comma list,
-  mainland point first and cross-border second when both are present. Nothing injected means no row and the delay test
-  is unchanged; one endpoint means one row, without a region label or a comparison sentence.
-- **Two locations, side by side.** The same measurement runs against a server in mainland China and one in Tokyo:
-  loss on the mainland side only means the visitor's own network or provider, loss only across the border means the
-  international route, and loss on both means neither alone explains it. The row names both places, and the sentence
-  under the tiles compares each side's worst loaded phase (download or upload; the idle phase is short and carries
-  the connection's warm-up), with under 1% counted as fine (the help's threshold). The help says the mainland server
-  is there to compare the domestic path and that the cross-border leg is whatever this run measures from the
-  visitor's network: no expected loss is published, and measurements taken between the two servers never go into the
-  copy. The bufferbloat grade and "what it's good for" still come from Cloudflare's measurement alone.
+  Shanghai first and Tokyo second when both are present. Nothing injected means no row and the delay test is
+  unchanged; one endpoint means one row, without a region label or a comparison sentence.
+- **Two locations, side by side.** The same measurement runs against a server in Shanghai and one in Tokyo: loss on
+  the Shanghai side only means the visitor's own network or provider, loss only on the Tokyo side means the path to
+  Tokyo, and loss on both means neither alone explains it. The rows name the two points ("this site (Shanghai)" and
+  "this site (Tokyo)", each with its flag), and the sentence under the tiles compares each side's worst loaded phase
+  (download or upload; the idle phase is short and carries the connection's warm-up), with under 1% counted as fine
+  (the help's threshold). The help says the Shanghai point is there to compare that side and that the Tokyo side is
+  whatever this run measures from the visitor's network: no expected loss is published, and measurements taken
+  between the two servers never go into the copy. The bufferbloat grade and "what it's good for" still come from
+  Cloudflare's measurement alone.
 - **Each path stands alone.** The browser keeps every candidate both servers answer with (IPv4 and IPv6); nothing in
   the page strips one family to force a path. If one side's signaling or UDP fails, its tiles say so ("UDP blocked",
   "server unreachable") and the other side still reports; the comparison says when only one side was measured. The
-  row also names the address family the browser picked for each path, because a cross-border IPv6 path can lose
-  packets where IPv4 does not. The checkup report keeps `udpLoss` and `quic` from the cross-border path, the facts
-  it has always carried.
+  row also names the address family the browser picked for each path, because the IPv6 path to Tokyo can lose packets
+  where IPv4 does not. The checkup report keeps `udpLoss` and `quic` from the Tokyo path, the facts it has always
+  carried.
 - **Beside the speed test, not after it.** QUIC against TCP runs as the test starts and shows in its first
   seconds; each phase's loss updates every 0.5 s (a packet counts once it is 1.5 s old); the final figures, split
   into the way there and back by the server's own count of what arrived, come at the end.

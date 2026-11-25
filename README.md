@@ -57,7 +57,7 @@ scripts/build.mjs   builds public/ (pages, assets, rule sets, CSP)
 scripts/assets.mjs  link preview images (public/og/)
 scripts/verify.mjs  checks the endpoints with tiny requests (weekly in GitHub Actions)
 scripts/capped.mjs  the site locally, every speed request capped at 16 KB
-server/             the rtc servers (mainland China and Tokyo): one Go process each (WebRTC, WebTransport, WebSocket echo) and its systemd unit
+server/             the rtc servers (Shanghai and Tokyo): one Go process each (WebRTC, WebTransport, WebSocket echo) and its systemd unit
 AGENTS.md           how to run, test and deploy, the server from scratch
 docs/design.md      why it works the way it does, and what was measured
 ```
@@ -73,7 +73,7 @@ npm run dev        # http://localhost:8796
 npx wrangler deploy
 ```
 
-The UDP/QUIC row talks to servers you configure at deploy time: the page reads `<meta name="ms-rtc">`, whose `sig` and `wt` keys are comma lists (mainland point first, cross-border second when both are present). Use a template or proxy to inject that tag; without it the row is hidden and the rest of the test works.
+The UDP/QUIC row talks to servers you configure at deploy time: the page reads `<meta name="ms-rtc">`, whose `sig` and `wt` keys are comma lists (Shanghai first, Tokyo second when both are present). Use a template or proxy to inject that tag; without it the row is hidden and the rest of the test works.
 
 Static files on a Cloudflare Worker: files are served without running the script (not metered); `src/worker.js` only answers `/r/<code>` and 404s. On 1ms.dog, pushes to `main` deploy through Workers Builds (`npm ci && npm test`, then `npx wrangler deploy`; nothing ships when `public/` is stale or a test fails). `wrangler.toml` binds no domain: on 1ms.dog the shared shell routes `speed.1ms.dog` to it. To self-host, bind your domain to the Worker in the Cloudflare dashboard and build with `SITE_URL=https://your.domain npm run build`.
 

@@ -173,8 +173,8 @@ import { udp, quic, compareSides, SIGS, WTS } from "./rtc.mjs";
   // unaffected.
   const RTC_PAIRS = SIGS.map((sig, i) => ({ sig, wt: WTS[i] || "" })).filter(p => p.sig && p.wt);
   const RTC_PATHS = RTC_PAIRS.length > 1
-    ? [{ k: "c", ...RTC_PAIRS[0], label: "udp_cn" }, { k: "o", ...RTC_PAIRS[1], label: "udp_os" }]
-    : RTC_PAIRS.length ? [{ k: "o", ...RTC_PAIRS[0], label: null }] : [];
+    ? [{ k: "c", ...RTC_PAIRS[0], label: "udp_cn", cc: "CN" }, { k: "o", ...RTC_PAIRS[1], label: "udp_os", cc: "JP" }]
+    : RTC_PAIRS.length ? [{ k: "o", ...RTC_PAIRS[0], label: null, cc: null }] : [];
   const RTC_ON = RTC_PATHS.length > 0 && typeof RTCPeerConnection === "function";
   if (RTC_ON) {
     $("#udp").hidden = false;
@@ -193,9 +193,9 @@ import { udp, quic, compareSides, SIGS, WTS } from "./rtc.mjs";
   // the path's name, plus the address family the browser chose once known: the cross-border IPv6 path can lose
   // packets where IPv4 does not, so the row says which one was measured
   const setPathLabel = (p, family) => {
-    const el = $(`#udp [data-p="${p}"] .udp-loc`), label = RTC_PATHS.find(x => x.k === p).label;
-    if (!el || !label) return;
-    el.textContent = t(label) + (family ? " · IPv" + family : "");
+    const path = RTC_PATHS.find(x => x.k === p), el = $(`#udp [data-p="${p}"] .udp-loc`);
+    if (!el || !path || !path.label) return;
+    el.innerHTML = (path.cc ? flag(path.cc) : "") + esc(t(path.label)) + (family ? " · IPv" + family : "");
   };
   const udpClear = p => { for (const k of [0, 1, 2, "q"]) udpCell(p, k, "–"); };
   const udpClearAll = () => { for (const { k } of RTC_PATHS) { udpClear(k); setPathLabel(k, null); } $("#udpV").textContent = " "; };
@@ -307,6 +307,8 @@ import { udp, quic, compareSides, SIGS, WTS } from "./rtc.mjs";
   const flagCode = cc => cc === "TW" ? "cn" : cc.toLowerCase();
   const country = cc => { if (!cc) return ""; try { return regionName(cc, D.lang); } catch (e) { return cc; } };
   const flag = cc => /^[A-Z]{2}$/.test(cc || "") ? `<img class="flag" src="/flags/${flagCode(cc)}.svg" alt="${esc(country(cc))}" width="18" height="14">` : "";
+  // the two measurement-point labels: the site's role name, with the city's flag
+  for (const pt of RTC_PATHS) if (pt.label) setPathLabel(pt.k, null);
   document.addEventListener("error", e => { if (e.target.matches && e.target.matches("img.flag")) e.target.remove(); }, true);
 
   /* ---------- which way the test goes: asked as the page loads, before any test ---------- */
