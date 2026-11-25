@@ -53,7 +53,7 @@ export default {
   k_grade: "Bufferbloat", jit_v: "ジッター {ms} ms", grade_sub: "負荷時 +{ms} ms",
   lat_wait: "待機中", lat_now: "測定中", lat_n: "{n} 回", lat_n_one: "{n} 回", grade_wait: "上りの測定後に評価",
   tip_grade: "回線がいっぱいのとき、空いているときより遅延がどれだけ増えるかを A+〜F で評価します：5 ms 未満 A+、30 未満 A、60 未満 B、200 未満 C、400 未満 D、それ以上 F。",
-  // the UDP and QUIC row (src/rtc.mjs, two servers: mainland China and Tokyo)
+  // the UDP and QUIC row (src/rtc.mjs, two servers: Shanghai and Tokyo)
   udp_h: "UDP と QUIC（当サイトの測定ポイント）", k_loss_idle: "パケットロス", k_loss_down: "下り中のロス", k_loss_up: "上り中のロス", k_quic: "QUIC", tip_loss: "通話やゲームと同じ UDP で、小さなパケットを毎秒 50 個この側のサーバーへ送り、戻ってこなかった割合です。1% 未満なら問題ありません。", tip_quic: "QUIC（HTTP/3、UDP を使用）があなたのネットワークを通ってこの側のサーバーまで届くか、同じサーバーへの TCP と同じくらい速いかを調べます。会社や学校、公共のネットワークでは UDP が遮断・制限されることがあります。", udp_blocked: "UDP 不通", rtc_down: "サーバーに届かない", quic_ok: "正常", quic_slow: "制限あり", quic_blocked: "遮断", quic_na: "判定不可", quic_em: "{q} · TCP {t} ms", quic_na_em: "ブラウザ非対応", quic_blocked_em: "TCP のみ {t} ms", udp_cn: "当サイト（上海）", udp_os: "当サイト（東京）", udp_v_same: "上海側も東京側も UDP は正常です", udp_v_border: "上海側は正常、東京側で {p}% のパケットロス", udp_v_domestic: "東京側は正常、上海側で {p}% のパケットロス", udp_v_both: "両側ともパケットロスがあります（上海側 {a}%、東京側 {b}%）", udp_v_partial_cn: "上海側だけ測定できました（東京側は利用不可）", udp_v_partial_os: "東京側だけ測定できました（上海側は利用不可）",
   grade_ap: "Bufferbloat A+：回線がいっぱいでも、遅延の増加はわずか {ms} ms。誰かがダウンロードしていても、通話やゲームに影響はありません。",
   grade_a: "Bufferbloat A：回線がいっぱいのとき、遅延が {ms} ms 増えます。混雑中も通話やほとんどのゲームは問題ありません。",
