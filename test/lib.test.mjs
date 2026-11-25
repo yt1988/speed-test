@@ -86,30 +86,13 @@ test("the exit, and signs it isn't the visitor's own line", () => {
   assert.deepEqual(egress(null).reasons, []);
 });
 
-test("deployment-injected endpoints: their metas, origins and connect-src", async () => {
-  const { metaTags, connectOrigins, extendCsp } = await import("../src/endpointenv.mjs");
-  const env = {
-    MS_RTC: "sig=https://rtc.example:2087;ice=rtc.example:40100-40101;wt=https://rtc.example:40101;sig_cn=https://cn.example:2087;wt_cn=https://cn.example:40101",
-    MS_ANCHORS: "cn=https://p.example:9443;intl=https://q.example",
-  };
-  const tags = metaTags(env);
-  assert.match(tags, /^<meta name="ms-anchors" content="cn=https:\/\/p\.example:9443;intl=https:\/\/q\.example">/);
-  assert.match(tags, /<meta name="ms-rtc" content="sig=https:\/\/rtc\.example:2087;ice=/);
-  assert.deepEqual(connectOrigins(env).sort(), [
-    "https://cn.example:2087", "https://cn.example:40101", "https://p.example:9443", "https://q.example",
-    "https://rtc.example:2087", "https://rtc.example:40101", "wss://cn.example:2087", "wss://rtc.example:2087",
-  ]);
-  const csp = extendCsp("default-src 'self'; connect-src 'self' https://speed.cloudflare.com", env);
-  assert.match(csp, /^default-src 'self'; connect-src 'self' https:\/\/speed\.cloudflare\.com https:\/\/rtc\.example:2087/);
-  assert.match(csp, /wss:\/\/cn\.example:2087/);
-  assert.equal(extendCsp("default-src 'self'; connect-src 'self'", "sig"), "default-src 'self'; connect-src 'self'", "nothing injected, nothing added");
-  assert.equal(metaTags({}), "");
-  assert.deepEqual(connectOrigins({}), []);
-});
-
-test("without injected endpoints there is nothing to measure", async () => {
-  const rtc = await import("../src/rtc.mjs");
-  assert.equal(rtc.SIG, ""); assert.equal(rtc.WT, ""); assert.equal(rtc.SIG_CN, ""); assert.equal(rtc.WT_CN, "");
+test("the ms-rtc keys are comma lists, the mainland point first", async () => {
+  const { list, SIGS, WTS } = await import("../src/rtc.mjs");
+  assert.deepEqual(list(" https://a:2087 , https://b:2087 "), ["https://a:2087", "https://b:2087"]);
+  assert.deepEqual(list(""), []);
+  assert.deepEqual(list("a,,b,"), ["a", "b"]);
+  assert.deepEqual(SIGS, [], "no meta in Node: nothing to measure");
+  assert.deepEqual(WTS, []);
 });
 
 test("the vendored egress core says which commit it came from", async () => {

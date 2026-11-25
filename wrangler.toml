@@ -13,6 +13,3 @@ preview_urls = false
 [assets]
 directory = "./public"
 binding = "ASSETS"   # the Worker reads a language's page for shared results (/r/<code>)
-# pages run through the Worker, so it can write the deployment's measurement endpoints (env.MS_RTC, env.MS_ANCHORS)
-# into their <head>; every other file is served as it is, before the Worker runs
-run_worker_first = ["/", "/*/"]

@@ -53,21 +53,17 @@ in the dashboard and build with `SITE_URL=https://<your-domain> npm run build`.
 ## Measurement endpoints
 
 The site's own endpoints are deployment data, not repository content (the 1ms.dog repo's tool contract, section 2).
-The page reads them from `<meta>` tags in its head:
+The shell's Worker proxies every tool page and writes the metas into its head from its own variables (it extends the
+page's `connect-src` too); this repository only reads them:
 
-- `ms-rtc` — `sig=<offer URL>;ice=<host:ports>;wt=<WebTransport URL>` for the cross-border point, plus optional
-  `sig_cn`/`wt_cn` for the mainland one it compares against. The browser uses `sig` and `wt`; `ice` is the server's
-  own configuration.
+- `ms-rtc` — `sig=<URL>,<URL>;ice=<host:ports>,<host:ports>;wt=<URL>,<URL>`. Each key is a comma list, and when both
+  measurement points are present the order is fixed: the mainland one first, the cross-border one second. The browser
+  uses `sig` and `wt` (`ice` is the server's own configuration). One value means one point, shown without a region
+  label.
 - `ms-anchors` — `cn=<base URL>;intl=<base URL>` for the two exit anchors (this page does not use them yet).
 
-On a Worker deployment they arrive from env (`MS_RTC`, `MS_ANCHORS`, e.g. `wrangler secret put MS_RTC --name
-speed-test`; nothing is in the repository): `src/worker.js` writes the tags and adds their origins to the page's
-`connect-src`. Without them the WebRTC/WebTransport row stays hidden and the rest of the test is unchanged.
-`run_worker_first = ["/", "/*/"]` in `wrangler.toml` sends pages through the Worker for this, and the page's ETag
-includes a hash of the values, so changing a secret is a new page rather than a stale 304.
-
-A static deployment without a Worker can bake the same tags in at build time:
-`MS_RTC='sig=…;wt=…' MS_ANCHORS='cn=…;intl=…' npm run build` — the build extends `_headers` the same way.
+Without `ms-rtc` the WebRTC/WebTransport row stays hidden and the rest of the test is unchanged. A static deployment
+that wants the row injects the same `<meta>` itself, at build time or in its own proxy; nothing here does that.
 
 ## Run the UDP and QUIC server
 
@@ -93,8 +89,8 @@ log and keeps nothing (see the top of `server/main.go`); about 12 MB of memory.
    GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o rtc .
    ```
    Keep quic-go at the version webtransport-go asks for in its go.mod (newer quic-go doesn't build with it).
-2. **Point it at your domains**: set the deployment's `MS_RTC` (see "Measurement endpoints"), and add the page's
-   origins to `origins` in `server/main.go` — the server only answers those.
+2. **Point it at your domains**: inject `ms-rtc` from the page's template or proxy (see "Measurement endpoints"), and
+   add the page's origins to `origins` in `server/main.go` — the server only answers those.
 3. **Install**: a system user for it, a directory such as `/opt/<app>/` with the binary, and a DNS name for the
    server pointing straight at it (not through a proxy or CDN: browsers connect to it directly, over UDP too).
 4. **Firewall**: open the three ports for IPv4 *and* IPv6. A cloud firewall often has a separate IPv6 list; with

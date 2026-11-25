@@ -1,19 +1,22 @@
 // UDP and QUIC to the site's measurement points (server/main.go): one across the border (keys sig/wt in the page's
 // <meta name="ms-rtc">) and one in mainland China (sig_cn/wt_cn), so a network that limits UDP at home is told apart
-// from one that limits it only across the border. The addresses are deploy-time data (src/endpointenv.mjs): nothing
-// injected means no measurement points, and the row hides. Little traffic each: 50 packets of 12 bytes a second while
-// the test runs (with WebRTC's own acknowledgements about 130 UDP packets and 10 KB a second each way, 0.4-0.7 MB a
-// test), then 10 echoes over QUIC and 10 over TCP. Both together: 0.8-1.4 MB.
+// from one that limits it only across the border. The addresses are deploy-time data, injected by the shell's Worker
+// as <meta name="ms-rtc">; nothing injected means no measurement points, and the row hides. Little traffic each: 50
+// packets of 12 bytes a second while the test runs (with WebRTC's own acknowledgements about 130 UDP packets and
+// 10 KB a second each way, 0.4-0.7 MB a test), then 10 echoes over QUIC and 10 over TCP. Both together: 0.8-1.4 MB.
 //
 //   udp(sig)       a WebRTC data channel, unreliable and unordered (as calls and games send): .phase(0|1|2) tags
 //                  what follows as idle, download or upload; .stop() gives { state, family, phases: [{ loss, up, down, jit }] }
 //   quic(sig,wt)   WebTransport datagrams against a WebSocket to the same server: is QUIC let through, and as fast?
 //
 // Pure helpers (lossOf, quicVerdict, compareSides) are unit-tested; the rest needs a browser.
-// the page's ms-rtc meta, parsed by the vendored core; empty strings when the deployment injected nothing
+// the page's ms-rtc meta, which the shell's Worker writes from its own variables; empty lists when nothing is
+// injected. Each key is a comma list, and when both points are present the order is fixed: the mainland one first,
+// the cross-border one second (the 1ms.dog tool contract, section 2).
 import { endpoints } from "./egress.js";
 const rtc = endpoints("ms-rtc");
-export const SIG = rtc.sig || "", WT = rtc.wt || "", SIG_CN = rtc.sig_cn || "", WT_CN = rtc.wt_cn || "";
+export const list = s => String(s || "").split(",").map(x => x.trim()).filter(Boolean);
+export const SIGS = list(rtc.sig), WTS = list(rtc.wt);
 export const RATE_MS = 20, WAIT_MS = 1500;
 const PHASES = 3;
 
