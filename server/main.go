@@ -1,11 +1,11 @@
-// rtc.1ms.dog: the server end of the UDP and QUIC checks of speed.1ms.dog and lag.1ms.dog (Network Diagnosis, which
+// The RTC endpoint: the server end of the UDP and QUIC checks of the speed test and lag (Network Diagnosis, which
 // copies src/rtc.mjs), in Tokyo. Ports, directory and service name are as registered in 1ms-shell docs/processes.md,
 // "VPS": 40100/udp (ICE), 40101/udp (WebTransport), 2087/tcp, 1ms-speed.
 //
-//   POST https://rtc.1ms.dog:2087/offer   a WebRTC offer in, the answer out (ice-lite, one UDP port): the page then
+//   POST https://<your-domain>:2087/offer   a WebRTC offer in, the answer out (ice-lite, one UDP port): the page then
 //                                          sends small packets on an unreliable data channel and this echoes each one
-//   GET  wss://rtc.1ms.dog:2087/ws         WebSocket echo, the TCP side of the QUIC comparison
-//   CONNECT https://rtc.1ms.dog:40101/wt   WebTransport (HTTP/3 over QUIC) echo of datagrams
+//   GET  wss://<your-domain>:2087/ws         WebSocket echo, the TCP side of the QUIC comparison
+//   CONNECT https://<your-domain>:40101/wt   WebTransport (HTTP/3 over QUIC) echo of datagrams
 //
 // Nothing is logged or kept: packets are counted in memory for the length of one test, then dropped. Only errors and
 // startup reach the journal. Every connection has a time limit, a packet budget and a cap on how many run at once.
