@@ -49,7 +49,7 @@ src/history.mjs     历史结果，只保存在浏览器里
 src/verdict.mjs     档位、缓冲膨胀、线路适合干什么
 src/rules.mjs       代理工具的直连规则
 src/share.mjs       把结果编进链接
-src/rtc.mjs         UDP 丢包和 QUIC，到东京和上海的两台服务器（只在 speed.1ms.dog 上）
+src/rtc.mjs         UDP 丢包和 QUIC，到部署注入的测量点（没有注入就隐藏）
 src/app.js          页面脚本
 src/worker.js       /r/<code> 的预览；其他路径返回不带 HTML 的 404
 src/i18n/*.mjs      10 种语言
@@ -73,7 +73,9 @@ npm run dev        # http://localhost:8796
 npx wrangler deploy
 ```
 
-整站是 Cloudflare Worker 上的静态文件：文件直接返回，不运行脚本，这部分请求不计费；`src/worker.js` 只处理 `/r/<code>` 和 404。在 1ms.dog 上，推送到 `main` 后由 Workers Builds 自动部署（先 `npm ci && npm test`，再 `npx wrangler deploy`；`public/` 没有重新生成或测试不通过时不会部署）。`wrangler.toml` 不绑定域名：在 1ms.dog 上由公共外壳把 `speed.1ms.dog` 路由过来。自己部署时，在 Cloudflare 控制台给 Worker 绑定你的域名，并用 `SITE_URL=https://你的域名 npm run build` 构建。
+UDP/QUIC 那一行连的测量点在部署时配置：页面从 `<meta name="ms-rtc">` 读。用 Worker 时由 `src/worker.js` 把 `MS_RTC`（和 `MS_ANCHORS`）写进去，值用 `wrangler secret put` 设置；纯静态部署可以用 `MS_RTC='sig=…;wt=…' npm run build` 在构建时写死。没有注入时那一行隐藏，其余测试照常。
+
+整站是 Cloudflare Worker 上的静态文件：文件直接返回，不运行脚本，这部分请求不计费；页面经过 `src/worker.js`（注入测量点、`/r/<code>` 预览），其余文件直接返回。在 1ms.dog 上，推送到 `main` 后由 Workers Builds 自动部署（先 `npm ci && npm test`，再 `npx wrangler deploy`；`public/` 没有重新生成或测试不通过时不会部署）。`wrangler.toml` 不绑定域名：在 1ms.dog 上由公共外壳把 `speed.1ms.dog` 路由过来。自己部署时，在 Cloudflare 控制台给 Worker 绑定你的域名，并用 `SITE_URL=https://你的域名 npm run build` 构建。
 
 ## 许可
 

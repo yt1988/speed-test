@@ -99,6 +99,7 @@ h2 { font-size: 15px; font-weight: 700; }
 .udp-h { font-size: 12px; color: var(--muted); font-weight: 600; margin: 0; }
 /* the same four tiles once per measurement point, and the sentence that says which side loses packets */
 .udp-p { display: flex; flex-direction: column; gap: 6px; }
+.udp-p[hidden] { display: none; }
 .udp-loc { font-size: 12px; color: var(--muted); font-weight: 600; margin: 0; }
 /* two lines reserved: the sentence arrives after the test, and in the long languages it needs both */
 .udp-v { font-size: 13px; color: var(--muted); line-height: 1.6; min-height: 3.2em; margin: 0; }

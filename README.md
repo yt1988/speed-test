@@ -49,7 +49,7 @@ src/history.mjs     past results, kept only in the browser
 src/verdict.mjs     tiers, bufferbloat and its A+ to F grade, what the line is good for
 src/rules.mjs       direct rules for proxy tools
 src/share.mjs       results in links
-src/rtc.mjs         UDP loss and QUIC, to mainland China and Tokyo (speed.1ms.dog only)
+src/rtc.mjs         UDP loss and QUIC at the deployment's measurement points (hidden without)
 src/app.js          the page script
 src/worker.js       /r/<code> previews; a bare 404 for anything else
 src/i18n/*.mjs      10 languages
@@ -73,7 +73,9 @@ npm run dev        # http://localhost:8796
 npx wrangler deploy
 ```
 
-Static files on a Cloudflare Worker: files are served without running the script (not metered); `src/worker.js` only answers `/r/<code>` and 404s. On 1ms.dog, pushes to `main` deploy through Workers Builds (`npm ci && npm test`, then `npx wrangler deploy`; nothing ships when `public/` is stale or a test fails). `wrangler.toml` binds no domain: on 1ms.dog the shared shell routes `speed.1ms.dog` to it. To self-host, bind your domain to the Worker in the Cloudflare dashboard and build with `SITE_URL=https://your.domain npm run build`.
+The UDP/QUIC row talks to servers you configure at deploy time: the page reads them from `<meta name="ms-rtc">`. On a Worker, `src/worker.js` writes that tag from `MS_RTC` (and `MS_ANCHORS`), set as secrets; a static copy can bake it in with `MS_RTC='sig=…;wt=…' npm run build`. Without it the row is hidden and the rest of the test works.
+
+Static files on a Cloudflare Worker: files are served without running the script (not metered); pages run through `src/worker.js` (for the injected endpoints and shared results), everything else is served directly. On 1ms.dog, pushes to `main` deploy through Workers Builds (`npm ci && npm test`, then `npx wrangler deploy`; nothing ships when `public/` is stale or a test fails). `wrangler.toml` binds no domain: on 1ms.dog the shared shell routes `speed.1ms.dog` to it. To self-host, bind your domain to the Worker in the Cloudflare dashboard and build with `SITE_URL=https://your.domain npm run build`.
 
 ## License
 

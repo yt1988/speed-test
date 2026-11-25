@@ -13,6 +13,10 @@ see [AGENTS.md](../AGENTS.md).
   which needs a peer that answers; a Cloudflare Worker can't be one. WebTransport (QUIC) against a WebSocket (TCP)
   to the same server is the only way a page can compare the two: whether the browser uses HTTP/3 to Cloudflare is
   the browser's choice and invisible to the page.
+- **Deployment-injected endpoints.** The addresses are not in this repository: the page reads `ms-rtc` from its head,
+  written either by the Worker from `MS_RTC`/`MS_ANCHORS` secrets (which also add the origins to `connect-src`, and
+  fold a hash of them into the page's ETag) or baked in by `npm run build`. Nothing injected means no row, and the
+  delay test is unchanged; one endpoint injected means one row and no comparison sentence.
 - **Two locations, side by side.** The same measurement runs against a server in mainland China and one in Tokyo:
   loss on the mainland side only means the visitor's own network or provider, loss only across the border means the
   international route, and loss on both means neither alone explains it. The row names both places, and the sentence

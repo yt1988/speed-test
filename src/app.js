@@ -167,11 +167,18 @@ import { udp, quic, compareSides, SIG, WT, SIG_CN, WT_CN } from "./rtc.mjs";
   const showLat = r => {
     latCell("idle", r.idle, r.jit); latCell("ldown", r.ldown, r.jdown, r.idle); latCell("lup", r.lup, r.jup, r.idle); gradeCell(r);
   };
-  // UDP and QUIC, measured to two of our servers: rtc.dog.1msapp.com in mainland China (the domestic path, "c") and
-  // rtc.1ms.dog in Tokyo (the cross-border path, "o"). Only on speed.1ms.dog (and its local copy), where both are.
-  const RTC_ON = /^(speed\.1ms\.dog|localhost|127\.0\.0\.1)$/.test(location.hostname) && typeof RTCPeerConnection === "function";
-  if (RTC_ON) $("#udp").hidden = false;
-  const RTC_PATHS = [{ k: "c", sig: SIG_CN, wt: WT_CN, label: "udp_cn" }, { k: "o", sig: SIG, wt: WT, label: "udp_os" }];
+  // UDP and QUIC at the site's measurement points: mainland China (the domestic path, "c") and across the border
+  // ("o"). The addresses come from the page's <meta name="ms-rtc"> (src/endpointenv.mjs); a deployment that injected
+  // nothing, or only one of the two, gets no row or one row, and the delay test is unaffected.
+  const RTC_PATHS = [
+    { k: "c", sig: SIG_CN, wt: WT_CN, label: "udp_cn" },
+    { k: "o", sig: SIG, wt: WT, label: "udp_os" },
+  ].filter(p => p.sig && p.wt);
+  const RTC_ON = RTC_PATHS.length > 0 && typeof RTCPeerConnection === "function";
+  if (RTC_ON) {
+    $("#udp").hidden = false;
+    for (const k of ["c", "o"]) if (!RTC_PATHS.some(p => p.k === k)) $(`#udp [data-p="${k}"]`).hidden = true;
+  }
   const udpCell = (p, k, val, em, cls) => {
     const li = $(`#udp [data-u="${p}${k}"]`), b = li.querySelector("b");
     b.className = cls || ""; b.innerHTML = val; li.querySelector("em").innerHTML = em || "&nbsp;";
@@ -226,6 +233,7 @@ import { udp, quic, compareSides, SIG, WT, SIG_CN, WT_CN } from "./rtc.mjs";
   const worstLoss = r => Math.max(0, ...RTC_PATHS.map(pt => sideLoss(r[pt.k] && r[pt.k].u) ?? 0));
   // the sentence that answers "limited at home, or only across the border?"
   function showVerdict(r) {
+    if (RTC_PATHS.length < 2) { $("#udpV").textContent = ""; return; }   // one point is not a comparison
     const c = compareSides(sideLoss(r.c && r.c.u), sideLoss(r.o && r.o.u));
     $("#udpV").textContent = c.side === "same" ? t("udp_v_same")
       : c.side === "border" ? t("udp_v_border", { p: fmtPct(c.os) })

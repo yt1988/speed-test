@@ -11,9 +11,9 @@ A speed test that runs in the browser:
 - **Download, upload, latency and bufferbloat** against Cloudflare's speed test servers (the ones behind
   speed.cloudflare.com), at the data center nearest the visitor. Nothing passes through the site serving the page.
 - **UDP loss and whether QUIC gets through**, to two small servers of its own (`server/`, one Go process each:
-  mainland China and Tokyo), so the result says whether UDP is held back at home or only across the border. Optional:
-  the page only shows that row on the host it is configured for (`src/rtc.mjs` and `RTC_ON` in `src/app.js`), so a
-  copy without the servers simply doesn't have it.
+  mainland China and Tokyo), so the result says whether UDP is held back at home or only across the border. The
+  addresses are deployment data, injected into the page as `<meta name="ms-rtc">` (see "Measurement endpoints"); a
+  copy without them simply doesn't show that row.
 - 10 languages, shared results in links (`/<lang>/r/<code>`), direct rules for proxy tools, an embed mode.
 
 The page is static files on a Cloudflare Worker (`src/worker.js` only answers `/r/<code>` and 404s). What each file
@@ -50,6 +50,25 @@ a push to `main` deploys (`npm ci && npm test`, then `npx wrangler deploy`; noth
 a test fails), so commit `public/` together with `src/`. `wrangler.toml` binds no domain: bind yours to the Worker
 in the dashboard and build with `SITE_URL=https://<your-domain> npm run build`.
 
+## Measurement endpoints
+
+The site's own endpoints are deployment data, not repository content (the 1ms.dog repo's tool contract, section 2).
+The page reads them from `<meta>` tags in its head:
+
+- `ms-rtc` — `sig=<offer URL>;ice=<host:ports>;wt=<WebTransport URL>` for the cross-border point, plus optional
+  `sig_cn`/`wt_cn` for the mainland one it compares against. The browser uses `sig` and `wt`; `ice` is the server's
+  own configuration.
+- `ms-anchors` — `cn=<base URL>;intl=<base URL>` for the two exit anchors (this page does not use them yet).
+
+On a Worker deployment they arrive from env (`MS_RTC`, `MS_ANCHORS`, e.g. `wrangler secret put MS_RTC --name
+speed-test`; nothing is in the repository): `src/worker.js` writes the tags and adds their origins to the page's
+`connect-src`. Without them the WebRTC/WebTransport row stays hidden and the rest of the test is unchanged.
+`run_worker_first = ["/", "/*/"]` in `wrangler.toml` sends pages through the Worker for this, and the page's ETag
+includes a hash of the values, so changing a secret is a new page rather than a stale 304.
+
+A static deployment without a Worker can bake the same tags in at build time:
+`MS_RTC='sig=…;wt=…' MS_ANCHORS='cn=…;intl=…' npm run build` — the build extends `_headers` the same way.
+
 ## Run the UDP and QUIC server
 
 One Go binary under systemd on any Linux VPS with a public IPv4 (and IPv6, if you want it tested); each location is
@@ -74,9 +93,8 @@ log and keeps nothing (see the top of `server/main.go`); about 12 MB of memory.
    GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o rtc .
    ```
    Keep quic-go at the version webtransport-go asks for in its go.mod (newer quic-go doesn't build with it).
-2. **Point it at your domains**: the page's server address is `RTC` in `src/rtc.mjs`, the hosts that show the row
-   are in `RTC_ON` (`src/app.js`), the CSP takes its origins from `src/rtc.mjs` at build time, and the server only
-   answers the page origins in `origins` (`server/main.go`).
+2. **Point it at your domains**: set the deployment's `MS_RTC` (see "Measurement endpoints"), and add the page's
+   origins to `origins` in `server/main.go` — the server only answers those.
 3. **Install**: a system user for it, a directory such as `/opt/<app>/` with the binary, and a DNS name for the
    server pointing straight at it (not through a proxy or CDN: browsers connect to it directly, over UDP too).
 4. **Firewall**: open the three ports for IPv4 *and* IPv6. A cloud firewall often has a separate IPv6 list; with

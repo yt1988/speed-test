@@ -16,7 +16,7 @@ import { fileURLToPath } from "node:url";
 import { build as bundle, transform } from "esbuild";
 import { ruleSets } from "../src/rules.mjs";
 import { CF } from "../src/measure.mjs";
-import { SIG, WT, SIG_CN, WT_CN } from "../src/rtc.mjs";
+import { metaTags, connectOrigins } from "../src/endpointenv.mjs";
 import { USES } from "../src/verdict.mjs";
 
 const SITE = (process.env.SITE_URL || "https://speed.1ms.dog").replace(/\/+$/, "");
@@ -88,10 +88,9 @@ const BUILD_ONLY = new Set(["name", "seo_title", "seo_desc", "seo_kw", "og_sub",
 
 // every origin the page asks
 export const ORIGINS = [new URL(CF).origin];
-// rtc.1ms.dog and rtc.dog.1msapp.com (src/rtc.mjs): the offer and the WebSocket on 2087, WebTransport on 40101;
-// WebRTC itself is not under connect-src
-export const RTC_ORIGINS = [SIG, SIG_CN].flatMap(s => [new URL(s).origin, new URL(s).origin.replace(/^https/, "wss")])
-  .concat([WT, WT_CN].map(w => new URL(w).origin));
+// the measurement endpoints, when the build itself was given MS_RTC / MS_ANCHORS (a static deployment without a
+// Worker); on 1ms.dog the Worker injects them per request and extends this header (src/worker.js)
+export const RTC_ORIGINS = connectOrigins(process.env);
 
 export async function build({ check = false } = {}) {
   const I = await loadI18n(), en = I.en;
@@ -161,7 +160,8 @@ export async function build({ check = false } = {}) {
       .replace(/\{\{a:(\w+)\}\}/g, (m, k) => esc(T(k)))   // translated attribute values (aria-label, tooltips)
       .replace(/\{\{(k_\w+)\}\}/g, (m, k) => esc(T(k)))   // labels that carry a tooltip
       .replace("{{lang}}", lang).replace("{{pathsAttr}}", esc(JSON.stringify(paths))).replace("{{rootAttr}}", slug ? "" : " data-root")
-      .replace("{{prepaint}}", PREPAINT).replace("{{head}}", head).replace("{{css}}", cssName).replace("{{js}}", jsName).replace("{{strings}}", sName)
+      .replace("{{prepaint}}", PREPAINT).replace("{{head}}", head).replace("{{msMetas}}", metaTags(process.env))
+      .replace("{{css}}", cssName).replace("{{js}}", jsName).replace("{{strings}}", sName)
       .split("{{homeHref}}").join(path(slug)).replace("{{langOpts}}", langOpts).replace("{{h1}}", esc(T("h1"))).replace("{{uses}}", uses)
       .replace("{{helpNav}}", helpNav).replace("{{helpC}}", helpC).replace("{{data}}", JSON.stringify({ lang, paths }).replace(/</g, "\\u003c"));
     if (/\{\{[\w:]+\}\}/.test(html)) throw new Error("unfilled placeholder in " + path(slug) + ": " + /\{\{[\w:]+\}\}/.exec(html)[0]);

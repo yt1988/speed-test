@@ -42,3 +42,11 @@ test("the CSP lets the page reach every test host", async () => {
   const hd = await readFile(new URL("../public/_headers", import.meta.url), "utf8");
   for (const o of [...ORIGINS, ...RTC_ORIGINS]) assert.ok(hd.includes(" " + o), o);
 });
+
+test("without injected endpoints the page carries none and hides the UDP row", async () => {
+  for (const [lang, slug] of LANGS) {
+    const h = await page(slug);
+    assert.doesNotMatch(h, /name="ms-rtc"|name="ms-anchors"/, lang + ": injected meta without a deployment value");
+    assert.match(h, /<div class="udp" id="udp" hidden>/, lang + ": the UDP row must start hidden");
+  }
+});

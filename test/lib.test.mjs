@@ -86,11 +86,37 @@ test("the exit, and signs it isn't the visitor's own line", () => {
   assert.deepEqual(egress(null).reasons, []);
 });
 
+test("deployment-injected endpoints: their metas, origins and connect-src", async () => {
+  const { metaTags, connectOrigins, extendCsp } = await import("../src/endpointenv.mjs");
+  const env = {
+    MS_RTC: "sig=https://rtc.example:2087;ice=rtc.example:40100-40101;wt=https://rtc.example:40101;sig_cn=https://cn.example:2087;wt_cn=https://cn.example:40101",
+    MS_ANCHORS: "cn=https://p.example:9443;intl=https://q.example",
+  };
+  const tags = metaTags(env);
+  assert.match(tags, /^<meta name="ms-anchors" content="cn=https:\/\/p\.example:9443;intl=https:\/\/q\.example">/);
+  assert.match(tags, /<meta name="ms-rtc" content="sig=https:\/\/rtc\.example:2087;ice=/);
+  assert.deepEqual(connectOrigins(env).sort(), [
+    "https://cn.example:2087", "https://cn.example:40101", "https://p.example:9443", "https://q.example",
+    "https://rtc.example:2087", "https://rtc.example:40101", "wss://cn.example:2087", "wss://rtc.example:2087",
+  ]);
+  const csp = extendCsp("default-src 'self'; connect-src 'self' https://speed.cloudflare.com", env);
+  assert.match(csp, /^default-src 'self'; connect-src 'self' https:\/\/speed\.cloudflare\.com https:\/\/rtc\.example:2087/);
+  assert.match(csp, /wss:\/\/cn\.example:2087/);
+  assert.equal(extendCsp("default-src 'self'; connect-src 'self'", "sig"), "default-src 'self'; connect-src 'self'", "nothing injected, nothing added");
+  assert.equal(metaTags({}), "");
+  assert.deepEqual(connectOrigins({}), []);
+});
+
+test("without injected endpoints there is nothing to measure", async () => {
+  const rtc = await import("../src/rtc.mjs");
+  assert.equal(rtc.SIG, ""); assert.equal(rtc.WT, ""); assert.equal(rtc.SIG_CN, ""); assert.equal(rtc.WT_CN, "");
+});
+
 test("the vendored egress core says which commit it came from", async () => {
   const s = await readFile(new URL("../src/egress.js", import.meta.url), "utf8");
-  assert.match(s, /^\/\/ vendored from 1ms\.dog\/src\/egress\.js VERSION 6 \(aa4e9f8\)/);
+  assert.match(s, /^\/\/ vendored from 1ms\.dog\/src\/egress\.js VERSION 7 \(414073e\)/);
   const { VERSION, classify, tzCountry } = await import("../src/egress.js");
-  assert.equal(VERSION, "6");
+  assert.equal(VERSION, "7");
   assert.equal(classify({ mode: "single" }).verdict, "unknown", "no answers: nothing is assumed");
   // a zone keeps the country of its place (VERSION 5 mapped links' targets and got these wrong), while the
   // backward links whose target is on another continent keep their hand-corrected country
