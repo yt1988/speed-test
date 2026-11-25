@@ -20,6 +20,51 @@ export const list = s => String(s || "").split(",").map(x => x.trim()).filter(Bo
 export const asURL = s => /^[a-z][\w+.-]*:\/\//i.test(s) ? s : "https://" + s;
 export const SIGS = list(rtc.sig).map(asURL), WTS = list(rtc.wt).map(asURL);
 export const RATE_MS = 20, WAIT_MS = 1500;
+
+/* ---------- the page's short-lived token for our own endpoints (the 1ms.dog tool contract, "auth") ---------- */
+// The shell writes <meta name="ms-auth" content="v1.<exp>.<nonce>.<scope>.<hmac>"> when its secret is set; without
+// it nothing is sent. A token that is missing or within a minute of expiring is renewed from /_ms/token (same
+// origin), and a 401 renews once and retries once — never in a loop.
+const AUTH = 'meta[name="ms-auth"]';
+export const readToken = (doc = globalThis.document) => {
+  const el = doc && doc.querySelector ? doc.querySelector(AUTH) : null;
+  return (el && el.getAttribute ? el.getAttribute("content") : "") || "";
+};
+export const writeToken = (t, doc = globalThis.document) => {
+  const el = doc && doc.querySelector ? doc.querySelector(AUTH) : null;
+  if (el && el.setAttribute) el.setAttribute("content", t);
+};
+const expOf = t => { const e = +String(t || "").split(".")[1]; return Number.isFinite(e) ? e * 1000 : 0; };
+let renewing = null;
+export function renewToken(doc = globalThis.document) {
+  if (renewing) return renewing;
+  renewing = (async () => {
+    try {
+      const r = await fetch("/_ms/token", { cache: "no-store" });
+      if (!r.ok) return "";
+      const j = await r.json();
+      const t = j && typeof j.token === "string" ? j.token : "";
+      if (t) writeToken(t, doc);
+      return t;
+    } catch (e) { return ""; } finally { renewing = null; }
+  })();
+  return renewing;
+}
+// the token to use now: the meta's, unless it is missing or nearly expired
+export async function freshToken(doc = globalThis.document) {
+  const t = readToken(doc);
+  if (!t || expOf(t) - Date.now() > 60000) return t;
+  return renewToken(doc);
+}
+export const authHeaders = t => t ? { Authorization: "Bearer " + t } : {};
+export const wsURL = (sig, token) => sig.replace(/^http/, "ws") + "/ws" + (token ? "?token=" + encodeURIComponent(token) : "");
+// one retry after a 401, with the renewed token; no token from the renewal means no second try
+export async function offerWithAuth(send, token, renew) {
+  const r = await send(token);
+  if (r.status !== 401) return r;
+  const t = await renew();
+  return t ? send(t) : r;
+}
 const PHASES = 3;
 
 // packets sent, the server's count of what reached it, and the round trips of those that came back → one phase:
@@ -89,7 +134,9 @@ export function udp(sig = SIG) {
   const open = new Promise((res, rej) => { dc.onopen = res; pc.onconnectionstatechange = () => pc.connectionState === "failed" && rej(new Error("failed")); });
   const ready = (async () => {
     await pc.setLocalDescription(await pc.createOffer());
-    const r = await timeout(fetch(sig + "/offer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pc.localDescription), cache: "no-store" }), 6000);
+    const send = t => timeout(fetch(sig + "/offer", { method: "POST",
+      headers: { "Content-Type": "application/json", ...authHeaders(t) }, body: JSON.stringify(pc.localDescription), cache: "no-store" }), 6000);
+    const r = await offerWithAuth(send, await freshToken(), () => renewToken());
     if (!r.ok) throw new Error("HTTP " + r.status);
     await pc.setRemoteDescription(await r.json());
     reached = true;                 // the server answered over HTTPS: if the channel doesn't open now, UDP is blocked
@@ -142,7 +189,7 @@ export async function quic(sig = SIG, wt = WT) {
   const api = typeof WebTransport === "function";
   const n = 10, gap = 100;
   const ws = await (async () => {
-    const s = new WebSocket(sig.replace(/^http/, "ws") + "/ws"); s.binaryType = "arraybuffer";
+    const s = new WebSocket(wsURL(sig, await freshToken())); s.binaryType = "arraybuffer";
     try {
       await timeout(new Promise((res, rej) => { s.onopen = res; s.onerror = rej; }), 5000);
       const rtts = [];

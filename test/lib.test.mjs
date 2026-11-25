@@ -86,6 +86,42 @@ test("the exit, and signs it isn't the visitor's own line", () => {
   assert.deepEqual(egress(null).reasons, []);
 });
 
+test("the page's token: sent when the meta has one, renewed once after a 401, never when absent", async () => {
+  const { readToken, writeToken, authHeaders, wsURL, freshToken, offerWithAuth } = await import("../src/rtc.mjs");
+  const meta = { content: "v1.2000000000.n.scope.hmac" };
+  const doc = { querySelector: s => s === 'meta[name="ms-auth"]' ? { getAttribute: () => meta.content, setAttribute: (k, v) => { meta.content = v; } } : null };
+  assert.equal(readToken(doc), "v1.2000000000.n.scope.hmac");
+  assert.equal(readToken({ querySelector: () => null }), "");
+  assert.deepEqual(authHeaders(""), {});
+  assert.deepEqual(authHeaders("t"), { Authorization: "Bearer t" });
+  assert.equal(wsURL("https://h:2087", "t"), "wss://h:2087/ws?token=t");
+  assert.equal(wsURL("https://h:2087", ""), "wss://h:2087/ws");
+  assert.equal(await freshToken(doc), "v1.2000000000.n.scope.hmac", "a fresh token is used as it is");
+
+  // nearly expired: one request to the same-origin renewal endpoint, and the meta is updated
+  const oldFetch = globalThis.fetch, oldDoc = globalThis.document;
+  let fetched = 0;
+  globalThis.fetch = async u => { fetched++; assert.equal(u, "/_ms/token"); return { ok: true, json: async () => ({ token: "v1.2000000600.n.scope.hmac" }) }; };
+  globalThis.document = doc;
+  try {
+    writeToken("v1.1.n.scope.hmac", doc);
+    assert.equal(await freshToken(doc), "v1.2000000600.n.scope.hmac");
+    assert.equal(readToken(doc), "v1.2000000600.n.scope.hmac");
+    assert.equal(fetched, 1);
+  } finally { globalThis.fetch = oldFetch; globalThis.document = oldDoc; }
+
+  let calls = [], renews = 0;
+  const r = await offerWithAuth(t => { calls.push(t); return Promise.resolve({ status: calls.length === 1 ? 401 : 200 }); }, "old", async () => { renews++; return "new"; });
+  assert.equal(r.status, 200); assert.deepEqual(calls, ["old", "new"]); assert.equal(renews, 1);
+  calls = []; renews = 0;
+  const r2 = await offerWithAuth(t => { calls.push(t); return Promise.resolve({ status: 401 }); }, "old", async () => { renews++; return "new"; });
+  assert.equal(r2.status, 401); assert.deepEqual(calls, ["old", "new"], "a second 401 is not retried again"); assert.equal(renews, 1);
+  assert.equal(await freshToken({ querySelector: () => null }), "", "no meta, no token");
+  calls = []; renews = 0;
+  const r3 = await offerWithAuth(t => { calls.push(t); return Promise.resolve({ status: 401 }); }, "", async () => { renews++; return ""; });
+  assert.equal(r3.status, 401); assert.deepEqual(calls, [""], "no replacement token, no second try"); assert.equal(renews, 1);
+});
+
 test("the ms-rtc keys are comma lists, the mainland point first", async () => {
   const { list, asURL, SIGS, WTS } = await import("../src/rtc.mjs");
   assert.deepEqual(list(" https://a:2087 , https://b:2087 "), ["https://a:2087", "https://b:2087"]);

@@ -123,7 +123,7 @@ func cors(w http.ResponseWriter, r *http.Request) bool {
 	}
 	w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
 	w.Header().Set("Access-Control-Allow-Methods", "POST")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 	w.Header().Set("Vary", "Origin")
 	w.Header().Set("Cache-Control", "no-store")
 	return true

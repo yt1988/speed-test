@@ -65,6 +65,10 @@ page's `connect-src` too); this repository only reads them:
 Without `ms-rtc` the WebRTC/WebTransport row stays hidden and the rest of the test is unchanged. A static deployment
 that wants the row injects the same `<meta>` itself, at build time or in its own proxy; nothing here does that.
 
+When the shell also writes `<meta name="ms-auth">` (a short-lived token), the offer carries `Authorization: Bearer` and
+the WebSocket echo `?token=`; a token within a minute of expiring, or any 401, renews once from the same-origin
+`/_ms/token` and retries. Without the meta nothing is sent. The rtc server's CORS allows the Authorization header.
+
 ## Run the UDP and QUIC server
 
 One Go binary under systemd on any Linux VPS with a public IPv4 (and IPv6, if you want it tested); each location is

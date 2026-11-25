@@ -16,7 +16,9 @@ see [AGENTS.md](../AGENTS.md).
 - **Deployment-injected endpoints.** The addresses are not in this repository: the shell's Worker proxies every tool
   page and writes `ms-rtc` into its head (and extends `connect-src`) from its own variables. Each key is a comma list,
   Shanghai first and Tokyo second when both are present. Nothing injected means no row and the delay test is
-  unchanged; one endpoint means one row, without a region label or a comparison sentence.
+  unchanged; one endpoint means one row, without a region label or a comparison sentence. When the shell also writes
+  `ms-auth`, the offer carries `Authorization: Bearer` and the WebSocket echo `?token=`; a token about to expire, or
+  a 401, renews once from `/_ms/token` and retries — twice is the end, and the path degrades as unavailable.
 - **Two locations, side by side.** The same measurement runs against a server in Shanghai and one in Tokyo: loss on
   the Shanghai side only means the visitor's own network or provider, loss only on the Tokyo side means the path to
   Tokyo, and loss on both means neither alone explains it. The rows name the two points ("this site (Shanghai)" and
