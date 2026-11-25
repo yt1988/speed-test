@@ -16,7 +16,9 @@
 import { endpoints } from "./egress.js";
 const rtc = endpoints("ms-rtc");
 export const list = s => String(s || "").split(",").map(x => x.trim()).filter(Boolean);
-export const SIGS = list(rtc.sig), WTS = list(rtc.wt);
+// sig is a full URL; wt is host:port in the contract's format, so it gets the scheme here
+export const asURL = s => /^[a-z][\w+.-]*:\/\//i.test(s) ? s : "https://" + s;
+export const SIGS = list(rtc.sig).map(asURL), WTS = list(rtc.wt).map(asURL);
 export const RATE_MS = 20, WAIT_MS = 1500;
 const PHASES = 3;
 

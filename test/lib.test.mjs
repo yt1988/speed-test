@@ -87,10 +87,12 @@ test("the exit, and signs it isn't the visitor's own line", () => {
 });
 
 test("the ms-rtc keys are comma lists, the mainland point first", async () => {
-  const { list, SIGS, WTS } = await import("../src/rtc.mjs");
+  const { list, asURL, SIGS, WTS } = await import("../src/rtc.mjs");
   assert.deepEqual(list(" https://a:2087 , https://b:2087 "), ["https://a:2087", "https://b:2087"]);
   assert.deepEqual(list(""), []);
   assert.deepEqual(list("a,,b,"), ["a", "b"]);
+  assert.equal(asURL("rtc.example:40101"), "https://rtc.example:40101", "the contract's wt is host:port");
+  assert.equal(asURL("https://rtc.example:40101"), "https://rtc.example:40101");
   assert.deepEqual(SIGS, [], "no meta in Node: nothing to measure");
   assert.deepEqual(WTS, []);
 });
