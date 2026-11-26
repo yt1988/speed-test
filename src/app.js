@@ -321,7 +321,9 @@ import { udp, quic, compareSides, SIGS, WTS } from "./rtc.mjs";
   const TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ""; } })();
   const NET = { cf: null, cfDone: false, reasons: [] };
   // a link to another 1ms.dog tool: its text, then the external-link icon (the same on every tool)
-  const XL = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2.5h4.5V7M13.5 2.5 7.5 8.5M12 10v3.5H2.5V4H6"/></svg>';
+  // the external-link icon: xmlns is not an attribute outerHTML keeps, and an SVG re-serialized on its own (Safari's
+  // Dark Reader does that) needs it to decode
+  const XL = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2.5h4.5V7M13.5 2.5 7.5 8.5M12 10v3.5H2.5V4H6"/></svg>';
   const xlink = (href, html) => `<a class="xl" href="${esc(href)}" target="_blank" rel="noopener">${html}${XL}</a>`;
   // a data value (an IP, a network) linked to its page on another tool: no icon, a dotted underline, where it goes in the title
   const dlink = (href, html, title, cls = "") => `<a class="dv${cls ? " " + cls : ""}" href="${esc(href)}" target="_blank" rel="noopener" title="${esc(title)}">${html}</a>`;
