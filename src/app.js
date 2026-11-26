@@ -101,16 +101,19 @@ import { udp, quic, compareSides, SIGS, WTS } from "./rtc.mjs";
   // the bubble is in the page markup (drawn once at load, scaled away) rather than built here: one built on the first
   // hover is painted for the first time at that moment, full size, and Chromium counts it as the largest paint
   const tipEl = document.getElementById("tip");
-  addEventListener("scroll", () => tipEl.classList.remove("on"), { passive: true });
+  const hideTip = () => { tipEl.classList.remove("on"); tipEl.setAttribute("aria-hidden", "true"); };
+  addEventListener("scroll", hideTip, { passive: true });
   function showTip(el) {
     tipEl.textContent = el.dataset.why;
     tipEl.classList.remove("pre");     // full size again, now that the position is about to be set
+    tipEl.removeAttribute("aria-hidden");
     const b = el.getBoundingClientRect(), w = tipEl.offsetWidth;
     tipEl.style.left = Math.max(8, Math.min(innerWidth - w - 8, b.left + b.width / 2 - w / 2)) + "px";
     tipEl.style.top = b.bottom + 6 + "px"; tipEl.classList.add("on");
   }
-  document.addEventListener("mouseover", e => { const el = e.target.closest && e.target.closest("[data-why]"); if (el) showTip(el); else tipEl.classList.remove("on"); });
+  document.addEventListener("mouseover", e => { const el = e.target.closest && e.target.closest("[data-why]"); if (el) showTip(el); else hideTip(); });
   document.addEventListener("focusin", e => { const el = e.target.closest && e.target.closest("[data-why]"); if (el) showTip(el); });
+  document.addEventListener("focusout", hideTip);
 
   /* ---------- live curves: each speed tile draws its own, behind the number ---------- */
   const SPAN = 10000, SERIES = { down: [], up: [] };
