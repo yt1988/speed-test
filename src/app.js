@@ -544,7 +544,7 @@ import { udp, quic, compareSides, SIGS, WTS } from "./rtc.mjs";
   // system share sheet; this page gives the link, the card's middle and the footer. The box adds the country and the
   // Cloudflare data center to both; the address is never in either.
   // the component, its version in the address: a copy cached before an update must not answer for the new one
-  const SHARE_JS = "/assets/share/share.js?v=10";
+  const SHARE_JS = "/assets/share/share.js?v=11";
   const shareLink = show => location.origin + D.paths[D.lang] + "r/" + encodeShare({ ...LAST, cc: show ? LAST.cc : "", colo: show ? LAST.colo : "" });
   // what the box adds to the card: the country and the Cloudflare node, on their own line under the speeds (the
   // footer is too short for them in de or fr, and a card must not clip them: tool-contract.md, "Share card")
@@ -598,7 +598,10 @@ import { udp, quic, compareSides, SIGS, WTS } from "./rtc.mjs";
   }
   $("#shareBtn").onclick = async () => {
     if (!LAST) return;
-    const S = LAST, { share } = await import(SHARE_JS);
+    const S = LAST;
+    const shareMod = await import(SHARE_JS).catch(() => null);
+    if (!shareMod) { window.msShareDown && window.msShareDown(); return; }
+    const { share } = shareMod;
     share({
       lang: D.lang, name: t("app_name"), file: "speed-test",
       show: ["country", "colo"], never: ["ip"], canShow: !!(S.cc || S.colo),
