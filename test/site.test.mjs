@@ -30,6 +30,17 @@ test("every language page keeps the shell contract", async () => {
   }
 });
 
+test("the tooltip bubble is in the markup with text, scaled away until first shown", async () => {
+  for (const [lang, slug] of LANGS) {
+    const h = await page(slug);
+    assert.match(h, /<div class="tip pre" id="tip" aria-hidden="true">[^<]{10,}<\/div>/, lang + ": a bubble with text, not built by script");
+    assert.ok(h.indexOf('id="tip"') < h.indexOf('<div class="app">'), lang + ": the bubble comes before the page");
+  }
+  const css = await readFile(new URL("../public/assets/" + (await readFile(new URL("../public/zh-cn/index.html", import.meta.url), "utf8")).match(/app\.[0-9a-f]+\.css/)[0], import.meta.url), "utf8");
+  assert.match(css, /\.tip\.pre\{[^}]*opacity:1[^}]*transform:scale\(0\)/, "painted at load, no area");
+  assert.match(css, /\.tip\.on\{[^}]*animation:tip-in/, "shown by animation, so the first frame is painted");
+});
+
 test("the hero's slots are there before the test", async () => {
   const h = await page("");
   for (const k of USES) assert.match(h, new RegExp(`<li data-u="${k}" data-lv="">`), k);

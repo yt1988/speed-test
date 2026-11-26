@@ -149,7 +149,11 @@ a.dv:hover { color: var(--ink); }
 .auto input:checked + .sw::after { transform: translateX(11px); }
 .auto input:focus-visible + .sw { outline: 2px solid var(--ink); outline-offset: 2px; }
 .tip { position: fixed; z-index: 50; white-space: pre-line; max-width: min(340px, calc(100vw - 16px)); background: var(--fg); color: var(--bg); font: 500 12.5px/1.45 var(--f-ui); padding: 6px 10px; border-radius: 7px; pointer-events: none; opacity: 0; transition: opacity .12s; }
-.tip.on { opacity: 1; }
+/* opacity is the animation rather than a transition, so the bubble is painted on the first frame with its text; `.pre`
+   keeps it in the viewport at no area until it is first shown (Chromium then no longer takes it as the largest paint) */
+.tip.on { opacity: 1; animation: tip-in .12s; }
+@keyframes tip-in { from { opacity: 0; } }
+.tip.pre { left: 0; top: 0; opacity: 1; transform: scale(0); }
 
 /* dialogs (as in the other 1ms.dog tools) */
 .scrim { position: fixed; inset: 0; z-index: 40; background: #0006; display: flex; align-items: center; justify-content: center; padding: 16px; }

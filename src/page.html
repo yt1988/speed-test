@@ -9,6 +9,9 @@
 <link rel="stylesheet" href="/assets/{{css}}">
 </head>
 <body>
+<!-- the tooltip bubble, drawn with its text on the first frame and scaled to no area: a bubble built on first hover
+     is painted for the first time then, at its full size, and Chromium counts that as the largest paint (#146) -->
+<div class="tip pre" id="tip" aria-hidden="true">{{a:tip_idle}}</div>
 <div class="app">
   <header class="top">
     <a class="brand" href="{{homeHref}}" aria-current="page">
